@@ -4,8 +4,5 @@
     <string name="app_name">AdminTools</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-    <string name="port">Port</string>
-    <string name="ipaddr">IP address</string>
-    <string name="connect">Connect</string>
 
 </resources>
