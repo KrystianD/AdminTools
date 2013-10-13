@@ -9,8 +9,51 @@
     tools:context=".AdminTools" >
 
     <TextView
+        android:id="@+id/textView_IP"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:text="@string/IP"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/editText_IP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView_IP"
+        android:layout_centerHorizontal="true"
+        android:inputType="textUri"
+        android:ems="10" />
+
+    <EditText
+        android:id="@+id/editText_Port"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView_Port"
+        android:layout_centerHorizontal="true"
+        android:ems="10"
+        android:maxLength="5"
+        android:inputType="numberDecimal" >
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/textView_Port"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText_IP"
+        android:layout_centerHorizontal="true"
+        android:text="@string/port"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android:id="@+id/button_connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText_Port"
+        android:layout_centerHorizontal="true"
+        android:onClick="onConnect"
+        android:text="@string/connect" />
 
 </RelativeLayout>

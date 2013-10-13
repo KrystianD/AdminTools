@@ -4,5 +4,13 @@
     <string name="app_name">AdminTools</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-
+    <string name="IP">Server Address</string>
+    <string name="port">Port</string>
+    <string name="connect">Connect</string>
+	<string name="port_too_small">Port must be higher than 0</string>
+	<string name="port_too_big">Port must be lower than 65535</string>
+	<string name="port_wrong_format">Wrong port format</string>
+	<string name="address_unknown">Wrong IP address or host name</string>
+	<string name="network_error">Network error</string>
+	
 </resources>
