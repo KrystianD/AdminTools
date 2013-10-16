@@ -56,4 +56,23 @@
         android:onClick="onConnect"
         android:text="@string/connect" />
 
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/textView_Port"
+        android:layout_marginBottom="107dp"
+        android:onClick="test"
+        android:text="testbutton" />
+
+    <ProgressBar
+        android:id="@+id/progressBar_connection"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_connect"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible" />
+
 </RelativeLayout>

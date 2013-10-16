@@ -9,39 +9,53 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public class AdminTools extends Activity {
-	private final String IP = "pl.edu.agh.zpi.admintools.ip";
-	private final String PORT = "pl.edu.agh.zpi.admintools.port";
-	private final String CONN_PREFS_NAME = "connection_prefs_file";
+	public static final String HOST = "pl.edu.agh.zpi.admintools.host";
+	public static final String PORT = "pl.edu.agh.zpi.admintools.port";
 	
-	private EditText editTextIP;
+	private static final String CONN_PREFS_NAME = "connection_prefs_file";
+	
+	private EditText editTextHost;
 	private EditText editTextPort;
+	private Button buttonConnect;
+	private ProgressBar progressBar;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_admin_tools);
 		
-		editTextIP = (EditText)findViewById(R.id.editText_IP);
+		editTextHost = (EditText)findViewById(R.id.editText_IP);
 		editTextPort = (EditText)findViewById(R.id.editText_Port);
+		buttonConnect = (Button)findViewById(R.id.button_connect);
+		progressBar = (ProgressBar)findViewById(R.id.progressBar_connection);
 		
 		SharedPreferences connectionPreferences = getSharedPreferences(CONN_PREFS_NAME, MODE_PRIVATE);
-		editTextIP.setText(connectionPreferences.getString(IP, ""));
+		editTextHost.setText(connectionPreferences.getString(HOST, ""));
 		editTextPort.setText(connectionPreferences.getString(PORT, ""));
 
 	}
 
-	public void onConnect(View view){
+	public void test(View view){
+		Intent intent = new Intent(this, StatsActivity.class);
+		startActivity(intent);
+	}
+	
+	public void onConnect(View view) throws InterruptedException{
+		setConnectionUI(true);
+		
 		if(!checkNetworkStatus())
 			return;
 		if(!validatePort())
@@ -52,14 +66,15 @@ public class AdminTools extends Activity {
 		saveConnection();
 		
 		int port = Integer.parseInt(editTextPort.getText().toString());
-		String address = editTextIP.getText().toString();
+		String host = editTextHost.getText().toString();
 		
+		Intent intent = new Intent(getApplicationContext(),ConnectionService.class);
+		intent.putExtra(HOST, host);
+		intent.putExtra(PORT, port);
 		
+		startService(intent);
 		
-		
-		
-		
-		Log.e("qwe", "clicked!");
+		setConnectionUI(false);
 	}
 	
 	@Override
@@ -79,7 +94,6 @@ public class AdminTools extends Activity {
 		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 		
 		if (networkInfo != null && networkInfo.isConnected()) {
-			showAlertToast(getString(R.string.network_error));
 			return true;
 		}
 		return false;
@@ -104,13 +118,12 @@ public class AdminTools extends Activity {
 	}
 	
 	private boolean validateAddress(){
-		final String address = editTextIP.getText().toString();
+		final String address = editTextHost.getText().toString();
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		Future<Boolean> future = executor.submit(new Callable<Boolean>() {
 			         public Boolean call() {
 			           try{
 			        	   InetAddress.getByName(address);
-			        	   Log.e("qwe","ok");
 			        	   return true;
 			           }catch(Exception e){ 
 			        	 return false;
@@ -130,10 +143,23 @@ public class AdminTools extends Activity {
 		return true;
 	}
 	
+	private void setConnectionUI(boolean connecting){
+		if(connecting){
+			buttonConnect.setEnabled(false);
+			buttonConnect.setText(getString(R.string.connecting));
+			progressBar.setVisibility(View.VISIBLE);
+		}
+		else{
+			buttonConnect.setEnabled(true);
+			buttonConnect.setText(getString(R.string.connect));
+			progressBar.setVisibility(View.INVISIBLE);
+		}
+	}
+	
 	private void saveConnection(){
 		SharedPreferences connectionSettings = getSharedPreferences(CONN_PREFS_NAME, MODE_PRIVATE);
 		SharedPreferences.Editor editor = connectionSettings.edit();
-		editor.putString(IP,editTextIP.getText().toString());
+		editor.putString(HOST,editTextHost.getText().toString());
 		editor.putString(PORT,editTextPort.getText().toString());
 		editor.commit();
 	}
