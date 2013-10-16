@@ -1,28 +1,31 @@
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+
+#include "sensors.h"
+#include "server.h"
+#include "config.h"
 
 int main ()
 {
-	FILE *f = fopen ("config", "rt");
+	Config c;
+	c.fromFile ("config");
+
+	printf ("%d\r\n", c.getInt ("port"));
+
 	
-	while (!feof (f))
+	Server serv;
+	serv.setup (c.getString ("host"), c.getInt ("port"));
+
+	for (;;)
 	{
-		char str[200];
-		fscanf (f, "%s", str);
+		serv.process ();
 
-		char* pos = strchr (str, '=');
-		if (pos == 0)
-			continue;
-		*pos = 0;
+		usleep (100000);
 
-		char key[200], value[200];
-		strcpy (key, str);
-		strcpy (value, pos + 1);
-
-		printf ("|%s|=|%s|\r\n", str, value);
+		TSensorsData d;
+		getSensorsData (d);
 	}
-
-	fclose (f);
 
 	return 0;
 }

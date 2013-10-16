@@ -25,17 +25,15 @@ private:
 	enum EState { WAITING_FOR_HEADER, WAITING_FOR_PACKET };
 
 	THeader currentHeader;
-	uint8_t buffer[1024];
+	uint8_t buffer[1024 * 1024];
 	int bufferPointer;
-	int dataPointer;
+	// int dataPointer;
 	int dataToReceive;
 	EState state;
+	buffer_t dataToSend;
 
 	void processPacket (int size);
-	
-	// packet processing
-	template<typename T>
-	bool getVal (T& val);
+	bool sendPacket (IPacket& packet);
 };
 
 #endif

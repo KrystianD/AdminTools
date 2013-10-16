@@ -54,6 +54,8 @@ int main ()
 		return 1;
 	}
 
+	printf ("ok\r\n");
+
 	for (;;)
 	{
 		timeval tv;

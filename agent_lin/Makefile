@@ -1,6 +1,6 @@
 CXX=g++
-OBJS=main.o
-CFLAGS=-O0 -static -static-libgcc
+OBJS=main.o ../common/config.o server.o ../common/kutils.o ../common/common.o sensors.o
+CFLAGS=-O0 -I../common
 LFLAGS=
 
 build/client: $(OBJS)

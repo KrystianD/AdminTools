@@ -10,6 +10,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "common.h"
 #include "packets.h"
 
 Client::Client (int fd, const string& ip, int port)
@@ -30,6 +31,7 @@ void Client::readData ()
 	if (rd == 0)
 	{
 		toDelete = true;
+		close (fd);
 		return;
 	}
 
@@ -44,8 +46,8 @@ void Client::readData ()
 		{
 		case WAITING_FOR_HEADER:
 			currentHeader = *((THeader*)buffer);
-			printf ("New header - key: %.*s type: %d size: %d\r\n",
-					sizeof (currentHeader.key), currentHeader.key, currentHeader.type, currentHeader.size);
+			printf ("New header - type: %d size: %d\r\n",
+					currentHeader.type, currentHeader.size);
 
 			if (currentHeader.size > 0)
 			{
@@ -66,42 +68,88 @@ void Client::readData ()
 			break;
 		}
 
-		memcpy (buffer, buffer + dataToReceive, dataToReceive);
+		printf ("shifting buffer by: %d\r\n", dataToReceive);
+		memcpy (buffer, buffer + dataToReceive, bufferPointer - dataToReceive);
 		bufferPointer -= dataToReceive;
 		dataToReceive = newDataLen;
 	}
 
-	printf ("rd: %d\r\n", rd);
-	for (int i=0;i<rd;i++)
-	{
-		putchar (buffer[i]);
-	}
+	// printf ("rd: %d\r\n", rd);
+	// for (int i=0;i<rd;i++)
+	// {
+		// putchar (buffer[i]);
+	// }
 }
 void Client::process ()
 {
+	if (dataToSend.size () > 0)
+	{
+		printf ("sending data...\r\n");
+
+		int len = dataToSend.size ();
+
+		int sent = send (fd, &dataToSend[0], len, 0);
+		if (sent == 0)
+		{
+			printf ("connection error, disconnecting\r\n");
+			toDelete = true;
+			close (fd);
+			return;
+		}
+
+		printf ("sent %d bytes, shifting... ", sent);
+		dataToSend.erase (dataToSend.begin (), dataToSend.begin () + sent);
+		printf ("%d bytes left to send\r\n", dataToSend.size ());
+	}
 }
 
-template<typename T>
-bool Client::getVal (T& val)
-{
-	const THeader& h = currentHeader;
-	printf ("dp: %d, sz: %d, h.size: %d\r\n", dataPointer, sizeof (T), h.size);
-	if (dataPointer + sizeof (T) > h.size)
-		return false;
-	val = *((T*)(buffer + dataPointer));
-	dataPointer += sizeof (T);
-	return true;
-}
+// template<typename T>
+// bool Client::getVal (T& val)
+// {
+	// const THeader& h = currentHeader;
+	// printf ("dp: %d, sz: %d, h.size: %d\r\n", dataPointer, sizeof (T), h.size);
+	// if (dataPointer + sizeof (T) > h.size)
+		// return false;
+	// val = *((T*)(buffer + dataPointer));
+	// dataPointer += sizeof (T);
+	// return true;
+// }
 
 void Client::processPacket (int size)
 {
 	const THeader& h = currentHeader;
-	dataPointer = 0;
+	// dataPointer = 0;
 	printf ("Processing packet of type: %d size: %d\r\n", h.type, h.size);
+	
+	buffer_t buf;
+	buf.insert (buf.begin (), (char*)buffer, (char*)buffer + size);
 
-	uint8_t val;
-	if (!getVal (val)) return;
+	switch (h.type)
+	{
+	case PACKET_AUTH:
+		{
+			TPacketAuth p;
+			p.fromBuffer (buf);
 
-	printf ("val: %d \r\n", val);
+			// printf ("key: %s\r\n", p.key);
+
+			TPacketReply pr;
+			pr.value = 1;		
+			sendPacket (pr);
+		}		
+		break;
+	}
 }
+bool Client::sendPacket (IPacket& packet)
+{
+	buffer_t b;
+	packet.toBuffer (b);
+	THeader h;
+	h.type = packet.getType ();
+	h.size = b.size ();
 
+	dataToSend.insert (dataToSend.end (), (char*)&h, (char*)&h + sizeof (h));
+	dataToSend.insert (dataToSend.end (), &b[0], &b[0] + b.size ());
+
+	printf ("dataToSend len: %d\r\n", dataToSend.size ());
+}
