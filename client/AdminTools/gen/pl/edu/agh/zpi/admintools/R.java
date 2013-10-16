@@ -232,7 +232,7 @@ containing a value of this type.
         public static final int alignBounds=0x7f040002;
         public static final int alignMargins=0x7f040003;
         public static final int bottom=0x7f040005;
-        public static final int button1=0x7f040017;
+        public static final int button1=0x7f040018;
         public static final int button_connect=0x7f040016;
         public static final int center=0x7f04000c;
         public static final int center_horizontal=0x7f04000a;
@@ -247,7 +247,7 @@ containing a value of this type.
         public static final int fill_vertical=0x7f040009;
         public static final int horizontal=0x7f040000;
         public static final int left=0x7f040006;
-        public static final int progressBar_connection=0x7f040018;
+        public static final int progressBar_connection=0x7f040017;
         public static final int right=0x7f040007;
         public static final int space1=0x7f04001a;
         public static final int space2=0x7f04001c;

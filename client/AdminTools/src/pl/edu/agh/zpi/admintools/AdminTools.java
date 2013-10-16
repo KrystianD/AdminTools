@@ -8,12 +8,18 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -21,7 +27,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-public class AdminTools extends Activity {
+public class AdminTools extends Activity implements ServiceConnection {
 	public static final String HOST = "pl.edu.agh.zpi.admintools.host";
 	public static final String PORT = "pl.edu.agh.zpi.admintools.port";
 	
@@ -31,6 +37,8 @@ public class AdminTools extends Activity {
 	private EditText editTextPort;
 	private Button buttonConnect;
 	private ProgressBar progressBar;
+	
+	private Messenger serviceMessenger;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +53,8 @@ public class AdminTools extends Activity {
 		SharedPreferences connectionPreferences = getSharedPreferences(CONN_PREFS_NAME, MODE_PRIVATE);
 		editTextHost.setText(connectionPreferences.getString(HOST, ""));
 		editTextPort.setText(connectionPreferences.getString(PORT, ""));
-
+		
+		bindService(new Intent(this,ConnectionService.class),this,Context.BIND_AUTO_CREATE);
 	}
 
 	public void test(View view){
@@ -75,6 +84,19 @@ public class AdminTools extends Activity {
 		startService(intent);
 		
 		setConnectionUI(false);
+		
+	}
+	
+	public void generateKey(View view){
+		if(serviceMessenger == null)
+			return;
+		
+		Message m = Message.obtain(null,ConnectionService.GENERATE_KEY);
+		try {
+			serviceMessenger.send(m);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -162,5 +184,15 @@ public class AdminTools extends Activity {
 		editor.putString(HOST,editTextHost.getText().toString());
 		editor.putString(PORT,editTextPort.getText().toString());
 		editor.commit();
+	}
+
+	@Override
+	public void onServiceConnected(ComponentName name, IBinder service) {
+		serviceMessenger = new Messenger(service);
+	}
+
+	@Override
+	public void onServiceDisconnected(ComponentName name) {
+		serviceMessenger = null;
 	}
 }

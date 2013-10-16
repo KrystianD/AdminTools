@@ -33,7 +33,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="pl.edu.agh.zpi.admintools.AdminTools" />
         </activity>
-        <service android:name="ConnectionService"></service>
+        <service android:name="ConnectionService" android:permission="android.permission.INTERNET"></service>
     </application>
 
 </manifest>
