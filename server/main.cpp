@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 
 // net
 #include <sys/time.h>
@@ -15,10 +16,52 @@ using namespace std;
 
 #include "client.h"
 
+#include "db.h"
+
 vector<Client> clients;
 
-int main ()
+int main (int argc, char** argv)
 {
+	int aflag = 0;
+	int bflag = 0;
+	const char *configPath = "config.cfg";
+	int index;
+	int c;
+
+	opterr = 0;
+
+	while ((c = getopt (argc, argv, "c:")) != -1)
+	{
+		switch (c)
+		{
+		case 'c':
+			configPath = optarg;
+			break;
+		default:
+			break;
+		}
+	}
+
+	printf ("using config: %s\r\n", configPath);
+
+	string dbPath = "";
+
+	if (!DB::open (dbPath))
+	{
+		printf ("Unable to open database\r\n");
+		return 1;
+	}
+
+	DB::createTables ();
+	// sqlite3 *db;
+
+	// sqlite3_open ("data.db", &db);
+	
+	// sqlite3_close (db);
+
+
+	signal (SIGPIPE, SIG_IGN);
+
 	sockaddr_in myaddr;
 
 	memset (&myaddr, 0, sizeof (myaddr));
@@ -35,11 +78,7 @@ int main ()
 	}
 
 	int yes = 1;
-	if (setsockopt (serverFd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof (int)) == -1)
-	{
-		perror ("setsockopt");
-		return 1;
-	}
+	setsockopt (serverFd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof (int));
 
 	// bind server to port
 	if (bind (serverFd, (sockaddr*)&myaddr, sizeof (myaddr)) == -1)
@@ -113,19 +152,18 @@ int main ()
 		}
 		for (int i = clients.size () - 1; i >= 0; i--)
 		{
+			clients[i].process ();
+		}
+		for (int i = clients.size () - 1; i >= 0; i--)
+		{
 			if (clients[i].toDelete)
 			{
 				close (clients[i].fd);
 				clients.erase (clients.begin () + i);
 				printf ("Client deleted\r\n");
 			}
-			else
-			{
-				clients[i].process ();
-			}
 		}
 	}
-	printf ("a\r\n");
 
 	return 0;
 }

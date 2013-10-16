@@ -45,7 +45,7 @@ void getSensorsData (TSensorsData& data)
 					ss << s;
 					ss >> temp;
 
-					tempAvg += temp;
+					tempAvg += (float)temp / 1000.0f;
 					cnt++;
 				}
 			}

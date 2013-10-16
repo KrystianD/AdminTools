@@ -1,6 +1,6 @@
 CXX=g++
-OBJS=main.o client.o sqlite3/sqlite3.o
-CFLAGS=-I../common \
+OBJS=main.o client.o sqlite3/sqlite3.o ../common/common.o ../common/kutils.o agents.o db.o
+CFLAGS=-I../common -Isqlite3 \
 	-O0 -static -static-libgcc \
 	-DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION
 LFLAGS=

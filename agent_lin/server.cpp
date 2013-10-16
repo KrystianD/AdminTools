@@ -35,7 +35,7 @@ void Server::setup (const string& host, int port)
 }
 void Server::process ()
 {
-	printf ("S %d\r\n", m_state);
+	// printf ("S %d\r\n", m_state);
 	if (m_state == NotConnected)
 	{
 		if (getTicks () - m_lastConnect >= 500)
@@ -106,12 +106,7 @@ void Server::connect ()
 	}
 
 	int yes = 1;
-	if (setsockopt (m_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof (int)) == -1)
-	{
-		close (m_fd);
-		perror ("setsockopt");
-		return;
-	}
+	setsockopt (m_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof (int));
 
 	memset (&servaddr, 0, sizeof (servaddr));
 	servaddr.sin_family = AF_INET;
@@ -166,9 +161,18 @@ void Server::connect ()
 
 	printf ("auth reply: %d\r\n", r.value);
 
+	sendHeader (PACKET_START);
+
 	m_state = Connected;
 }
 
+bool Server::sendHeader (int type)
+{
+	THeader h;
+	h.type = type;
+	h.size = 0;
+	send (m_fd, &h, sizeof (h), 0);
+}
 bool Server::sendPacket (IPacket& packet)
 {
 	buffer_t b;
@@ -178,7 +182,6 @@ bool Server::sendPacket (IPacket& packet)
 	h.size = b.size ();
 	send (m_fd, &h, sizeof (h), 0);
 	send (m_fd, &b[0], b.size (), 0);
-	printf ("send auth\r\n");
 }
 bool Server::readPacket (int replyType, IPacket& p, int timeout)
 {

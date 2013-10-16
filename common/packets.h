@@ -6,8 +6,13 @@
 #define PACKET_AGENTDATA 2
 #define PACKET_START     3
 #define PACKET_STOP      4
+#define PACKET_PING      5
+#define PACKET_AGENTSDATA 6
+#define PACKET_KEY_REQUEST 7
+#define PACKET_KEY_REPLY   8
 
 #include <string.h>
+#include <stdint.h>
 
 #include <vector>
 using namespace std;
@@ -80,9 +85,61 @@ public:
 		fetch (buf, value);
 	}
 };
-class TAgentData
+class TAgentData : public IPacket
 {
+public:
+	uint16_t id;
+	float temp;
+
+	virtual int getType () { return PACKET_AGENTDATA; }
+	virtual void toBuffer (buffer_t& buf)
+	{
+		append (buf, id);
+		append (buf, temp);
+	}
+	virtual void fromBuffer (buffer_t& buf)
+	{
+		m_pos = 0;
+		fetch (buf, id);
+		fetch (buf, temp);
+	}
+};
+class TAgentsData : public IPacket
+{
+public:
+	vector<TAgentData> agents;
+
+	virtual int getType () { return PACKET_AGENTSDATA; }
+	virtual void toBuffer (buffer_t& buf)
+	{
+		uint16_t len = agents.size ();
+		append (buf, len);
+		for (int i = 0; i < agents.size (); i++)
+		{
+			buffer_t tmp;
+			agents[i].toBuffer (tmp);
+			buf.insert (buf.end (), tmp.begin (), tmp.end ());
+		}
+	}
+	virtual void fromBuffer (buffer_t& buf)
+	{
+	}
+};
+class TKeyReply : public IPacket
+{
+public:
+	char key[16];
 	
+	virtual int getType () { return PACKET_KEY_REPLY; }
+	virtual void toBuffer (buffer_t& buf)
+	{
+		append (buf, key);
+	}
+	virtual void fromBuffer (buffer_t& buf)
+	{
+		m_pos = 0;
+		fetch (buf, key);
+	}
 };
 
 #endif

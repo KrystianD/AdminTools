@@ -32,6 +32,16 @@ private:
 	EState state;
 	buffer_t dataToSend;
 
+	uint32_t packetStartTime;
+	uint32_t lastPingTime;
+
+	// agent
+	int agentId;
+
+	// client
+	bool sendingActive;
+	uint32_t lastAgentsDataTime;
+
 	void processPacket (int size);
 	bool sendPacket (IPacket& packet);
 };

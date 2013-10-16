@@ -17,6 +17,9 @@ public:
 	void setup (const string& host, int port);
 	void process ();
 
+	bool isValid () { return m_state == Connected; }
+	bool sendPacket (IPacket& packet);
+
 private:
 	enum EState { NotConnected, Connected };
 
@@ -29,7 +32,7 @@ private:
 
 	void connect ();
 
-	bool sendPacket (IPacket& packet);
+	bool sendHeader (int type);
 	bool readPacket (int replyType, IPacket& p, int timeout);
 
 	void processPacket (THeader& h, buffer_t& buf);

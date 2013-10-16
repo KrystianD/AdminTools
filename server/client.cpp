@@ -10,6 +10,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "agents.h"
+#include "kutils.h"
 #include "common.h"
 #include "packets.h"
 
@@ -22,19 +24,24 @@ Client::Client (int fd, const string& ip, int port)
 	bufferPointer = 0;
 	dataToReceive = sizeof (THeader);
 	toDelete = false;
+	lastPingTime = getTicks ();
+	agentId = 1;
+
+	sendingActive = 0;
 }
 
 void Client::readData ()
 {
 	// new data to be received
 	int rd = recv (fd, buffer + bufferPointer, sizeof (buffer) - bufferPointer, 0);
-	if (rd == 0)
+	if (rd <= 0)
 	{
 		toDelete = true;
 		close (fd);
 		return;
 	}
 
+	lastPingTime = getTicks ();
 	bufferPointer += rd;
 	printf ("new data: %d\r\n", rd);
 
@@ -53,15 +60,19 @@ void Client::readData ()
 			{
 				printf ("Waiting for a packet\r\n");
 				state = WAITING_FOR_PACKET;
+				packetStartTime = getTicks ();
 				newDataLen = currentHeader.size;
 			}
 			else
 			{
+				state = WAITING_FOR_HEADER;
+				processPacket (0);
 				printf ("Waiting for new header\r\n");
 				newDataLen = sizeof (THeader);
 			}
 			break;
 		case WAITING_FOR_PACKET:
+			state = WAITING_FOR_HEADER;
 			processPacket (dataToReceive);
 			printf ("Waiting for new header\r\n");
 			newDataLen = sizeof (THeader);
@@ -89,7 +100,7 @@ void Client::process ()
 		int len = dataToSend.size ();
 
 		int sent = send (fd, &dataToSend[0], len, 0);
-		if (sent == 0)
+		if (sent <= 0)
 		{
 			printf ("connection error, disconnecting\r\n");
 			toDelete = true;
@@ -100,6 +111,33 @@ void Client::process ()
 		printf ("sent %d bytes, shifting... ", sent);
 		dataToSend.erase (dataToSend.begin (), dataToSend.begin () + sent);
 		printf ("%d bytes left to send\r\n", dataToSend.size ());
+	}
+
+	if (state == WAITING_FOR_PACKET && getTicks () - packetStartTime >= 500)
+	{
+		printf ("packet read timeout\r\n");
+		toDelete = true;
+		close (fd);
+		return;
+	}
+
+	if (getTicks () - lastPingTime >= 4000)
+	{
+		printf ("ping timeout\r\n");
+		toDelete = true;
+		close (fd);
+		return;
+	}
+
+	if (sendingActive && getTicks () - lastAgentsDataTime >= 200)
+	{
+		TAgentsData d;
+		
+		d.agents = agentsData;
+
+		sendPacket (d);
+
+		lastAgentsDataTime = getTicks ();
 	}
 }
 
@@ -135,6 +173,32 @@ void Client::processPacket (int size)
 
 			TPacketReply pr;
 			pr.value = 1;		
+			sendPacket (pr);
+		}		
+		break;
+	case PACKET_AGENTDATA:
+		{
+			TAgentData p;
+			p.fromBuffer (buf);
+			p.id = agentId;
+
+			assignData (p);
+			
+			printf ("temp: %f\r\n", p.temp);
+		}
+		break;
+	case PACKET_START:
+		printf ("START\r\n");
+		sendingActive = true;
+		break;
+	case PACKET_STOP:
+		sendingActive = false;
+		break;
+	case PACKET_KEY_REQUEST:
+		{
+			TKeyReply pr;
+			strncpy (pr.key, "123412341234abcd", 16);
+			pr.key[0] = rand ();
 			sendPacket (pr);
 		}		
 		break;
