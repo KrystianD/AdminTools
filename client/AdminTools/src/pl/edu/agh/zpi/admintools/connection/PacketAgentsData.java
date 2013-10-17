@@ -5,14 +5,15 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import pl.edu.agh.zpi.admintools.sensors.AgentData;
 import android.util.Log;
 
-public class AgentsData implements IPacket {
+public class PacketAgentsData implements IPacket {
 	private final byte type = Header.PACKET_AGENTS_DATA;
 	
 	private ArrayList<AgentData> list = new ArrayList<AgentData>();
 	
-	public AgentsData() {
+	public PacketAgentsData() {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -24,19 +25,14 @@ public class AgentsData implements IPacket {
 
 	@Override
 	public void fromByteArray(byte[] array) {
-		short id,size;
-		float temp;
+		short agentsAmount;
 		ByteBuffer buffer = ByteBuffer.wrap(array);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
-		
-		size = buffer.getShort();
-		
-		while(size-- > 0){
-			id = buffer.getShort();
-			temp = buffer.getFloat();
-			list.add(new AgentData(id,temp));
+		agentsAmount = buffer.getShort();
+		for(int i = 0 ; i < agentsAmount ; i++){
+			list.add(AgentData.fromByteBuffer(buffer));
 		}
-		Log.d("qwe", Arrays.toString(list.toArray()));
+		Log.d("qwe",agentsAmount+"\n"+Arrays.toString(list.toArray()));
 	}
 
 	@Override
