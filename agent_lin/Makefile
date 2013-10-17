@@ -11,4 +11,4 @@ build/client: $(OBJS)
 	$(CXX) -c $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o build/client
+	rm -rf *.o ../common/*.o build/client

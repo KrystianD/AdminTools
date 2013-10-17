@@ -18,31 +18,12 @@
 using namespace std;
 
 #include "common.h"
+#include "sensors.h"
 
-class IPacket
+class IPacket : public ISerializable
 {
 public:
 	virtual int getType () = 0;
-	virtual void toBuffer (buffer_t& buf) = 0;
-	virtual void fromBuffer (buffer_t& buf) = 0;
-
-	template<typename T>
-	bool append (buffer_t& buf, T& val)
-	{
-		buf.insert (buf.end (), (char*)&val, (char*)&val + sizeof (T));
-	}
-	template<typename T>
-	bool fetch (buffer_t& buf, T& val)
-	{
-		if (m_pos + sizeof (T) > buf.size ())
-			return false;
-		memcpy (&val, &buf[m_pos], sizeof (T));
-		m_pos += sizeof (T);
-		return true;
-	}
-
-protected:
-	int m_pos;
 };
 
 #pragma pack(1)
@@ -85,36 +66,56 @@ public:
 		fetch (buf, value);
 	}
 };
-class TAgentData : public IPacket
+class TPacketStart : public IPacket
+{
+public:
+	uint16_t interval;
+
+	virtual int getType () { return PACKET_START; }
+	virtual void toBuffer (buffer_t& buf)
+	{
+		append (buf, interval);
+	}
+	virtual void fromBuffer (buffer_t& buf)
+	{
+		m_pos = 0;
+		fetch (buf, interval);
+	}
+};
+class TPacketAgentData : public IPacket
 {
 public:
 	uint16_t id;
-	float temp;
+	TSensorsData data;
 
 	virtual int getType () { return PACKET_AGENTDATA; }
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, id);
-		append (buf, temp);
+		buffer_t tmp;
+		data.toBuffer (tmp);
+		buf.insert (buf.end (), tmp.begin (), tmp.end ());
 	}
 	virtual void fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
 		fetch (buf, id);
-		fetch (buf, temp);
+		buffer_t tmp;
+		tmp.insert (tmp.begin (), buf.begin () + m_pos, buf.end ());
+		data.fromBuffer (tmp);
 	}
 };
-class TAgentsData : public IPacket
+class TPacketAgentsData : public IPacket
 {
 public:
-	vector<TAgentData> agents;
+	vector<TPacketAgentData> agents;
 
 	virtual int getType () { return PACKET_AGENTSDATA; }
 	virtual void toBuffer (buffer_t& buf)
 	{
 		uint16_t len = agents.size ();
 		append (buf, len);
-		for (int i = 0; i < agents.size (); i++)
+		for (int i = 0; i < len; i++)
 		{
 			buffer_t tmp;
 			agents[i].toBuffer (tmp);
@@ -125,7 +126,7 @@ public:
 	{
 	}
 };
-class TKeyReply : public IPacket
+class TPacketKeyReply : public IPacket
 {
 public:
 	char key[16];

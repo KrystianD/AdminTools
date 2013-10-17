@@ -101,3 +101,19 @@ int sendall (int sockfd, void* data, int size)
 	fcntl (sockfd, F_SETFL, arg);
 	return size;
 }
+bool fileExists (const string& path)
+{
+	FILE *f = fopen (path.c_str (), "r");
+	if (!f)
+		return false;
+	fclose (f);
+	return true;
+}
+bool fileAccessible (const string& path)
+{
+	FILE *f = fopen (path.c_str (), "r+");
+	if (!f)
+		return false;
+	fclose (f);
+	return true;
+}

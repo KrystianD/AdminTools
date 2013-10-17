@@ -1,8 +1,8 @@
 #include "agents.h"
 
-vector<TAgentData> agentsData;
+vector<TPacketAgentData> agentsData;
 
-void assignData (TAgentData& data)
+void assignData (TPacketAgentData& data)
 {
 	for (int i = 0; i < agentsData.size (); i++)
 	{

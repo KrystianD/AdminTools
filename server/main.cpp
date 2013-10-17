@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include <time.h>
+#include <stdlib.h>
 
 // net
 #include <sys/time.h>
@@ -15,7 +17,7 @@
 using namespace std;
 
 #include "client.h"
-
+#include "config.h"
 #include "db.h"
 
 vector<Client> clients;
@@ -29,6 +31,8 @@ int main (int argc, char** argv)
 	int c;
 
 	opterr = 0;
+
+	srand (time (0));
 
 	while ((c = getopt (argc, argv, "c:")) != -1)
 	{
@@ -44,21 +48,55 @@ int main (int argc, char** argv)
 
 	printf ("using config: %s\r\n", configPath);
 
-	string dbPath = "";
-
-	if (!DB::open (dbPath))
+	if (!fileExists (configPath))
 	{
-		printf ("Unable to open database\r\n");
+		printf ("No config file\r\n");
+		return 1;
+	}
+	if (!fileAccessible (configPath))
+	{
+		printf ("Config file not writable\r\n");
 		return 1;
 	}
 
-	DB::createTables ();
-	// sqlite3 *db;
+	Config cfg;
+	cfg.fromFile (configPath);
 
-	// sqlite3_open ("data.db", &db);
-	
-	// sqlite3_close (db);
+	string dbPath = cfg.getString ("db", "data.db");
 
+	printf ("using database: %s\r\n", dbPath.c_str ());
+
+	if (!fileExists (dbPath))
+	{
+		printf ("No database file, creating...\r\n");
+		if (!DB::open (dbPath))
+		{
+			printf ("Unable to open database\r\n");
+			return 1;
+		}
+		if (!DB::createTables ())
+		{
+			unlink (dbPath.c_str ());
+			printf ("Unable to create database\r\n");
+			return 1;
+		}
+	}
+	else
+	{
+		if (!fileAccessible (dbPath))
+		{
+			printf ("Database not writable\r\n");
+			return 1;
+		}
+		if (!DB::open (dbPath))
+		{
+			printf ("Unable to open database\r\n");
+			return 1;
+		}
+	}
+
+	char key[16];
+	DB::generateNewKey(key);
 
 	signal (SIGPIPE, SIG_IGN);
 

@@ -14,6 +14,9 @@ Config::~Config ()
 bool Config::fromFile (const string& path)
 {
 	FILE *f = fopen (path.c_str (), "rt");
+
+	if (!f)
+		return false;
 	
 	while (!feof (f))
 	{
@@ -32,6 +35,8 @@ bool Config::fromFile (const string& path)
 	}
 
 	fclose (f);
+
+	return true;
 }
 bool Config::saveToFile (const string& path)
 {

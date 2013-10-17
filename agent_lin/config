@@ -1,6 +1,5 @@
 host=127.0.0.1
 port=1234
-temp1=/sys/class/hwmon/hwmon0/device/temp1_input
-temp1_div=1000
-temp2=/sys/class/hwmon/hwmon0/device/temp2_input
-temp2_div=1000
+key=NZTEWSQEMPWHMMDX
+temp=/sys/class/hwmon/hwmon0/device/temp1_input
+temp_div=1000

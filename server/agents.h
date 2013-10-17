@@ -6,8 +6,8 @@ using namespace std;
 
 #include "packets.h"
 
-extern vector<TAgentData> agentsData;
+extern vector<TPacketAgentData> agentsData;
 
-void assignData (TAgentData& data);
+void assignData (TPacketAgentData& data);
 
 #endif

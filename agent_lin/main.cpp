@@ -34,8 +34,10 @@ int main ()
 
 		if (serv.isValid () && getTicks () - lastSendTime >= 1000)
 		{
-			TAgentData agentData;
-			agentData.temp = d.temp;
+			TPacketAgentData agentData;
+			agentData.id = 1;
+			agentData.data = d;
+			// agentData.temp = d.temp;
 
 			serv.sendPacket (agentData);
 

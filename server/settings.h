@@ -1,0 +1,10 @@
+#ifndef __SETTINGS_H__
+#define __SETTINGS_H__
+
+#define SERVER_PING_TIME 4000
+#define SERVER_PACKET_TIMEOUT 500
+
+#define SERVER_INTERVAL_MIN 500
+#define SERVER_INTERVAL_MAX 5000
+
+#endif

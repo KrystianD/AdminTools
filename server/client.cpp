@@ -14,20 +14,25 @@
 #include "kutils.h"
 #include "common.h"
 #include "packets.h"
+#include "settings.h"
+#include "db.h"
+
+#define CLIENT_DEBUG(x,...) printf ("[Client #%2d id: %2d] " x "\r\n", fd, agentId, ##__VA_ARGS__)
 
 Client::Client (int fd, const string& ip, int port)
 	: fd (fd), ip (ip), port (port)
 {
-	printf ("New client fd: %d addr: %s:%d\r\n", fd, ip.c_str (), port);
+	CLIENT_DEBUG("New client fd: %d addr: %s:%d", fd, ip.c_str (), port);
 
 	state = WAITING_FOR_HEADER;
 	bufferPointer = 0;
 	dataToReceive = sizeof (THeader);
 	toDelete = false;
 	lastPingTime = getTicks ();
-	agentId = 1;
+	agentId = -1;
 
 	sendingActive = 0;
+	authorized = false;
 }
 
 void Client::readData ()
@@ -43,7 +48,7 @@ void Client::readData ()
 
 	lastPingTime = getTicks ();
 	bufferPointer += rd;
-	printf ("new data: %d\r\n", rd);
+	CLIENT_DEBUG("[READ] New data: %d", rd);
 
 	while (bufferPointer >= dataToReceive)
 	{
@@ -53,12 +58,12 @@ void Client::readData ()
 		{
 		case WAITING_FOR_HEADER:
 			currentHeader = *((THeader*)buffer);
-			printf ("New header - type: %d size: %d\r\n",
+			CLIENT_DEBUG("[READ] New header - type: %d size: %d",
 					currentHeader.type, currentHeader.size);
 
 			if (currentHeader.size > 0)
 			{
-				printf ("Waiting for a packet\r\n");
+				CLIENT_DEBUG("[READ] Waiting for a packet");
 				state = WAITING_FOR_PACKET;
 				packetStartTime = getTicks ();
 				newDataLen = currentHeader.size;
@@ -67,19 +72,19 @@ void Client::readData ()
 			{
 				state = WAITING_FOR_HEADER;
 				processPacket (0);
-				printf ("Waiting for new header\r\n");
+				CLIENT_DEBUG("[READ] Waiting for new header");
 				newDataLen = sizeof (THeader);
 			}
 			break;
 		case WAITING_FOR_PACKET:
 			state = WAITING_FOR_HEADER;
 			processPacket (dataToReceive);
-			printf ("Waiting for new header\r\n");
+			CLIENT_DEBUG("[READ] Waiting for new header");
 			newDataLen = sizeof (THeader);
 			break;
 		}
 
-		printf ("shifting buffer by: %d\r\n", dataToReceive);
+		CLIENT_DEBUG("[READ] Shifting buffer by: %d", dataToReceive);
 		memcpy (buffer, buffer + dataToReceive, bufferPointer - dataToReceive);
 		bufferPointer -= dataToReceive;
 		dataToReceive = newDataLen;
@@ -95,113 +100,126 @@ void Client::process ()
 {
 	if (dataToSend.size () > 0)
 	{
-		printf ("sending data...\r\n");
-
 		int len = dataToSend.size ();
 
 		int sent = send (fd, &dataToSend[0], len, 0);
 		if (sent <= 0)
 		{
-			printf ("connection error, disconnecting\r\n");
+			CLIENT_DEBUG("connection error, disconnecting");
 			toDelete = true;
 			close (fd);
 			return;
 		}
 
-		printf ("sent %d bytes, shifting... ", sent);
 		dataToSend.erase (dataToSend.begin (), dataToSend.begin () + sent);
-		printf ("%d bytes left to send\r\n", dataToSend.size ());
+		CLIENT_DEBUG ("[SEND] %d bytes sent, %d bytes left", sent, dataToSend.size ());
 	}
 
-	if (state == WAITING_FOR_PACKET && getTicks () - packetStartTime >= 500)
+	if (state == WAITING_FOR_PACKET && getTicks () - packetStartTime >= SERVER_PACKET_TIMEOUT)
 	{
-		printf ("packet read timeout\r\n");
+		CLIENT_DEBUG("[SEND] packet read timeout");
 		toDelete = true;
 		close (fd);
 		return;
 	}
 
-	if (getTicks () - lastPingTime >= 4000)
+	if (getTicks () - lastPingTime >= SERVER_PING_TIME)
 	{
-		printf ("ping timeout\r\n");
+		CLIENT_DEBUG("[SEND] ping timeout\r\n");
 		toDelete = true;
 		close (fd);
 		return;
 	}
 
-	if (sendingActive && getTicks () - lastAgentsDataTime >= 200)
+	if (sendingActive && sendDataTimer.process ())
 	{
-		TAgentsData d;
-		
+		TPacketAgentsData d;
 		d.agents = agentsData;
-
 		sendPacket (d);
-
-		lastAgentsDataTime = getTicks ();
 	}
 }
-
-// template<typename T>
-// bool Client::getVal (T& val)
-// {
-	// const THeader& h = currentHeader;
-	// printf ("dp: %d, sz: %d, h.size: %d\r\n", dataPointer, sizeof (T), h.size);
-	// if (dataPointer + sizeof (T) > h.size)
-		// return false;
-	// val = *((T*)(buffer + dataPointer));
-	// dataPointer += sizeof (T);
-	// return true;
-// }
 
 void Client::processPacket (int size)
 {
 	const THeader& h = currentHeader;
-	// dataPointer = 0;
-	printf ("Processing packet of type: %d size: %d\r\n", h.type, h.size);
+	CLIENT_DEBUG("[READ] Processing packet of type: %d size: %d", h.type, h.size);
 	
 	buffer_t buf;
 	buf.insert (buf.begin (), (char*)buffer, (char*)buffer + size);
 
+
 	switch (h.type)
 	{
 	case PACKET_AUTH:
+	{
+		if (size == 0) { kill (); return; }
+		TPacketAuth p;
+		p.fromBuffer (buf);
+
+		TDBAgent agent;
+		TPacketReply pr;
+		int clientId;
+		if (DB::findAgent (p.key, &agent))
 		{
-			TPacketAuth p;
-			p.fromBuffer (buf);
-
-			// printf ("key: %s\r\n", p.key);
-
-			TPacketReply pr;
-			pr.value = 1;		
-			sendPacket (pr);
-		}		
-		break;
-	case PACKET_AGENTDATA:
-		{
-			TAgentData p;
-			p.fromBuffer (buf);
-			p.id = agentId;
-
-			assignData (p);
-			
-			printf ("temp: %f\r\n", p.temp);
+			CLIENT_DEBUG("Authorized");
+			pr.value = 1;
+			agentId = agent.id;
+			authorized = true;
 		}
-		break;
-	case PACKET_START:
-		printf ("START\r\n");
-		sendingActive = true;
-		break;
-	case PACKET_STOP:
-		sendingActive = false;
-		break;
-	case PACKET_KEY_REQUEST:
+		else
 		{
-			TKeyReply pr;
-			strncpy (pr.key, "123412341234abcd", 16);
-			pr.key[0] = rand ();
-			sendPacket (pr);
-		}		
-		break;
+			CLIENT_DEBUG("Invalid key");
+			pr.value = 0;
+		}
+		sendPacket (pr);
+	}
+	break;
+	case PACKET_AGENTDATA:
+	{
+		if (size == 0) { kill (); return; }
+		if (!authorized) { kill (); return; }
+		TPacketAgentData p;
+		p.fromBuffer (buf);
+		p.id = agentId;
+
+		assignData (p);
+
+		// printf ("temp: %f\r\n", p.temp);
+	}
+	break;
+	case PACKET_START:
+	{
+		if (size == 0) { kill (); return; }
+		if (!authorized) { kill (); return; }
+		TPacketStart p;
+		p.fromBuffer (buf);
+
+		CLIENT_DEBUG("START");
+		sendingActive = true;
+
+		if (p.interval <= SERVER_INTERVAL_MIN)
+			p.interval = SERVER_INTERVAL_MIN;
+		if (p.interval >= SERVER_INTERVAL_MAX)
+			p.interval = SERVER_INTERVAL_MAX;
+
+		sendDataTimer.setInterval (p.interval);		
+	}
+	break;
+	case PACKET_STOP:
+	{
+		if (!authorized) { kill (); return; }
+		CLIENT_DEBUG("STOP");
+		sendingActive = false;
+	}
+	break;
+	case PACKET_KEY_REQUEST:
+	{
+		if (!authorized) { kill (); return; }
+		TPacketKeyReply pr;
+		DB::generateNewKey (pr.key);
+		sendPacket (pr);
+	}		
+	break;
 	}
 }
 bool Client::sendPacket (IPacket& packet)
@@ -215,5 +233,10 @@ bool Client::sendPacket (IPacket& packet)
 	dataToSend.insert (dataToSend.end (), (char*)&h, (char*)&h + sizeof (h));
 	dataToSend.insert (dataToSend.end (), &b[0], &b[0] + b.size ());
 
-	printf ("dataToSend len: %d\r\n", dataToSend.size ());
+	CLIENT_DEBUG("[SEND] New data to send: %d", dataToSend.size ());
+}
+void Client::kill ()
+{
+	toDelete = true;
+	close (fd);
 }

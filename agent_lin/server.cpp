@@ -147,7 +147,7 @@ void Server::connect ()
 	}
 
 	TPacketAuth p;
-	strcpy (p.key, "abcdefg");
+	strcpy (p.key, "UPDKPRHMPQRJXRET");
 
 	sendPacket (p);
 
@@ -161,7 +161,7 @@ void Server::connect ()
 
 	printf ("auth reply: %d\r\n", r.value);
 
-	sendHeader (PACKET_START);
+	// sendHeader (PACKET_START);
 
 	m_state = Connected;
 }

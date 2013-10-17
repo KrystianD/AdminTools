@@ -7,6 +7,7 @@
 using namespace std;
 
 #include "packets.h"
+#include "kutils.h"
 
 class Client
 {
@@ -35,15 +36,18 @@ private:
 	uint32_t packetStartTime;
 	uint32_t lastPingTime;
 
+	bool authorized;
+
 	// agent
 	int agentId;
 
 	// client
 	bool sendingActive;
-	uint32_t lastAgentsDataTime;
+	Timer sendDataTimer;
 
 	void processPacket (int size);
 	bool sendPacket (IPacket& packet);
+	void kill ();
 };
 
 #endif
