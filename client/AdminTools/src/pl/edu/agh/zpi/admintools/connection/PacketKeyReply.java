@@ -5,12 +5,12 @@ import java.util.Arrays;
 import android.util.Log;
 
 
-public class KeyReply implements IPacket {
+public class PacketKeyReply implements IPacket {
 	private final byte type = Header.PACKET_KEY_REPLY;
 	
 	private byte[] key = new byte[16];
 	
-	public KeyReply() {
+	public PacketKeyReply() {
 	}
 
 	@Override

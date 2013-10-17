@@ -8,12 +8,12 @@ import java.nio.ByteOrder;
  *
  * Zwraca 
  */
-public class Reply implements IPacket {
+public class PacketReply implements IPacket {
 	private final byte type = Header.PACKET_REPLY;
 	
 	private int value;
 	
-	public Reply() {
+	public PacketReply() {
 	}
 
 	public int getValue(){

@@ -1,14 +1,14 @@
 package pl.edu.agh.zpi.admintools.connection;
 
-public class AuthKey implements IPacket {
+public class PacketAuthKey implements IPacket {
 	private final byte type = Header.PACKET_AUTH;
 	
 	private byte[] key = new byte[16];
 	
-	public AuthKey() {
+	public PacketAuthKey() {
 	}
 	
-	public AuthKey(byte[] key) {
+	public PacketAuthKey(byte[] key) {
 		if(key.length == 16){
 			this.key = key;
 		}
