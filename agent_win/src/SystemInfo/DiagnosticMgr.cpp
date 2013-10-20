@@ -10,7 +10,7 @@ DiagnosticMgr::DiagnosticMgr()
 {
 	sigar_open(&sigarCore);
 
-	if(sigarCore != nullptr)
+	if(sigarCore != NULL)
 		initialized = true;		
 	else
 		std::cout << "Error while opening SIGAR core" << std::endl;		
@@ -25,17 +25,17 @@ Memory* DiagnosticMgr::getMemoryInfo()
 {
 	if(!initialized) {
 		std::cout << "Couldn't acquire memory info" << std::endl;
-		return nullptr;
+		return NULL;
 	}
 	sigar_mem_t* memData = new sigar_mem_t();
 	if(sigar_mem_get(sigarCore, memData)) {
 		std::cout << "SIGAR couldn't acquire memory info" << std::endl;
-		return nullptr;
+		return NULL;
 	}
 	sigar_swap_t* swapData = new sigar_swap_t();
 	if(sigar_swap_get(sigarCore, swapData)) {
 		std::cout << "SIGAR couldn't acquire swap info" << std::endl;		
-		return nullptr;
+		return NULL;
 	}	
 	return InfoMapper::sigarMemAndSwapToMemory(memData, swapData);	
 }
@@ -44,12 +44,12 @@ Resources* DiagnosticMgr::getResourcesInfo()
 {
 	if(!initialized) {
 		std::cout << "Couldn't acquire resources info" << std::endl;
-		return nullptr;
+		return NULL;
 	}
 	sigar_resource_limit_t* resourcesData = new sigar_resource_limit_t();
 	if(sigar_resource_limit_get(sigarCore, resourcesData)) {
 		std::cout << "SIGAR couldn't acquire resources info" << std::endl;
-		return nullptr;
+		return NULL;
 	}
 
 	return InfoMapper::sigarResourcesLimitToResources(resourcesData);
@@ -59,12 +59,12 @@ Cpu* DiagnosticMgr::getCpuInfo()
 {
 	if(!initialized) {
 		std::cout << "Couldn't acquire cpu info" << std::endl;
-		return nullptr;
+		return NULL;
 	}
 	sigar_cpu_t* cpuData = new sigar_cpu_t();
 	if(sigar_cpu_get(sigarCore, cpuData)) {
 		std::cout << "SIGAR couldn't acquire cpu info" << std::endl;
-		return nullptr;
+		return NULL;
 	}
 	Cpu* result = new Cpu();
 	result -> generalTimes = InfoMapper::sigarCpuToCpuTimes(cpuData);	
@@ -95,13 +95,13 @@ Processes* DiagnosticMgr::getProcessesInfo()
 {
 	if(!initialized) {
 		std::cout << "Couldn't acquire processes info" << std::endl;
-		return nullptr;
+		return NULL;
 	}
 
 	sigar_proc_stat_t* procStats = new sigar_proc_stat_t();
 	if(sigar_proc_stat_get(sigarCore, procStats)) {
 		std::cout << "SIGAR couldn't acquire processes stats" << std::endl;
-		return nullptr;
+		return NULL;
 	}
 	Processes* result = new Processes();
 	result -> stats = InfoMapper::sigarProcStatToProcessesStats(procStats);
