@@ -1,8 +1,10 @@
 package pl.edu.agh.zpi.admintools.sensors;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 
-public class AgentData {
+public class AgentData implements Serializable{
+	private static final long serialVersionUID = 1L;
 	private short id;
 	private SensorsData data;
 

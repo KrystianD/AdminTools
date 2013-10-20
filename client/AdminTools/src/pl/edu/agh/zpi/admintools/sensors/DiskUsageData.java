@@ -1,8 +1,10 @@
 package pl.edu.agh.zpi.admintools.sensors;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 
-public class DiskUsageData {
+public class DiskUsageData implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private String name = "";
 	private long totalSpace;
 	private long usedSpace;

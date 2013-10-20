@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="pl.edu.agh.zpi.admintools.Stats"
+            android:name="pl.edu.agh.zpi.admintools.StatsActivity"
             android:label="@string/title_activity_stats"
             android:parentActivityName="pl.edu.agh.zpi.admintools.AdminTools" >
             <meta-data

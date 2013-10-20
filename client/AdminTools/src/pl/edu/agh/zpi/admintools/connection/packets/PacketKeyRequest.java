@@ -1,4 +1,6 @@
-package pl.edu.agh.zpi.admintools.connection;
+package pl.edu.agh.zpi.admintools.connection.packets;
+
+import pl.edu.agh.zpi.admintools.connection.Header;
 
 public class PacketKeyRequest implements IPacket {
 	private final byte type = Header.PACKET_KEY_REQUEST;

@@ -3,19 +3,36 @@ package pl.edu.agh.zpi.admintools.connection;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import pl.edu.agh.zpi.admintools.connection.packets.IPacket;
+import pl.edu.agh.zpi.admintools.connection.packets.PacketAgentsData;
+import pl.edu.agh.zpi.admintools.connection.packets.PacketAuthKey;
+import pl.edu.agh.zpi.admintools.connection.packets.PacketKeyReply;
+import pl.edu.agh.zpi.admintools.connection.packets.PacketReply;
+import pl.edu.agh.zpi.admintools.connection.packets.PacketStart;
+
+import android.os.Bundle;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.util.Log;
 
 public class ConnectionTask implements Runnable {
+	public static final int CONNECTED = 0;
+	public static final int AGENTS_DATA = 1;
+	public static final int AGENT_KEY = 2;
+	
 	enum State {
 		IDLE, CONNECTING, DISCONNECTING, ACTIVE
 	}
 
+	private Messenger activityMessenger;
 	private boolean endConnection = false;
-	private long lastPing;
+	private long lastPing = System.currentTimeMillis();
 	private Socket socket;
 	private InputStream input;
 	private OutputStream output;
@@ -57,6 +74,7 @@ public class ConnectionTask implements Runnable {
 					e.printStackTrace();
 					endConnection = true;
 				}
+				break;
 			default:
 				Log.e("qwe", "unknown state");
 				break;
@@ -68,6 +86,7 @@ public class ConnectionTask implements Runnable {
 				e.printStackTrace();
 			}
 		}
+		Log.d("qwe", "thread dead");
 	}
 
 	public void processIdle() {
@@ -87,11 +106,13 @@ public class ConnectionTask implements Runnable {
 
 		processAuthKey();
 		sendPacket(new PacketStart((short) 1000));
-		
+
+		callback(CONNECTED, null);
 		state = State.ACTIVE;
 	}
 
 	public void processDisconnecting() throws Exception {
+		Log.d("qwe", "disconnecting");
 		sendHeader(Header.PACKET_STOP);
 		output.close();
 		input.close();
@@ -102,37 +123,37 @@ public class ConnectionTask implements Runnable {
 	private void processActive() throws Exception {
 		IPacket packet = null;
 		Header header;
-		lastPing = System.currentTimeMillis();
-		while (!endConnection && socket.isConnected()) {
-			if (input.available() >= 3) {
-				header = readHeader();
-				switch (header.getType()) {
-				case Header.PACKET_AGENTS_DATA:
-					PacketAgentsData agentsData = new PacketAgentsData();
-					readPacket(agentsData, header.getSize());
-					break;
-				case Header.PACKET_KEY_REPLY:
-					PacketKeyReply keyReply = new PacketKeyReply();
-					readPacket(keyReply, header.getSize());
-					break;
-				default:
-					Log.e("qwe", "unknown header " + header.getType());
-				}
 
+		if (input.available() >= 3) {
+			header = readHeader();
+			switch (header.getType()) {
+			case Header.PACKET_AGENTS_DATA:
+				PacketAgentsData agentsData = new PacketAgentsData();
+				readPacket(agentsData, header.getSize());
+				callback(AGENTS_DATA,agentsData);
+				break;
+			case Header.PACKET_KEY_REPLY:
+				PacketKeyReply keyReply = new PacketKeyReply();
+				readPacket(keyReply, header.getSize());
+				callback(AGENT_KEY,keyReply);
+				break;
+			default:
+				Log.e("qwe", "unknown header " + header.getType());
 			}
-			packet = packetQueue.poll();
-			if (packet != null) {
-				sendPacket(packet);
-			}
-			if (System.currentTimeMillis() - lastPing > 1000) {
-				sendHeader(Header.PACKET_PING);
-				lastPing = System.currentTimeMillis();
-			}
+
+		}
+		packet = packetQueue.poll();
+		if (packet != null) {
+			sendPacket(packet);
+		}
+		if (System.currentTimeMillis() - lastPing > 1000) {
+			sendHeader(Header.PACKET_PING);
+			lastPing = System.currentTimeMillis();
 		}
 	}
 
 	private void processAuthKey() throws Exception {
-		String s = "BYCDGWHDFHXZMYST";
+		String s = "BQXRESZQDASHCDUI";
 		PacketAuthKey authKey = new PacketAuthKey(s.getBytes());
 		sendPacket(authKey);
 		long start = System.currentTimeMillis();
@@ -149,7 +170,7 @@ public class ConnectionTask implements Runnable {
 		if (header.getType() == Header.PACKET_REPLY) {
 			PacketReply r = new PacketReply();
 			r.fromByteArray(data);
-			Log.d("qwe", "" + r.getValue());
+			//Log.d("qwe", "" + r.getValue());
 		} else {
 			throw new Exception("authKey");
 		}
@@ -193,13 +214,53 @@ public class ConnectionTask implements Runnable {
 		output.write(data);
 		output.flush();
 	}
-
-	public synchronized void connect() {
-		state = State.CONNECTING;
+	
+	private void callback(int type, Serializable data){
+		if(activityMessenger != null){
+			Bundle b = new Bundle();
+			Message m = Message.obtain(null, type);
+			switch(type){
+			case AGENTS_DATA:
+				b.putSerializable(PacketAgentsData.PACKET_AGENTS_DATA, data);
+				m.setData(b);
+				break;
+			case CONNECTED:
+				// nothing to send
+				break;
+			case AGENT_KEY:
+				b.putSerializable(PacketKeyReply.PACKET_KEY_REPLY, data);
+				m.setData(b);
+				break;
+			default:
+				return;
+			}
+			
+			try {
+				activityMessenger.send(m);
+			} catch (RemoteException e) {
+				Log.d("qwe", "connectiontask callback exception");
+				activityMessenger = null ; // ??
+				e.printStackTrace();
+			}
+		}
 	}
 
-	public synchronized void disconnect() {
-		state = State.DISCONNECTING;
+	public synchronized void connect() {
+		synchronized (state) {
+			state = State.CONNECTING;
+		}
+	}
+
+	public void disconnect() {
+		synchronized (state) {
+			state = State.DISCONNECTING;
+		}
+	}
+
+	public void setMessenger(Messenger activityMessenger) {
+		synchronized (activityMessenger) {
+			this.activityMessenger = activityMessenger;
+		}
 	}
 
 	public void enqueueMessage(IPacket packet) {

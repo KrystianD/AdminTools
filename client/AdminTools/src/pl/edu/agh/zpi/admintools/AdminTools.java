@@ -7,6 +7,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import pl.edu.agh.zpi.admintools.connection.ConnectionTask;
+import pl.edu.agh.zpi.admintools.utils.Handable;
+import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -20,6 +24,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -27,7 +32,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-public class AdminTools extends Activity implements ServiceConnection {
+public class AdminTools extends Activity implements ServiceConnection, Handable {
 	public static final String HOST = "pl.edu.agh.zpi.admintools.host";
 	public static final String PORT = "pl.edu.agh.zpi.admintools.port";
 
@@ -39,12 +44,13 @@ public class AdminTools extends Activity implements ServiceConnection {
 	private ProgressBar progressBar;
 
 	private Messenger serviceMessenger;
-
+	private Messenger activityMessenger = new Messenger(new IncomingHandler(this));
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_admin_tools);
-
+		
 		editTextHost = (EditText) findViewById(R.id.editText_IP);
 		editTextPort = (EditText) findViewById(R.id.editText_Port);
 		buttonConnect = (Button) findViewById(R.id.button_connect);
@@ -61,7 +67,7 @@ public class AdminTools extends Activity implements ServiceConnection {
 
 	public void onConnect(View view) throws InterruptedException {
 		setConnectionUI(true);
-
+		
 		if (!checkNetworkStatus())
 			return;
 		if (!validatePort())
@@ -79,9 +85,7 @@ public class AdminTools extends Activity implements ServiceConnection {
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-
-		setConnectionUI(false);
-
+		
 	}
 
 	public void generateKey(View view) {
@@ -180,10 +184,17 @@ public class AdminTools extends Activity implements ServiceConnection {
 		editor.putString(PORT, editTextPort.getText().toString());
 		editor.commit();
 	}
-
+	
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
 		serviceMessenger = new Messenger(service);
+		Message m = Message.obtain(null, ConnectionService.GET_MESSENGER);
+		m.replyTo = activityMessenger;
+		try {
+			serviceMessenger.send(m);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -192,8 +203,39 @@ public class AdminTools extends Activity implements ServiceConnection {
 	}
 
 	@Override
-	protected void onStop() {
-		unbindService(this);
+	protected void onDestroy() {
+		//Log.d("qwe", "unbinded AdminTools");
+		try{
+			unbindService(this);
+		}catch(Exception e){}
 		super.onDestroy();
+	}
+
+	@Override
+	protected void onResume() {
+		if(serviceMessenger != null){
+			Message m = Message.obtain(null, ConnectionService.GET_MESSENGER);
+			m.replyTo = activityMessenger;
+			try {
+				serviceMessenger.send(m);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
+		super.onResume();
+	}
+	
+	@Override
+	public void handleMessage(Message msg) {
+		Log.d("qwe", "AdminTools handleMessage");
+		switch(msg.what){
+		case ConnectionTask.CONNECTED:
+			Intent intent = new Intent(this, StatsActivity.class);
+			startActivity(intent);
+			setConnectionUI(false);
+			break;
+		default:
+			break;
+		}
 	}
 }

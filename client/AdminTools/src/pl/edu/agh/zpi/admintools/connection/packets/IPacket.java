@@ -1,4 +1,4 @@
-package pl.edu.agh.zpi.admintools.connection;
+package pl.edu.agh.zpi.admintools.connection.packets;
 
 public interface IPacket {
 	public byte[] toByteArray();

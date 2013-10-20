@@ -1,8 +1,10 @@
 package pl.edu.agh.zpi.admintools.sensors;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 
-public class ServiceData {
+public class ServiceData implements Serializable{
+	private static final long serialVersionUID = 1L;
 	private String name = "";
 	private boolean available;
 

@@ -1,15 +1,17 @@
-package pl.edu.agh.zpi.admintools.connection;
+package pl.edu.agh.zpi.admintools.connection.packets;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Arrays;
 
+import pl.edu.agh.zpi.admintools.connection.Header;
 import pl.edu.agh.zpi.admintools.sensors.AgentData;
-import android.util.Log;
 
-public class PacketAgentsData implements IPacket {
-	private final byte type = Header.PACKET_AGENTS_DATA;
+public class PacketAgentsData implements IPacket, Serializable {	
+	private static final long serialVersionUID = 1L;
+	public static final String PACKET_AGENTS_DATA = "pl.edu.agh.zpi.admintools.connection.packets.PACKET_AGENTS_DATA";
+	private static final byte type = Header.PACKET_AGENTS_DATA;
 	
 	private ArrayList<AgentData> list = new ArrayList<AgentData>();
 	
@@ -32,12 +34,16 @@ public class PacketAgentsData implements IPacket {
 		for(int i = 0 ; i < agentsAmount ; i++){
 			list.add(AgentData.fromByteBuffer(buffer));
 		}
-		Log.d("qwe",agentsAmount+"\n"+Arrays.toString(list.toArray()));
 	}
 
 	@Override
 	public byte getType() {
 		return type;
+	}
+
+	@Override
+	public String toString() {
+		return "PacketAgentsData [list=" + list + "]";
 	}
 
 }

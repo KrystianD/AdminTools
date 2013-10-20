@@ -1,9 +1,11 @@
 package pl.edu.agh.zpi.admintools.sensors;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-public class SensorsData {
+public class SensorsData implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private float temp;
 	private boolean tempValid;
 	private float cpuUsage;
