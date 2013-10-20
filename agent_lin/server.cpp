@@ -17,6 +17,7 @@
 
 #include "kutils.h"
 #include "packets.h"
+#include "settings.h"
 
 Server::Server ()
 {
@@ -44,7 +45,15 @@ void Server::process ()
 			m_lastConnect = getTicks ();
 		}
 	}
-	else if (m_state == Connected)
+	else if (m_state == WaitingForConfig)
+	{
+		if (getTicks () > m_configTime)
+		{
+			m_state = NotConnected;
+		}
+	}
+
+	if (m_state == Connected || m_state == WaitingForConfig)
 	{
 		timeval tv;
 		fd_set fds;
@@ -87,8 +96,8 @@ void Server::process ()
 					}
 
 					processPacket (h, buf);
+					printf ("got packet!\r\n");
 				}
-				printf ("got header!\r\n");
 			}
 		}
 	}
@@ -161,9 +170,11 @@ void Server::connect ()
 
 	printf ("auth reply: %d\r\n", r.value);
 
-	// sendHeader (PACKET_START);
-
-	m_state = Connected;
+	if (r.value == 1)
+	{
+		m_state = WaitingForConfig;
+		m_configTime = getTicks () + CONFIG_TIMEOUT;
+	}
 }
 
 bool Server::sendHeader (int type)
@@ -227,6 +238,17 @@ void Server::processPacket (THeader& h, buffer_t& buf)
 
 			printf ("reply: %d\r\n", p.value);
 		}		
+		break;
+	case PACKET_CONFIG:
+		{
+			config.fromBuffer (buf);
+			if (m_state == WaitingForConfig)
+			{
+				m_state = Connected;
+			}
+
+			printf ("cfg\r\n");
+		}
 		break;
 	}
 }

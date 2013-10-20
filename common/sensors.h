@@ -9,6 +9,8 @@ using namespace std;
 
 #include "common.h"
 
+class TPacketConfig;
+
 class TDiskUsage : public ISerializable
 {
 public:
@@ -112,6 +114,6 @@ public:
 	}
 };
 
-void getSensorsData (TSensorsData& data);
+void getSensorsData (TSensorsData& data, const TPacketConfig& config);
 
 #endif

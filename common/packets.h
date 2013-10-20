@@ -10,6 +10,7 @@
 #define PACKET_AGENTSDATA 6
 #define PACKET_KEY_REQUEST 7
 #define PACKET_KEY_REPLY   8
+#define PACKET_CONFIG    9
 
 #include <string.h>
 #include <stdint.h>
@@ -17,6 +18,7 @@
 #include <vector>
 using namespace std;
 
+#include "db.h"
 #include "common.h"
 #include "sensors.h"
 
@@ -140,6 +142,54 @@ public:
 	{
 		m_pos = 0;
 		fetch (buf, key);
+	}
+};
+class TPacketConfig : public IPacket
+{
+public:
+	struct TService
+	{
+		string name;
+		uint16_t port;
+	};
+	uint16_t agentId;
+	string tempPath;
+	uint16_t tempDivider;
+	vector<TPacketConfig::TService> services;
+	uint16_t interval;
+
+	virtual int getType () { return PACKET_CONFIG; }
+	virtual void toBuffer (buffer_t& buf)
+	{
+		append (buf, agentId);
+		append (buf, tempPath);
+		append (buf, tempDivider);
+		uint16_t len = services.size ();
+		append (buf, len);
+		for (int i = 0; i < len; i++)
+		{
+			append (buf, services[i].name);
+			append (buf, services[i].port);
+		}
+		append (buf, interval);
+	}
+	virtual void fromBuffer (buffer_t& buf)
+	{
+		m_pos = 0;
+		fetch (buf, agentId);
+		fetch (buf, tempPath);
+		fetch (buf, tempDivider);
+		uint16_t len;
+		fetch (buf, len);
+		services.clear ();
+		while (len--)
+		{
+			TPacketConfig::TService s;
+			fetch (buf, s.name);
+			fetch (buf, s.port);
+			services.push_back (s);
+		}
+		fetch (buf, interval);
 	}
 };
 

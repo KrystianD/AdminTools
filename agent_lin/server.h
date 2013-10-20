@@ -7,6 +7,7 @@
 using namespace std;
 
 #include "packets.h"
+#include "db.h"
 
 class Server
 {
@@ -20,8 +21,10 @@ public:
 	bool isValid () { return m_state == Connected; }
 	bool sendPacket (IPacket& packet);
 
+	const TPacketConfig& getConfig () const { return config; }
+
 private:
-	enum EState { NotConnected, Connected };
+	enum EState { NotConnected, WaitingForConfig, Connected };
 
 	string m_host;
 	int m_port;
@@ -29,6 +32,9 @@ private:
 	int m_fd;
 	uint32_t m_lastConnect;
 	EState m_state;
+	uint32_t m_configTime;
+
+	TPacketConfig config;
 
 	void connect ();
 

@@ -14,8 +14,6 @@ int main ()
 	Config c;
 	c.fromFile ("config");
 
-	printf ("%d\r\n", c.getInt ("port"));
-
 	signal (SIGPIPE, SIG_IGN);
 	
 	Server serv;
@@ -30,9 +28,9 @@ int main ()
 		usleep (10000);
 
 		TSensorsData d;
-		getSensorsData (d);
+		getSensorsData (d, serv.getConfig ());
 
-		if (serv.isValid () && getTicks () - lastSendTime >= 1000)
+		if (serv.isValid () && getTicks () - lastSendTime >= serv.getConfig ().interval)
 		{
 			TPacketAgentData agentData;
 			agentData.id = 1;

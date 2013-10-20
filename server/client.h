@@ -6,6 +6,7 @@
 #include <string>
 using namespace std;
 
+#include "db.h"
 #include "packets.h"
 #include "kutils.h"
 
@@ -45,9 +46,14 @@ private:
 	bool sendingActive;
 	Timer sendDataTimer;
 
+	TDBAgent dbAgent;
+
+	void fetchConfig ();
+
 	void processPacket (int size);
 	bool sendPacket (IPacket& packet);
 	void kill ();
+	void sendConfig ();
 };
 
 #endif

@@ -139,6 +139,14 @@ void Client::process ()
 	}
 }
 
+void Client::fetchConfig ()
+{
+	if (agentId == -1)
+		return;
+
+	DB::findAgentById (agentId, dbAgent);
+}
+
 void Client::processPacket (int size)
 {
 	const THeader& h = currentHeader;
@@ -146,7 +154,6 @@ void Client::processPacket (int size)
 	
 	buffer_t buf;
 	buf.insert (buf.begin (), (char*)buffer, (char*)buffer + size);
-
 
 	switch (h.type)
 	{
@@ -156,14 +163,12 @@ void Client::processPacket (int size)
 		TPacketAuth p;
 		p.fromBuffer (buf);
 
-		TDBAgent agent;
 		TPacketReply pr;
-		int clientId;
-		if (DB::findAgent (p.key, &agent))
+		if (DB::findAgentByKey (p.key, dbAgent))
 		{
-			CLIENT_DEBUG("Authorized");
+			CLIENT_DEBUG("Authorized id: %d", dbAgent.id);
 			pr.value = 1;
-			agentId = agent.id;
+			agentId = dbAgent.id;
 			authorized = true;
 		}
 		else
@@ -172,6 +177,11 @@ void Client::processPacket (int size)
 			pr.value = 0;
 		}
 		sendPacket (pr);
+
+		if (authorized)
+		{
+			sendConfig ();
+		}
 	}
 	break;
 	case PACKET_AGENTDATA:
@@ -183,8 +193,6 @@ void Client::processPacket (int size)
 		p.id = agentId;
 
 		assignData (p);
-
-		// printf ("temp: %f\r\n", p.temp);
 	}
 	break;
 	case PACKET_START:
@@ -239,4 +247,22 @@ void Client::kill ()
 {
 	toDelete = true;
 	close (fd);
+}
+void Client::sendConfig ()
+{
+	TPacketConfig p;
+	p.agentId = agentId;
+	for (int i = 0; i < dbAgent.services.size (); i++)
+	{
+		TPacketConfig::TService s;
+		s.name = dbAgent.services[i].name;
+		s.port = dbAgent.services[i].port;
+		p.services.push_back (s);
+	}
+	p.tempPath = dbAgent.tempPath;
+	p.tempDivider = dbAgent.tempDivider;
+	p.interval = dbAgent.interval;
+
+	printf ("%d\r\n", p.interval);
+	sendPacket (p);
 }
