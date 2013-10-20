@@ -2,7 +2,7 @@
 
 using namespace SystemInfo;
 
-Cpu::Times* SystemInfo::InfoMapper::sigarCpuToCpuTimes( sigar_cpu_t* cpuData )
+Cpu::Times* InfoMapper::sigarCpuToCpuTimes( sigar_cpu_t* cpuData )
 {
 	Cpu::Times* result = new Cpu::Times();
 	if(!cpuData) return result;
@@ -19,7 +19,7 @@ Cpu::Times* SystemInfo::InfoMapper::sigarCpuToCpuTimes( sigar_cpu_t* cpuData )
 	return result;
 }
 
-Cpu::Details* SystemInfo::InfoMapper::sigarCpuInfoToDetails( sigar_cpu_info_t* cpuData )
+Cpu::Details* InfoMapper::sigarCpuInfoToDetails( sigar_cpu_info_t* cpuData )
 {
 	Cpu::Details* result = new Cpu::Details();
 	if(!cpuData) return result;
@@ -34,7 +34,7 @@ Cpu::Details* SystemInfo::InfoMapper::sigarCpuInfoToDetails( sigar_cpu_info_t* c
 	return result;
 }
 
-Memory* SystemInfo::InfoMapper::sigarMemAndSwapToMemory( sigar_mem_t* memData, sigar_swap_t* swapData )
+Memory* InfoMapper::sigarMemAndSwapToMemory( sigar_mem_t* memData, sigar_swap_t* swapData )
 {
 	Memory* result = new Memory();
 	if(!memData || !swapData) return result;
@@ -56,7 +56,7 @@ Memory* SystemInfo::InfoMapper::sigarMemAndSwapToMemory( sigar_mem_t* memData, s
 	return result;
 }
 
-Resources* SystemInfo::InfoMapper::sigarResourcesLimitToResources( sigar_resource_limit_t* resData )
+Resources* InfoMapper::sigarResourcesLimitToResources( sigar_resource_limit_t* resData )
 {
 	Resources* result = new Resources();
 	if(!resData) return result;
@@ -84,7 +84,7 @@ Resources* SystemInfo::InfoMapper::sigarResourcesLimitToResources( sigar_resourc
 	return result;
 }
 
-Processes::Stats* SystemInfo::InfoMapper::sigarProcStatToProcessesStats( sigar_proc_stat_t* procData )
+Processes::Stats* InfoMapper::sigarProcStatToProcessesStats( sigar_proc_stat_t* procData )
 {
 	Processes::Stats* result = new Processes::Stats();
 	if(!procData) return result;
@@ -99,7 +99,7 @@ Processes::Stats* SystemInfo::InfoMapper::sigarProcStatToProcessesStats( sigar_p
 	return result;
 }
 
-void SystemInfo::InfoMapper::fillProcessDetailsWithSigarProcState( Processes::Details* details, sigar_proc_state_t* state )
+void InfoMapper::fillProcessDetailsWithSigarProcState( Processes::Details* details, sigar_proc_state_t* state )
 {
 	if(!details || !state) return;
 
@@ -113,7 +113,7 @@ void SystemInfo::InfoMapper::fillProcessDetailsWithSigarProcState( Processes::De
 	details -> threads = state -> threads;
 }
 
-void SystemInfo::InfoMapper::fillProcessDetailsWithSigarProcCpu( Processes::Details* details, sigar_proc_cpu_t* cpu )
+void InfoMapper::fillProcessDetailsWithSigarProcCpu( Processes::Details* details, sigar_proc_cpu_t* cpu )
 {
 	if(!details || !cpu) return;
 
@@ -125,7 +125,7 @@ void SystemInfo::InfoMapper::fillProcessDetailsWithSigarProcCpu( Processes::Deta
 	details -> cpu_percent = cpu -> percent;
 }
 
-void SystemInfo::InfoMapper::fillProcessDetailsWithSigarProcTime( Processes::Details* details, sigar_proc_time_t* time )
+void InfoMapper::fillProcessDetailsWithSigarProcTime( Processes::Details* details, sigar_proc_time_t* time )
 {
 	if(!details || !time) return;
 
@@ -135,7 +135,7 @@ void SystemInfo::InfoMapper::fillProcessDetailsWithSigarProcTime( Processes::Det
 	details -> time_total = time -> total;
 }
 
-void SystemInfo::InfoMapper::fillProcessDetailsWithSigarProcMemory( Processes::Details* details, sigar_proc_mem_t* mem )
+void InfoMapper::fillProcessDetailsWithSigarProcMemory( Processes::Details* details, sigar_proc_mem_t* mem )
 {
 	if(!details || !mem) return;
 
@@ -145,4 +145,46 @@ void SystemInfo::InfoMapper::fillProcessDetailsWithSigarProcMemory( Processes::D
 	details -> mem_minor_faults = mem -> minor_faults;
 	details -> mem_major_faults = mem -> major_faults;
 	details -> mem_page_faults = mem -> page_faults;
+}
+
+FileSystem::Details* InfoMapper::sigarFileSystemToFsDetails( sigar_file_system_t* fsData )
+{
+	FileSystem::Details* result = new FileSystem::Details();
+	if(!fsData) return result;
+
+	result -> dir = fsData -> dir_name;
+	result -> dev = fsData -> dev_name;
+	result -> type = fsData -> type_name;
+	result -> sys_type = fsData -> sys_type_name;
+	result -> options = fsData -> options;
+	result -> fsType = FileSystem::getFullFsTypeName(fsData -> type);
+	result -> flags = fsData -> flags;
+	return result;
+}
+
+FileSystem::Usage* SystemInfo::InfoMapper::sigarFileSystemUsageToFsUsage( sigar_file_system_usage_t* fsData )
+{
+	FileSystem::Usage* result = new FileSystem::Usage();
+	if(!fsData) return result;
+
+	result -> percent_use = fsData -> use_percent;
+	result -> total = fsData -> total;
+	result -> free = fsData -> free;
+	result -> used = fsData -> used;
+	result -> avail = fsData -> avail;
+	result -> files = fsData -> files;
+	result -> free_files = fsData -> free_files;
+
+	result -> disc_reads = fsData -> disk.reads;
+	result -> disc_writes = fsData -> disk.writes;
+	result -> disc_write_bytes = fsData -> disk.write_bytes;
+	result -> disc_read_bytes = fsData -> disk.read_bytes;
+	result -> disc_rtime = fsData -> disk.rtime;
+	result -> disc_wtime = fsData -> disk.wtime;
+	result -> disc_qtime = fsData -> disk.qtime;
+	result -> disc_time = fsData -> disk.time;
+	result -> disc_snaptime = fsData -> disk.snaptime;
+	result -> disc_service_time = fsData -> disk.service_time;
+	result -> disc_queue = fsData -> disk.queue;
+	return result;
 }

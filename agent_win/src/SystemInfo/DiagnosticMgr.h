@@ -5,6 +5,7 @@
 #include "Resources.h"
 #include "Cpu.h"
 #include "Processes.h"
+#include "FileSystem.h"
 
 namespace SystemInfo
 {
@@ -15,6 +16,7 @@ namespace SystemInfo
 			Resources* getResourcesInfo();
 			Cpu* getCpuInfo();
 			Processes* getProcessesInfo();
+			FileSystem* getFileSystemInfo();
 
 			static DiagnosticMgr& getInstance() {
 				static DiagnosticMgr instance;
