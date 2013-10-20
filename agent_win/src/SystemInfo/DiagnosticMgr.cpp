@@ -127,31 +127,67 @@ Processes::Details* DiagnosticMgr::getProcessDetails( uint64 pid )
 
 	sigar_proc_state_t* procState = new sigar_proc_state_t();
 	if(sigar_proc_state_get(sigarCore, pid, procState)) {
-		std::cout << "SIGAR couldn't acquire process state" << std::endl;
+		std::cout << "SIGAR couldn't acquire process state for pid: " 
+			<< pid << std::endl;
 		return result;
 	}
 	InfoMapper::fillProcessDetailsWithSigarProcState(result, procState);
 
 	sigar_proc_cpu_t* procCpu = new sigar_proc_cpu_t();
 	if(sigar_proc_cpu_get(sigarCore, pid, procCpu)) {
-		std::cout << "SIGAR couldn't acquire process cpu" << std::endl;
+		std::cout << "SIGAR couldn't acquire process cpu for pid: "
+			<< pid << std::endl;
 		return result;
 	}
 	InfoMapper::fillProcessDetailsWithSigarProcCpu(result, procCpu);
 
 	sigar_proc_time_t* procTime = new sigar_proc_time_t();
 	if(sigar_proc_time_get(sigarCore, pid, procTime)) {
-		std::cout << "SIGAR couldn't acquire process time" << std::endl;
+		std::cout << "SIGAR couldn't acquire process time for pid: "
+			<< pid << std::endl;
 		return result;
 	}
 	InfoMapper::fillProcessDetailsWithSigarProcTime(result, procTime);
 
 	sigar_proc_mem_t* procMem = new sigar_proc_mem_t();
 	if(sigar_proc_mem_get(sigarCore, pid, procMem)) {
-		std::cout << "SIGAR couldn't acquire process memory" << std::endl;
+		std::cout << "SIGAR couldn't acquire process memory for pid: "
+			<< pid << std::endl;
 		return result;
 	}
 	InfoMapper::fillProcessDetailsWithSigarProcMemory(result, procMem);
+	return result;
+}
+
+FileSystem* SystemInfo::DiagnosticMgr::getFileSystemInfo()
+{
+	if(!initialized) {
+		std::cout << "Couldn't acquire file system info" << std::endl;
+		return NULL;
+	}
+
+	sigar_file_system_list_t* fsAvail = new sigar_file_system_list_t();
+	if(sigar_file_system_list_get(sigarCore, fsAvail)) {
+		std::cout << "SIGAR couldn't acquire file system list info" << std::endl;
+		return NULL;
+	}	
+	FileSystem* result = new FileSystem();
+	for(uint16 i = 0; i < fsAvail -> number; ++i) {
+		result -> dirDetails.push_back(
+			InfoMapper::sigarFileSystemToFsDetails(&(fsAvail -> data[i])));
+	}
+	std::vector<FileSystem::Details*> details = result -> dirDetails;
+	for(auto it = details.begin(); it != details.end(); ++it) {
+		std::string currentDir = (*it) -> dir;
+
+		sigar_file_system_usage_t* fsDirUsage = new sigar_file_system_usage_t();
+		if(sigar_file_system_usage_get(sigarCore, currentDir.c_str(), fsDirUsage)) {
+			std::cout << "SIGAR couldn't acquire file system usage for dir: "
+				<< currentDir << std::endl;
+		} else {
+
+		}		
+	}
 
 	return result;
 }
