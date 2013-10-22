@@ -23,6 +23,18 @@ public class DiskUsageData implements Serializable {
 		return dud;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public long getTotalSpace() {
+		return totalSpace;
+	}
+
+	public long getUsedSpace() {
+		return usedSpace;
+	}
+
 	@Override
 	public String toString() {
 		return "DiskUsageData [name=" + name + ", totalSpace=" + totalSpace

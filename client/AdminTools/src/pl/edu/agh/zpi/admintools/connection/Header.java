@@ -15,6 +15,7 @@ public class Header {
 	public static final byte PACKET_AGENTS_DATA = 6;
 	public static final byte PACKET_KEY_REQUEST = 7;
 	public static final byte PACKET_KEY_REPLY = 8;
+	public static final byte PACKET_CONFIG = 9;
 
 	private byte type;
 	private short size;

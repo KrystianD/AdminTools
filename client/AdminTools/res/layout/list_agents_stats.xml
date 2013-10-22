@@ -1,117 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/RelativeLayout1"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <android.support.v7.widget.Space
-        android:id="@+id/space1"
+    <TextView
+        android:id="@+id/textView_list_agent_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/textView1" />
-
-    <android.support.v7.widget.Space
-        android:id="@+id/space2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/space1" />
+        android:layout_marginTop="15dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TableLayout
+        android:id="@+id/tableLayout_list_table"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView1"
-        android:layout_alignRight="@+id/textView1"
-        android:layout_below="@+id/textView1"
-        android:layout_marginTop="18dp" >
+        android:layout_marginTop="16dp" >
 
         <TableRow
-            android:id="@+id/tableRow1"
+            android:id="@+id/tableRow_list_temp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/textView_list_temp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="@string/temperature" />
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/textView_list_temp_data"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
-
+                android:layout_height="wrap_content" />
         </TableRow>
 
         <TableRow
-            android:id="@+id/tableRow2"
+            android:id="@+id/tableRow_list_cpu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/textView_list_cpu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="@string/cpu" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/textView_list_cpu_data"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
-
+                android:layout_height="wrap_content" />
         </TableRow>
 
         <TableRow
-            android:id="@+id/tableRow3"
+            android:id="@+id/tableRow_list_ram"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/textView_list_ram"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="@string/ram" />
 
             <TextView
-                android:id="@+id/textView7"
+                android:id="@+id/textView_list_ram_data"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
-
+                android:layout_height="wrap_content" />
         </TableRow>
 
         <TableRow
-            android:id="@+id/tableRow4"
+            android:id="@+id/tableRow_list_uptime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
             <TextView
-                android:id="@+id/textView8"
+                android:id="@+id/textView_list_uptime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="@string/uptime" />
 
             <TextView
-                android:id="@+id/textView9"
+                android:id="@+id/textView_list_uptime_data"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
-
+                android:layout_height="wrap_content" />
         </TableRow>
     </TableLayout>
 
-    <TextView
-        android:id="@+id/textView1"
+    <ToggleButton
+        android:id="@+id/toggleButton_list_services"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
-        android:text="Medium Text"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textOff="@string/services"
+        android:textOn="@string/services"
+        android:onClick="toggleTable" />
 
-</RelativeLayout>
+    <TableLayout
+        android:id="@+id/tableLayout_list_services"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+    </TableLayout>
+
+    <ToggleButton
+        android:id="@+id/toggleButton_list_disks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOff="@string/disks"
+        android:textOn="@string/disks"
+        android:onClick="toggleTable" />
+
+    <TableLayout
+        android:id="@+id/tableLayout_list_disks"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+    </TableLayout>
+
+</LinearLayout>

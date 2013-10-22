@@ -80,6 +80,10 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 		if (serviceMessenger == null)
 			return;
 		Message m = Message.obtain(null, ConnectionService.CONNECT);
+		Bundle b = new Bundle();
+		b.putInt(PORT, Integer.parseInt(editTextPort.getText().toString()));
+		b.putString(HOST, editTextHost.getText().toString());
+		m.setData(b);
 		try {
 			serviceMessenger.send(m);
 		} catch (RemoteException e) {
@@ -231,6 +235,8 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 		switch(msg.what){
 		case ConnectionTask.CONNECTED:
 			Intent intent = new Intent(this, StatsActivity.class);
+			intent.putExtra(PORT, Integer.parseInt(editTextPort.getText().toString()));
+			intent.putExtra(HOST, editTextHost.getText().toString());
 			startActivity(intent);
 			setConnectionUI(false);
 			break;

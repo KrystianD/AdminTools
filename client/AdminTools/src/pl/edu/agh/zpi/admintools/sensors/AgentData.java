@@ -18,8 +18,23 @@ public class AgentData implements Serializable{
 		return agent;
 	}
 
+	public short getId(){
+		return id;
+	}
+	
+	public SensorsData getData(){
+		return data;
+	}
+	
 	@Override
 	public String toString() {
 		return "AgentData [id=" + id + ", data=" + data + "]";
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o != null && !(o instanceof AgentData))
+			return false;
+		return ((AgentData)o).id == this.id;
 	}
 }

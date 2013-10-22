@@ -19,6 +19,14 @@ public class PacketAgentsData implements IPacket, Serializable {
 		// TODO Auto-generated constructor stub
 	}
 
+	public AgentData[] getAgentsArray(){
+		return (AgentData[])list.toArray();
+	}
+	
+	public ArrayList<AgentData> getAgentsList(){
+		return list;
+	}
+	
 	@Override
 	public byte[] toByteArray() {
 		// TODO Auto-generated method stub
@@ -45,5 +53,4 @@ public class PacketAgentsData implements IPacket, Serializable {
 	public String toString() {
 		return "PacketAgentsData [list=" + list + "]";
 	}
-
 }

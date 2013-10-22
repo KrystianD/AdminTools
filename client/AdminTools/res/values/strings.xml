@@ -19,5 +19,13 @@
     <string name="generate_agent_key">Generate new agent\'s key</string>
     <string name="generate_agent_dialog">Do you really want to create new key?\nThis cannot be undone!</string>
     <string name="dialog_get_key_text">This is your new agent\'s key:</string>
-    
+    <string name="temperature">Temperature:</string>
+    <string name="cpu">CPU usage:</string>
+    <string name="ram">RAM usage:</string>
+    <string name="uptime">Uptime:</string>
+    <string name="services">Services</string>
+    <string name="disks">Disks</string>
+    <string name="available">Available</string>
+    <string name="inavailable">Inavailable!</string>
+
 </resources>

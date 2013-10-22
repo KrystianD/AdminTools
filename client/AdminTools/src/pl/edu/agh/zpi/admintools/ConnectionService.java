@@ -6,6 +6,7 @@ import pl.edu.agh.zpi.admintools.utils.Handable;
 import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -54,7 +55,10 @@ public class ConnectionService extends Service implements Handable {
 			connectionTask.enqueueMessage(new PacketKeyRequest());
 			break;
 		case CONNECT:
-			connectionTask.connect();
+			Bundle b = msg.getData();
+			String host = b.getString(AdminTools.HOST);
+			int port = b.getInt(AdminTools.PORT);
+			connectionTask.connect(host,port);
 			break;
 		case SEND_SETTINGS:
 			// connectionTask.enqueueMessage(new PacketSettings());

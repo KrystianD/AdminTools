@@ -43,9 +43,6 @@ public class ConnectionTask implements Runnable {
 
 	@Override
 	public void run() {
-		host = "89.68.52.148";// intent.getStringExtra(AdminTools.HOST);
-		port = 1234;// intent.getIntExtra(AdminTools.PORT, -1);
-
 		while (!endConnection) {
 			switch (state) {
 			case IDLE:
@@ -137,6 +134,11 @@ public class ConnectionTask implements Runnable {
 				readPacket(keyReply, header.getSize());
 				callback(AGENT_KEY,keyReply);
 				break;
+			case Header.PACKET_CONFIG:
+				//nie powinien tego dostać!
+				Log.d("qwe", "packet config. why leo?");
+				readPacket(null,header.getSize());
+				break;
 			default:
 				Log.e("qwe", "unknown header " + header.getType());
 			}
@@ -153,8 +155,8 @@ public class ConnectionTask implements Runnable {
 	}
 
 	private void processAuthKey() throws Exception {
-		String s = "BQXRESZQDASHCDUI";
-		PacketAuthKey authKey = new PacketAuthKey(s.getBytes());
+		String s = "PUAEODBIAGSYILOX";
+		PacketAuthKey authKey = new PacketAuthKey(s.getBytes(),false);
 		sendPacket(authKey);
 		long start = System.currentTimeMillis();
 		while (input.available() < Header.HEADER_SIZE) {
@@ -204,7 +206,8 @@ public class ConnectionTask implements Runnable {
 			Thread.sleep(10);
 		}
 		input.read(data);
-		packet.fromByteArray(data);
+		if(packet != null)
+			packet.fromByteArray(data);
 	}
 
 	private void sendPacket(IPacket packet) throws IOException {
@@ -245,10 +248,10 @@ public class ConnectionTask implements Runnable {
 		}
 	}
 
-	public synchronized void connect() {
-		synchronized (state) {
+	public synchronized void connect(String host,int port) {
+			this.host = host;
+			this.port = port;
 			state = State.CONNECTING;
-		}
 	}
 
 	public void disconnect() {

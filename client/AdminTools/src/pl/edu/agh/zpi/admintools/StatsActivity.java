@@ -3,6 +3,7 @@ package pl.edu.agh.zpi.admintools;
 import pl.edu.agh.zpi.admintools.connection.ConnectionTask;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketAgentsData;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketKeyReply;
+import pl.edu.agh.zpi.admintools.listdata.AgentArrayAdapter;
 import pl.edu.agh.zpi.admintools.utils.Handable;
 import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
 import android.app.Activity;
@@ -24,21 +25,30 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
+import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class StatsActivity extends Activity implements ServiceConnection, Handable{
-	private TextView tv;
+	private ListView listView;
+	private AgentArrayAdapter agentsArray;
 	
 	private Messenger serviceMessenger;
-	private Messenger activityMessenger = new Messenger(new IncomingHandler(this));;
+	private Messenger activityMessenger = new Messenger(new IncomingHandler(this));
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_stats_activity);
 		
-		tv = (TextView)findViewById(R.id.textView1);
+		TextView tv = (TextView)findViewById(R.id.textView_server_name);
+		String serverName = getIntent().getStringExtra(AdminTools.HOST) + ":" + getIntent().getIntExtra(AdminTools.PORT,0);
+		tv.setText(serverName);
+		
+		agentsArray = new AgentArrayAdapter(this);
+
+		listView = (ListView)findViewById(R.id.listView_agents_data);
+		listView.setAdapter(agentsArray);
 		
 		bindService(new Intent(this, ConnectionService.class), this,
 				Context.BIND_AUTO_CREATE);
@@ -62,7 +72,7 @@ public class StatsActivity extends Activity implements ServiceConnection, Handab
 	}
 
 	@Override
-	protected void onPause() {
+	protected void onStop() {
 		unbindService(this);
 		super.onDestroy();
 	}
@@ -89,7 +99,10 @@ public class StatsActivity extends Activity implements ServiceConnection, Handab
 		case ConnectionTask.AGENTS_DATA:
 			b = msg.getData();
 			PacketAgentsData pad = (PacketAgentsData)b.get(PacketAgentsData.PACKET_AGENTS_DATA);
-			tv.setText(pad.toString());
+			
+			agentsArray.clear();
+			agentsArray.addAll(pad.getAgentsList());
+			agentsArray.notifyDataSetChanged();
 			break;
 		case ConnectionTask.AGENT_KEY:
 			b = msg.getData();
@@ -160,5 +173,9 @@ public class StatsActivity extends Activity implements ServiceConnection, Handab
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	public void toggleTable(View view){
+		agentsArray.notifyDataSetChanged();
 	}
 }

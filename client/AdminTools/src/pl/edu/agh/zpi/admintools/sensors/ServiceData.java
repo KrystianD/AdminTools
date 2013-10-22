@@ -21,6 +21,14 @@ public class ServiceData implements Serializable{
 		return serviceData;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public boolean isAvailable() {
+		return available;
+	}
+
 	@Override
 	public String toString() {
 		return "ServiceData [name=" + name + ", available=" + available + "]";
