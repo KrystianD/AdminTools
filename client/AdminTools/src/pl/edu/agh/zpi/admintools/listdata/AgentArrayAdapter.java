@@ -59,18 +59,16 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 		ToggleButton toggleButtonServices = (ToggleButton)convertView.findViewById(R.id.toggleButton_list_services);
 		
 		if(toggleButtonServices.isChecked()){
-			servicesTab.setVisibility(View.VISIBLE);
 			addServicesContent(servicesTab, serviceData);
+			servicesTab.setVisibility(View.VISIBLE);
 		}else{
-			servicesTab.removeAllViews();
-			servicesTab.setVisibility(View.INVISIBLE);
+			servicesTab.setVisibility(View.GONE);
 		}
 		if(toggleButtonDisks.isChecked()){
 			addDisksContent(disksTab, diskUsage);
 			disksTab.setVisibility(View.VISIBLE);
 		}else{
-			disksTab.removeAllViews();
-			disksTab.setVisibility(View.INVISIBLE);
+			disksTab.setVisibility(View.GONE);
 		}
 		
 		name.setText("" + agent.getId());
@@ -91,7 +89,7 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 		int seconds = up % 60;
 		uptime.setText(String.format("%dD %dH %dM %dS", days, hours, minutes,
 				seconds));
-
+		
 		return convertView;
 	}
 

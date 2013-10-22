@@ -32,14 +32,21 @@ import android.widget.TextView;
 public class StatsActivity extends Activity implements ServiceConnection, Handable{
 	private ListView listView;
 	private AgentArrayAdapter agentsArray;
+	private boolean isServiceBinded;
 	
 	private Messenger serviceMessenger;
 	private Messenger activityMessenger = new Messenger(new IncomingHandler(this));
+	
+	private String host;
+	private int port;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_stats_activity);
+		
+		host = this.getIntent().getStringExtra(AdminTools.HOST);
+		port = this.getIntent().getIntExtra(AdminTools.PORT, 0);
 		
 		TextView tv = (TextView)findViewById(R.id.textView_server_name);
 		String serverName = getIntent().getStringExtra(AdminTools.HOST) + ":" + getIntent().getIntExtra(AdminTools.PORT,0);
@@ -50,47 +57,52 @@ public class StatsActivity extends Activity implements ServiceConnection, Handab
 		listView = (ListView)findViewById(R.id.listView_agents_data);
 		listView.setAdapter(agentsArray);
 		
-		bindService(new Intent(this, ConnectionService.class), this,
+		isServiceBinded = bindService(new Intent(this, ConnectionService.class), this,
 				Context.BIND_AUTO_CREATE);
 	}	
 
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
 		serviceMessenger = new Messenger(service);
-		Message m = Message.obtain(null, ConnectionService.GET_MESSENGER);
-		m.replyTo = activityMessenger;
-		try {
-			serviceMessenger.send(m);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
+		sendMessageToService(ConnectionService.GET_MESSENGER);
+		sendMessageToService(ConnectionService.CONNECT);
 	}
 
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
+		Log.d("qwe", "StatsActivity.onServiceDisconnected()");
 		serviceMessenger = null;
+		isServiceBinded = false;
 	}
 
 	@Override
-	protected void onStop() {
-		unbindService(this);
+	protected void onDestroy() {
+		if(isServiceBinded){
+			unbindService(this);
+			isServiceBinded = false;
+			serviceMessenger = null;
+		}
 		super.onDestroy();
 	}
 
 	@Override
-	protected void onResume() {
-		if(serviceMessenger != null){
-			Message m = Message.obtain(null, ConnectionService.GET_MESSENGER);
-			m.replyTo = activityMessenger;
-			try {
-				serviceMessenger.send(m);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-		}
-		super.onResume();
+	protected void onStop() {
+		sendMessageToService(ConnectionService.STOP);
+	
+		super.onStop();
 	}
 
+	@Override
+	protected void onResume() {
+		Log.d("qwe", "StatsActivity.onResume()" + serviceMessenger);
+		if(serviceMessenger == null){
+			isServiceBinded = bindService(new Intent(this, ConnectionService.class), this,
+					Context.BIND_AUTO_CREATE);
+		}
+		sendMessageToService(ConnectionService.CONNECT);
+		super.onResume();
+	}
+	
 	@Override
 	public void handleMessage(Message msg) {
 		Log.d("qwe", "StatsActivity handleMessage");
@@ -98,6 +110,7 @@ public class StatsActivity extends Activity implements ServiceConnection, Handab
 		switch(msg.what){
 		case ConnectionTask.AGENTS_DATA:
 			b = msg.getData();
+			
 			PacketAgentsData pad = (PacketAgentsData)b.get(PacketAgentsData.PACKET_AGENTS_DATA);
 			
 			agentsArray.clear();
@@ -124,6 +137,24 @@ public class StatsActivity extends Activity implements ServiceConnection, Handab
 			break;
 		}
 		
+	}
+	
+	private void sendMessageToService(int type){
+		if(serviceMessenger != null){
+			Message m = Message.obtain(null, type);
+			if(type == ConnectionService.CONNECT){
+				Bundle b = new Bundle();
+				b.putInt(AdminTools.PORT, port);
+				b.putString(AdminTools.HOST, host);
+				m.setData(b);
+			}
+			m.replyTo = activityMessenger;
+			try {
+				serviceMessenger.send(m);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	@Override

@@ -14,7 +14,6 @@ import pl.edu.agh.zpi.admintools.connection.packets.PacketAuthKey;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketKeyReply;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketReply;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketStart;
-
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
@@ -27,7 +26,7 @@ public class ConnectionTask implements Runnable {
 	public static final int AGENT_KEY = 2;
 	
 	enum State {
-		IDLE, CONNECTING, DISCONNECTING, ACTIVE
+		IDLE, CONNECTING, DISCONNECTING, ACTIVE, STOPPING, STARTING
 	}
 
 	private Messenger activityMessenger;
@@ -38,12 +37,14 @@ public class ConnectionTask implements Runnable {
 	private OutputStream output;
 	private ConcurrentLinkedQueue<IPacket> packetQueue = new ConcurrentLinkedQueue<IPacket>();
 	private State state = State.IDLE;
+	private boolean isConnected = false;
 	private String host;
 	private int port;
 
 	@Override
 	public void run() {
 		while (!endConnection) {
+			//Log.d("qwe", "ConnectionTask.run() loop " + state);
 			switch (state) {
 			case IDLE:
 				processIdle();
@@ -56,12 +57,28 @@ public class ConnectionTask implements Runnable {
 					state = State.IDLE;
 				}
 				break;
+			case STARTING:
+				try {
+					processStarting();
+				} catch (Exception e) {
+					e.printStackTrace();
+					state = State.IDLE;
+				}
+				break;
 			case ACTIVE:
 				try {
 					processActive();
 				} catch (Exception e) {
 					e.printStackTrace();
 					state = State.CONNECTING;
+				}
+				break;
+			case STOPPING:
+				try {
+					processStopping();
+				} catch (Exception e) {
+					e.printStackTrace();
+					state = State.IDLE;
 				}
 				break;
 			case DISCONNECTING:
@@ -76,9 +93,9 @@ public class ConnectionTask implements Runnable {
 				Log.e("qwe", "unknown state");
 				break;
 			}
-
+			sendPing();
 			try {
-				Thread.sleep(10);
+				Thread.sleep(16);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -86,7 +103,7 @@ public class ConnectionTask implements Runnable {
 		Log.d("qwe", "thread dead");
 	}
 
-	public void processIdle() {
+	private void processIdle() {
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e) {
@@ -94,7 +111,17 @@ public class ConnectionTask implements Runnable {
 		}
 	}
 
-	public void processConnecting() throws Exception {
+	private void processStopping() throws Exception{
+		sendHeader(Header.PACKET_STOP);
+		state = State.IDLE;
+	}
+	
+	private void processStarting() throws Exception{
+		sendPacket(new PacketStart((short) 1000));
+		state = State.ACTIVE;
+	}
+	
+	private void processConnecting() throws Exception {		
 		InetAddress address = InetAddress.getByName(host);
 		socket = new Socket(address, port);
 
@@ -102,18 +129,18 @@ public class ConnectionTask implements Runnable {
 		output = socket.getOutputStream();
 
 		processAuthKey();
-		sendPacket(new PacketStart((short) 1000));
 
 		callback(CONNECTED, null);
-		state = State.ACTIVE;
+
+		state = State.STARTING;
 	}
 
-	public void processDisconnecting() throws Exception {
+	private void processDisconnecting() throws Exception {
 		Log.d("qwe", "disconnecting");
-		sendHeader(Header.PACKET_STOP);
 		output.close();
 		input.close();
 		socket.close();
+		isConnected = false;
 		endConnection = true;
 	}
 
@@ -148,12 +175,20 @@ public class ConnectionTask implements Runnable {
 		if (packet != null) {
 			sendPacket(packet);
 		}
-		if (System.currentTimeMillis() - lastPing > 1000) {
-			sendHeader(Header.PACKET_PING);
+	}
+
+	private void sendPing(){
+		//Log.d("qwe", "ConnectionTask.sendPing()" + isConnected);
+		if (isConnected && System.currentTimeMillis() - lastPing > 1000) {
+			try {
+				sendHeader(Header.PACKET_PING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			lastPing = System.currentTimeMillis();
 		}
 	}
-
+	
 	private void processAuthKey() throws Exception {
 		String s = "PUAEODBIAGSYILOX";
 		PacketAuthKey authKey = new PacketAuthKey(s.getBytes(),false);
@@ -170,10 +205,12 @@ public class ConnectionTask implements Runnable {
 		input.read(data);
 		Log.d("qwe", "" + header.getType());
 		if (header.getType() == Header.PACKET_REPLY) {
+			isConnected = true;
 			PacketReply r = new PacketReply();
 			r.fromByteArray(data);
 			//Log.d("qwe", "" + r.getValue());
 		} else {
+			isConnected = false;
 			throw new Exception("authKey");
 		}
 	}
@@ -192,6 +229,8 @@ public class ConnectionTask implements Runnable {
 
 	private void sendHeader(byte type) throws IOException {
 		Header header = new Header(type, (byte) 0);
+		Log.d("qwe", "header type "+ type);
+		Log.d("qwe", "output null"+ (output==null));
 		output.write(header.toByteArray());
 		output.flush();
 	}
@@ -219,6 +258,7 @@ public class ConnectionTask implements Runnable {
 	}
 	
 	private void callback(int type, Serializable data){
+		Log.d("qwe", "ConnectionTask.callback()");
 		if(activityMessenger != null){
 			Bundle b = new Bundle();
 			Message m = Message.obtain(null, type);
@@ -249,9 +289,18 @@ public class ConnectionTask implements Runnable {
 	}
 
 	public synchronized void connect(String host,int port) {
+		Log.d("qwe", "ConnectionTask.connect()" + state);
+		if((!isConnected() && (this.port != port || this.host != host))){
 			this.host = host;
 			this.port = port;
 			state = State.CONNECTING;
+		}
+		else{
+			if(state == State.IDLE){
+				state = State.STARTING;
+			}
+			callback(CONNECTED, null);
+		}
 	}
 
 	public void disconnect() {
@@ -260,6 +309,16 @@ public class ConnectionTask implements Runnable {
 		}
 	}
 
+	public void stop() {
+		synchronized (state) {
+			state = State.STOPPING;
+		}
+	}
+	
+	public synchronized boolean isConnected(){
+		return isConnected;
+	}
+	
 	public void setMessenger(Messenger activityMessenger) {
 		synchronized (activityMessenger) {
 			this.activityMessenger = activityMessenger;
@@ -270,6 +329,7 @@ public class ConnectionTask implements Runnable {
 		try {
 			packetQueue.add(packet);
 		} catch (Exception e) {
+			Log.e("qwe", "ConnectionTask.enqueueMessage()");
 		}
 	}
 }

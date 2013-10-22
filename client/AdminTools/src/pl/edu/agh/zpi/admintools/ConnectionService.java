@@ -17,35 +17,41 @@ public class ConnectionService extends Service implements Handable {
 	public static final int GET_MESSENGER = 0;
 	public static final int GENERATE_KEY = 1;
 	public static final int CONNECT = 2;
-	public static final int SEND_SETTINGS = 3;
+	public static final int DISCONNECT = 3;
+	public static final int SEND_SETTINGS = 4;
+	public static final int STOP = 5;
+	
 
 	public static final String NAME = "pl.edu.agh.zpi.admintools.ConnectionService";
-
+	
 	private Messenger serviceMessenger = new Messenger(
 			new IncomingHandler(this));
 	private Messenger activityMessenger;
 
 	private ConnectionTask connectionTask = new ConnectionTask();
-
+	private Thread connectionThread;
+	
 	public ConnectionService() {
 		super();
 	}
 
 	@Override
 	public void onCreate() {
-		Thread conn = new Thread(connectionTask);
-		conn.start();
+		connectionThread = new Thread(connectionTask);
+		connectionThread.start();
 		
 		super.onCreate();
 	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		Log.d("qwe", "onbind");
+		Log.d("qwe", "ConnectionService.onBind()");
+
 		return serviceMessenger.getBinder();
 	}
 
 	public void handleMessage(Message msg) {
+		//Log.d("qwe","ConnectionService.handleMessage()");
 		switch (msg.what) {
 		case GET_MESSENGER:
 			activityMessenger = msg.replyTo;
@@ -55,10 +61,18 @@ public class ConnectionService extends Service implements Handable {
 			connectionTask.enqueueMessage(new PacketKeyRequest());
 			break;
 		case CONNECT:
-			Bundle b = msg.getData();
-			String host = b.getString(AdminTools.HOST);
-			int port = b.getInt(AdminTools.PORT);
-			connectionTask.connect(host,port);
+				Bundle b = msg.getData();
+				String host = b.getString(AdminTools.HOST);
+				int port = b.getInt(AdminTools.PORT);
+				connectionTask.connect(host,port);
+			break;
+		case DISCONNECT:
+			if(!connectionTask.isConnected()){
+				connectionTask.disconnect();
+			}
+			break;
+		case STOP:
+			connectionTask.stop();
 			break;
 		case SEND_SETTINGS:
 			// connectionTask.enqueueMessage(new PacketSettings());
