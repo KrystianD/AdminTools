@@ -21,7 +21,7 @@ class ISerializable
 {
 public:
 	virtual void toBuffer (buffer_t& buf) = 0;
-	virtual void fromBuffer (buffer_t& buf) = 0;
+	virtual bool fromBuffer (buffer_t& buf) = 0;
 
 	template<typename T>
 	bool append (buffer_t& buf, T& val)

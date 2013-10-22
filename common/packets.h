@@ -40,16 +40,20 @@ class TPacketAuth : public IPacket
 {
 public:
 	char key[16];
+	uint8_t sendConfig;
 	
 	virtual int getType () { return PACKET_AUTH; }
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, key);
+		append (buf, sendConfig);
 	}
-	virtual void fromBuffer (buffer_t& buf)
+	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
-		fetch (buf, key);
+		if (!fetch (buf, key)) return false;
+		if (!fetch (buf, sendConfig)) return false;
+		return true;
 	}
 };
 class TPacketReply : public IPacket
@@ -62,10 +66,11 @@ public:
 	{
 		append (buf, value);
 	}
-	virtual void fromBuffer (buffer_t& buf)
+	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
-		fetch (buf, value);
+		if (!fetch (buf, value)) return false;
+		return true;
 	}
 };
 class TPacketStart : public IPacket
@@ -78,10 +83,11 @@ public:
 	{
 		append (buf, interval);
 	}
-	virtual void fromBuffer (buffer_t& buf)
+	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
-		fetch (buf, interval);
+		if (!fetch (buf, interval)) return false;
+		return true;
 	}
 };
 class TPacketAgentData : public IPacket
@@ -98,13 +104,14 @@ public:
 		data.toBuffer (tmp);
 		buf.insert (buf.end (), tmp.begin (), tmp.end ());
 	}
-	virtual void fromBuffer (buffer_t& buf)
+	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
-		fetch (buf, id);
+		if (!fetch (buf, id)) return false;
 		buffer_t tmp;
 		tmp.insert (tmp.begin (), buf.begin () + m_pos, buf.end ());
 		data.fromBuffer (tmp);
+		return true;
 	}
 };
 class TPacketAgentsData : public IPacket
@@ -124,8 +131,9 @@ public:
 			buf.insert (buf.end (), tmp.begin (), tmp.end ());
 		}
 	}
-	virtual void fromBuffer (buffer_t& buf)
+	virtual bool fromBuffer (buffer_t& buf)
 	{
+		return true;
 	}
 };
 class TPacketKeyReply : public IPacket
@@ -138,10 +146,11 @@ public:
 	{
 		append (buf, key);
 	}
-	virtual void fromBuffer (buffer_t& buf)
+	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
-		fetch (buf, key);
+		if (!fetch (buf, key)) return false;
+		return true;
 	}
 };
 class TPacketConfig : public IPacket
@@ -173,23 +182,24 @@ public:
 		}
 		append (buf, interval);
 	}
-	virtual void fromBuffer (buffer_t& buf)
+	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
-		fetch (buf, agentId);
-		fetch (buf, tempPath);
-		fetch (buf, tempDivider);
+		if (!fetch (buf, agentId)) return false;
+		if (!fetch (buf, tempPath)) return false;
+		if (!fetch (buf, tempDivider)) return false;
 		uint16_t len;
-		fetch (buf, len);
+		if (!fetch (buf, len)) return false;
 		services.clear ();
 		while (len--)
 		{
 			TPacketConfig::TService s;
-			fetch (buf, s.name);
-			fetch (buf, s.port);
+			if (!fetch (buf, s.name)) return false;
+			if (!fetch (buf, s.port)) return false;
 			services.push_back (s);
 		}
-		fetch (buf, interval);
+		if (!fetch (buf, interval)) return false;
+		return true;
 	}
 };
 

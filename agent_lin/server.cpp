@@ -49,6 +49,8 @@ void Server::process ()
 	{
 		if (getTicks () > m_configTime)
 		{
+			printf ("config timeouted\r\n");
+			close (m_fd);
 			m_state = NotConnected;
 		}
 	}
@@ -156,7 +158,8 @@ void Server::connect ()
 	}
 
 	TPacketAuth p;
-	strcpy (p.key, "UPDKPRHMPQRJXRET");
+	p.sendConfig = 1;
+	strncpy (p.key, "UPDKPRHMPQRJXRET", 16);
 
 	sendPacket (p);
 
@@ -241,7 +244,7 @@ void Server::processPacket (THeader& h, buffer_t& buf)
 		break;
 	case PACKET_CONFIG:
 		{
-			config.fromBuffer (buf);
+			m_config.fromBuffer (buf);
 			if (m_state == WaitingForConfig)
 			{
 				m_state = Connected;

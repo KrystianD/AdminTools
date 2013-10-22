@@ -23,8 +23,9 @@ public:
 		append (buf, totalSpace);
 		append (buf, usedSpace);
 	}
-	virtual void fromBuffer (buffer_t& buf)
+	virtual bool fromBuffer (buffer_t& buf)
 	{
+		return true;
 	}
 };
 class TService : public ISerializable
@@ -38,13 +39,15 @@ public:
 		append (buf, name);
 		append (buf, available);
 	}
-	virtual void fromBuffer (buffer_t& buf)
+	virtual bool fromBuffer (buffer_t& buf)
 	{
+		return true;
 	}
 };
 class TSensorsData : public ISerializable
 {
 public:
+	uint32_t timestamp;
 	float temp;
 	bool tempValid;
 	float cpuUsage;
@@ -55,6 +58,7 @@ public:
 
 	virtual void toBuffer (buffer_t& buf)
 	{
+		append (buf, timestamp);
 		append (buf, temp);
 		append (buf, tempValid);
 		append (buf, cpuUsage);
@@ -80,37 +84,39 @@ public:
 			buf.insert (buf.end (), tmp.begin (), tmp.end ());
 		}
 	}
-	virtual void fromBuffer (buffer_t& buf)
+	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
-		fetch (buf, temp);
-		fetch (buf, tempValid);
-		fetch (buf, cpuUsage);
-		fetch (buf, totalRam);
-		fetch (buf, freeRam);
-		fetch (buf, uptime);
+		if (!fetch (buf, timestamp)) return false;
+		if (!fetch (buf, temp)) return false;
+		if (!fetch (buf, tempValid)) return false;
+		if (!fetch (buf, cpuUsage)) return false;
+		if (!fetch (buf, totalRam)) return false;
+		if (!fetch (buf, freeRam)) return false;
+		if (!fetch (buf, uptime)) return false;
 
 		uint16_t len;
-		fetch (buf, len);
+		if (!fetch (buf, len)) return false;
 		disksUsage.clear ();
 		while (len--)
 		{
 			TDiskUsage d;
-			fetch (buf, d.name);
-			fetch (buf, d.totalSpace);
-			fetch (buf, d.usedSpace);
+			if (!fetch (buf, d.name)) return false;
+			if (!fetch (buf, d.totalSpace)) return false;
+			if (!fetch (buf, d.usedSpace)) return false;
 			disksUsage.push_back (d);
 		}
 
-		fetch (buf, len);
+		if (!fetch (buf, len)) return false;
 		services.clear ();
 		while (len--)
 		{
 			TService s;
-			fetch (buf, s.name);
-			fetch (buf, s.available);
+			if (!fetch (buf, s.name)) return false;
+			if (!fetch (buf, s.available)) return false;
 			services.push_back (s);
 		}
+		return true;
 	}
 };
 

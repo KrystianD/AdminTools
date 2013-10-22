@@ -21,7 +21,7 @@ public:
 	bool isValid () { return m_state == Connected; }
 	bool sendPacket (IPacket& packet);
 
-	const TPacketConfig& getConfig () const { return config; }
+	const TPacketConfig& getConfig () const { return m_config; }
 
 private:
 	enum EState { NotConnected, WaitingForConfig, Connected };
@@ -34,7 +34,7 @@ private:
 	EState m_state;
 	uint32_t m_configTime;
 
-	TPacketConfig config;
+	TPacketConfig m_config;
 
 	void connect ();
 

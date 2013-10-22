@@ -17,11 +17,13 @@ public:
 	string ip;
 	int port;
 	bool toDelete;
+	bool settingsChanged;
 
 	Client (int fd, const string& ip, int port);
 
 	void readData ();
 	void process ();
+	void fetchConfig ();
 
 private:
 	enum EState { WAITING_FOR_HEADER, WAITING_FOR_PACKET };
@@ -39,16 +41,11 @@ private:
 
 	bool authorized;
 
-	// agent
-	int agentId;
-
 	// client
 	bool sendingActive;
 	Timer sendDataTimer;
 
 	TDBAgent dbAgent;
-
-	void fetchConfig ();
 
 	void processPacket (int size);
 	bool sendPacket (IPacket& packet);

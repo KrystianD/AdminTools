@@ -9,6 +9,8 @@ using namespace std;
 
 #include "sqlite3.h"
 
+#include "sensors.h"
+
 class TDBService
 {
 public:
@@ -38,6 +40,7 @@ public:
 	static bool generateNewKey (char key[16]);
 	static bool findAgentByKey (const char key[16], TDBAgent& agent);
 	static bool findAgentById (uint16_t id, TDBAgent& agent);
+	static bool insertRecord (const TDBAgent& agent, const TSensorsData& data);
 
 // private:
 	static bool execute (const string& query);

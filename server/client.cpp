@@ -17,7 +17,7 @@
 #include "settings.h"
 #include "db.h"
 
-#define CLIENT_DEBUG(x,...) printf ("[Client #%2d id: %2d] " x "\r\n", fd, agentId, ##__VA_ARGS__)
+#define CLIENT_DEBUG(x,...) printf ("[Client #%2d id: %2d] " x "\r\n", fd, dbAgent.id, ##__VA_ARGS__)
 
 Client::Client (int fd, const string& ip, int port)
 	: fd (fd), ip (ip), port (port)
@@ -29,7 +29,7 @@ Client::Client (int fd, const string& ip, int port)
 	dataToReceive = sizeof (THeader);
 	toDelete = false;
 	lastPingTime = getTicks ();
-	agentId = -1;
+	settingsChanged = false;
 
 	sendingActive = 0;
 	authorized = false;
@@ -141,10 +141,9 @@ void Client::process ()
 
 void Client::fetchConfig ()
 {
-	if (agentId == -1)
-		return;
-
-	DB::findAgentById (agentId, dbAgent);
+	DB::findAgentById (dbAgent.id, dbAgent);
+	sendConfig ();
+	CLIENT_DEBUG("[CONFIG] New config fetched and sent");
 }
 
 void Client::processPacket (int size)
@@ -168,7 +167,6 @@ void Client::processPacket (int size)
 		{
 			CLIENT_DEBUG("Authorized id: %d", dbAgent.id);
 			pr.value = 1;
-			agentId = dbAgent.id;
 			authorized = true;
 		}
 		else
@@ -178,9 +176,11 @@ void Client::processPacket (int size)
 		}
 		sendPacket (pr);
 
-		if (authorized)
+		printf ("q %d\r\n", p.sendConfig);
+		if (authorized && p.sendConfig)
 		{
 			sendConfig ();
+			printf ("config sent\r\n");
 		}
 	}
 	break;
@@ -189,10 +189,12 @@ void Client::processPacket (int size)
 		if (size == 0) { kill (); return; }
 		if (!authorized) { kill (); return; }
 		TPacketAgentData p;
-		p.fromBuffer (buf);
-		p.id = agentId;
-
-		assignData (p);
+		if (p.fromBuffer (buf))
+		{
+			p.id = dbAgent.id;
+			assignData (p);
+			DB::insertRecord (dbAgent, p.data);
+		}
 	}
 	break;
 	case PACKET_START:
@@ -251,7 +253,7 @@ void Client::kill ()
 void Client::sendConfig ()
 {
 	TPacketConfig p;
-	p.agentId = agentId;
+	p.agentId = dbAgent.id;
 	for (int i = 0; i < dbAgent.services.size (); i++)
 	{
 		TPacketConfig::TService s;

@@ -95,6 +95,7 @@ int main (int argc, char** argv)
 		}
 	}
 
+	// DB::createTables ();
 	char key[16];
 	DB::generateNewKey(key);
 
@@ -188,9 +189,20 @@ int main (int argc, char** argv)
 				}
 			}
 		}
+		bool needSettingsReload = false;
 		for (int i = clients.size () - 1; i >= 0; i--)
 		{
 			clients[i].process ();
+			if (clients[i].settingsChanged)
+			{
+				needSettingsReload = true;
+				clients[i].settingsChanged = false;
+			}
+		}
+		for (int i = clients.size () - 1; i >= 0; i--)
+		{
+			if (needSettingsReload)
+				clients[i].fetchConfig ();
 		}
 		for (int i = clients.size () - 1; i >= 0; i--)
 		{

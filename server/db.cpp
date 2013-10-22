@@ -8,6 +8,7 @@
 #include "kutils.h"
 
 #include <vector>
+#include <sstream>
 using namespace std;
 
 sqlite3 *DB::db;
@@ -25,23 +26,35 @@ bool DB::open (const string& path)
 bool DB::createTables ()
 {
 	const char* str;
-	// const char* str = 
-		// "CREATE TABLE agents ("
-		// " id INTEGER PRIMARY KEY AUTOINCREMENT,"
-		// " key TEXT NOT NULL,"
-		// " name TEXT NOT NULL);";
+	
+	str = 
+		"CREATE TABLE records ("
+		" id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+		" agentId INTEGER NOT NULL,"
+		" date DATETIME NOT NULL,"
+		" temp FLOAT NOT NULL,"
+		" cpu FLOAT NOT NULL,"
+		" ram FLOAT NOT NULL,"
+		" diskUsages TEXT NOT NULL"
+	 	");";	
 
-	// execute (str);
+	if (!execute (str))
+		return false;
 
 	str = 
 		"CREATE TABLE agents ("
-		" id INTEGER PRIMARY KEY AUTOINCREMENT,"
+		" id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
 		" key TEXT NOT NULL DEFAULT(''),"
 		" name TEXT NOT NULL DEFAULT(''),"
 		" services TEXT NOT NULL DEFAULT(''),"
 		" temp TEXT NOT NULL DEFAULT(''),"
 		" interval INT NOT NULL DEFAULT(2000)"
 		");";
+
+	if (!execute (str))
+		return false;
+
+	str = "INSERT INTO agents VALUES (1, 'c980f323bba3186f7093176f46c883fc', '192.168.1.2', 'http:80,ssh:22,dns:53', '', 2000);";
 
 	if (!execute (str))
 		return false;
@@ -114,6 +127,43 @@ bool DB::findAgentByKey (const char key[16], TDBAgent& agent)
 		return false;
 	}
 }
+bool DB::insertRecord (const TDBAgent& agent, const TSensorsData& data)
+{
+	string query = "INSERT INTO records(agentId,date,temp,cpu,ram,diskUsages) VALUES(?,?,?,?,?,?);";
+	sqlite3_stmt *stm;
+	int res = sqlite3_prepare_v2 (db, query.c_str (), query.size (), &stm, 0);
+	sqlite3_bind_int (stm, 1, agent.id);
+	sqlite3_bind_int (stm, 2, data.timestamp);
+	sqlite3_bind_double (stm, 3, data.temp);
+	sqlite3_bind_double (stm, 4, data.cpuUsage);
+	sqlite3_bind_double (stm, 5, (double)data.freeRam / (double)data.totalRam);
+
+	string disk = "";
+
+	stringstream ss;
+	ss.precision (1);
+	for (int i = 0; i < data.disksUsage.size (); i++)
+	{
+		const TDiskUsage& d = data.disksUsage[i];
+		if (i > 0)
+			ss << ",";
+		ss << d.name << ":" << ((double)d.usedSpace / (double)d.totalSpace);
+	}
+	disk = ss.str ();
+
+	sqlite3_bind_text (stm, 6, disk.c_str (), disk.size (), 0);
+
+printf ("ASD\r\n");
+	res = sqlite3_step (stm);
+	if (res == SQLITE_DONE)
+	{
+		sqlite3_finalize (stm);
+	}
+	else
+	{
+		sqlite3_finalize (stm);
+	}
+}
 
 bool DB::execute (const string& query)
 {
@@ -155,12 +205,13 @@ void DB::fetchAgent (sqlite3_stmt* stm, TDBAgent& agent)
 		srv.port = atoi (parts2[1].c_str ());
 		agent.services.push_back (srv);
 
-		printf ("n %s p %d\r\n", srv.name.c_str(), srv.port);
+		// printf ("n %s p %d\r\n", srv.name.c_str(), srv.port);
 	}
 
 	tmp = (const char*)sqlite3_column_text (stm, 3);
 	parts = explode (tmp, ":");
 	agent.tempPath = "";
+	agent.tempDivider = 1;
 	if (parts.size () == 2)
 	{
 		agent.tempPath = parts[0];
@@ -169,5 +220,5 @@ void DB::fetchAgent (sqlite3_stmt* stm, TDBAgent& agent)
 
 	agent.interval = sqlite3_column_int (stm, 4);
 
-	printf ("%s %s %d %d\r\n", agent.name.c_str(), agent.tempPath.c_str(), agent.tempDivider, agent.interval);
+	// printf ("%s %s %d %d\r\n", agent.name.c_str(), agent.tempPath.c_str(), agent.tempDivider, agent.interval);
 }

@@ -12,7 +12,11 @@
 int main ()
 {
 	Config c;
-	c.fromFile ("config");
+	if (!c.fromFile ("config"))
+	{
+		printf ("Unable to read config file\r\n");
+		return 1;
+	}
 
 	signal (SIGPIPE, SIG_IGN);
 	
@@ -35,7 +39,7 @@ int main ()
 			TPacketAgentData agentData;
 			agentData.id = 1;
 			agentData.data = d;
-			// agentData.temp = d.temp;
+			agentData.data.timestamp = time (0);
 
 			serv.sendPacket (agentData);
 
