@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="5dp" >
+
+    <EditText
+        android:id="@+id/editText_dialog_agent_config_service_port"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/editText_dialog_agent_config_service_name"
+        android:layout_below="@+id/editText_dialog_agent_config_service_name"
+        android:ems="8"
+        android:inputType="numberDecimal"
+        android:text="0" />
+
+    <TextView
+        android:id="@+id/textView_dialog_agent_config_service_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/editText_dialog_agent_config_service_name"
+        android:layout_alignBottom="@+id/editText_dialog_agent_config_service_name"
+        android:layout_alignParentLeft="true"
+        android:text="@string/name" />
+
+    <TextView
+        android:id="@+id/textView_dialog_agent_config_service_port"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/editText_dialog_agent_config_service_port"
+        android:layout_alignBottom="@+id/editText_dialog_agent_config_service_port"
+        android:layout_alignParentLeft="true"
+        android:text="@string/port" />
+
+    <EditText
+        android:id="@+id/editText_dialog_agent_config_service_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/textView_dialog_agent_config_service_name"
+        android:ems="8" >
+
+        <requestFocus />
+    </EditText>
+
+    <ToggleButton
+        android:id="@+id/toggleButton_dialog_agent_config_service_isTcp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/textView_dialog_agent_config_service_name"
+        android:layout_toRightOf="@+id/editText_dialog_agent_config_service_port"
+        android:checked="true"
+        android:textOff="@string/udp"
+        android:textOn="TCP" />
+
+</RelativeLayout>

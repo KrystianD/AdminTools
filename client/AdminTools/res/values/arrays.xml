@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array
+        name="choose_agent_array">
+        <item>@string/choose_agent_action_settings</item>
+        <item>@string/choose_agent_action_charts</item>
+    </string-array>
+</resources>

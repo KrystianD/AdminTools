@@ -1,3 +1,9 @@
+/**
+TODO obsługa headerTimeout - teraz zawiesza się przy próbie zalogowania
+
+**/
+
+
 package pl.edu.agh.zpi.admintools;
 
 import java.net.InetAddress;
@@ -106,13 +112,6 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.admin_tools, menu);
-		return true;
 	}
 
 	private void showAlertToast(String msg) {
@@ -253,4 +252,11 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 			break;
 		}
 	}
+	
+//	@Override
+//	public boolean onCreateOptionsMenu(Menu menu) {
+//		// Inflate the menu; this adds items to the action bar if it is present.
+//		getMenuInflater().inflate(R.menu.admin_tools, menu);
+//		return true;
+//	}
 }

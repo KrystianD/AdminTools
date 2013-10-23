@@ -16,6 +16,8 @@ public class Header {
 	public static final byte PACKET_KEY_REQUEST = 7;
 	public static final byte PACKET_KEY_REPLY = 8;
 	public static final byte PACKET_CONFIG = 9;
+	public static final byte PACKET_CONFIG_REQUEST = 10;
+	public static final byte PACKET_CONFIG_REPLY = 11; // unused
 
 	private byte type;
 	private short size;

@@ -35,6 +35,7 @@ public class PacketAgentsData implements IPacket, Serializable {
 
 	@Override
 	public void fromByteArray(byte[] array) {
+		//try{
 		short agentsAmount;
 		ByteBuffer buffer = ByteBuffer.wrap(array);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -42,6 +43,9 @@ public class PacketAgentsData implements IPacket, Serializable {
 		for(int i = 0 ; i < agentsAmount ; i++){
 			list.add(AgentData.fromByteBuffer(buffer));
 		}
+		//}catch(Exception e){
+		//	System.err.print(this.toString());
+		//}
 	}
 
 	@Override

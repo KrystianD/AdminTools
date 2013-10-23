@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/textView_dialog_config_temperature_divider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/temp_path" />
+
+        <EditText
+            android:id="@+id/editText_dialog_config_tempPath"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/temp_path" >
+
+            <requestFocus />
+        </EditText>
+
+        <TextView
+            android:id="@+id/textView_dialog_config_tempDivider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/temp_divider" />
+
+        <EditText
+            android:id="@+id/editText_dialog_config_tempDivider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/temp_divider"
+            android:inputType="numberDecimal" />
+
+        <TextView
+            android:id="@+id/textView_dialog_config_interval"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/interval" />
+
+        <EditText
+            android:id="@+id/editText_dialog_config_interval"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/interval"
+            android:inputType="numberDecimal" />
+
+        <TextView
+            android:id="@+id/textView_dialog_config_services"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/services" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout_dialog_config_services"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+        </LinearLayout>
+
+        <LinearLayout
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/button_dialog_config_add_service"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onDialogConfigButtonClicked"
+                android:text="@string/add" />
+
+            <Button
+                android:id="@+id/button_dialog_config_remove_service"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onDialogConfigButtonClicked"
+                android:text="@string/remove" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

@@ -71,7 +71,7 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 			disksTab.setVisibility(View.GONE);
 		}
 		
-		name.setText("" + agent.getId());
+		name.setText("" + agent.getName());
 
 		temp.setText(sensors.getTemp() + "°C");
 
@@ -89,6 +89,8 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 		int seconds = up % 60;
 		uptime.setText(String.format("%dD %dH %dM %dS", days, hours, minutes,
 				seconds));
+		
+		convertView.setId(agent.getId());
 		
 		return convertView;
 	}

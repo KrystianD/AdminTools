@@ -1,6 +1,8 @@
 package pl.edu.agh.zpi.admintools;
 
 import pl.edu.agh.zpi.admintools.connection.ConnectionTask;
+import pl.edu.agh.zpi.admintools.connection.packets.PacketConfig;
+import pl.edu.agh.zpi.admintools.connection.packets.PacketConfigRequest;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketKeyRequest;
 import pl.edu.agh.zpi.admintools.utils.Handable;
 import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
@@ -18,8 +20,9 @@ public class ConnectionService extends Service implements Handable {
 	public static final int GENERATE_KEY = 1;
 	public static final int CONNECT = 2;
 	public static final int DISCONNECT = 3;
-	public static final int SEND_SETTINGS = 4;
+	public static final int SEND_CONFIG = 4;
 	public static final int STOP = 5;
+	public static final int REQUEST_CONFIG = 6;
 	
 
 	public static final String NAME = "pl.edu.agh.zpi.admintools.ConnectionService";
@@ -52,6 +55,7 @@ public class ConnectionService extends Service implements Handable {
 
 	public void handleMessage(Message msg) {
 		//Log.d("qwe","ConnectionService.handleMessage()");
+		Bundle b;
 		switch (msg.what) {
 		case GET_MESSENGER:
 			activityMessenger = msg.replyTo;
@@ -61,10 +65,10 @@ public class ConnectionService extends Service implements Handable {
 			connectionTask.enqueueMessage(new PacketKeyRequest());
 			break;
 		case CONNECT:
-				Bundle b = msg.getData();
-				String host = b.getString(AdminTools.HOST);
-				int port = b.getInt(AdminTools.PORT);
-				connectionTask.connect(host,port);
+			b = msg.getData();
+			String host = b.getString(AdminTools.HOST);
+			int port = b.getInt(AdminTools.PORT);
+			connectionTask.connect(host,port);
 			break;
 		case DISCONNECT:
 			if(!connectionTask.isConnected()){
@@ -74,8 +78,14 @@ public class ConnectionService extends Service implements Handable {
 		case STOP:
 			connectionTask.stop();
 			break;
-		case SEND_SETTINGS:
-			// connectionTask.enqueueMessage(new PacketSettings());
+		case SEND_CONFIG:
+			b = msg.getData();
+			PacketConfig data = (PacketConfig)b.getSerializable(PacketConfig.PACKET_CONFIG);
+			connectionTask.enqueueMessage(data);
+		case REQUEST_CONFIG:
+			b = msg.getData();
+			short id = b.getShort(PacketConfigRequest.ID);
+			connectionTask.enqueueMessage(new PacketConfigRequest(id));
 			break;
 		default:
 			break;
