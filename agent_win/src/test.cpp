@@ -9,11 +9,9 @@
 #include "windows.h"
 #include "winbase.h"
 
-
-
 extern "C" {
-#include "sigar.h"
-#include "sigar_format.h"
+       #include "sigar.h"
+       #include "sigar_format.h"
 }
 
 
@@ -53,27 +51,50 @@ void readSensors(TSensorsData& data) {
     // Ustawienie temperatury
     
     
-    // Pamiêæ
+    // Ca³kowita pamiêc RAM
     
     MEMORYSTATUSEX statex;
 
     statex.dwLength = sizeof (statex); 
 
     GlobalMemoryStatusEx (&statex);
-    cout << "Physical RAM: " << (float)statex.ullTotalPhys/(1024*1024*1024)<< endl;
+    cout << "Physical RAM: " << (float)statex.ullTotalPhys/(1024*1024) << " MB" << std::endl;
      
-    data.totalRam = (float)statex.ullTotalPhys/(1024*1024*1024);
+    data.totalRam = (uint64_t)statex.ullTotalPhys/(1024*1024);
 
+    // Pobranie wolnej pamiêci RAM
+
+    MEMORYSTATUS m;
+   	
+    m.dwLength = sizeof(m);
+   	int ret = 0;
+   	
+    GlobalMemoryStatus(&m);
+   	ret = (int)(m.dwAvailPhys >> 20);
+    cout << "Available physical RAM: " << ret << " MB" << std::endl;
+     
+    data.freeRam = ret;    
     
+    // Pobranie czasu pracy
     
+    float hrup = GetTickCount() / 1000 / 60 / 60 ;
+
+    float minup = GetTickCount() / 1000 / 60 ;
+
+    float secup = GetTickCount() / 1000 ;
     
+    std::cout << "Uptime: " << minup << " minutes." << std::endl;
+    data.uptime = (uint32_t)minup;
     
+    // Wyznaczanie zajêtoœci dysków
     
-    data.tempValid = true;
+	//ULARGE_INTEGER pulAvailable, pulTotal, pulFree;
+
+	//GetDiskFreeSpaceEx(NULL, &pulAvailable, &pulTotal, &pulFree);
     
-    data.uptime = 0;
-	data.freeRam = 0;
-	
+    //d.totalSpace = pulTotal;
+    //d.usedSpace = pulTotal - pulAvailable;
+    
 //	TDiskUsage d;
 //	d.name = dev;
 //	d.totalSpace = blocks * blksize;
