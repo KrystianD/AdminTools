@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import pl.edu.agh.zpi.admintools.connection.ConnectionTask;
 import pl.edu.agh.zpi.admintools.utils.Handable;
 import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
-
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -31,7 +30,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;

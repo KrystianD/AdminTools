@@ -78,15 +78,17 @@ public final class R {
     }
     public static final class layout {
         public static final int activity_admin_tools=0x7f030000;
-        public static final int activity_stats_activity=0x7f030001;
-        public static final int dialog_agent_config=0x7f030002;
-        public static final int dialog_agent_config_service=0x7f030003;
-        public static final int dialog_get_key=0x7f030004;
-        public static final int list_agents_stats=0x7f030005;
+        public static final int activity_charts=0x7f030001;
+        public static final int activity_stats_activity=0x7f030002;
+        public static final int dialog_agent_config=0x7f030003;
+        public static final int dialog_agent_config_service=0x7f030004;
+        public static final int dialog_get_key=0x7f030005;
+        public static final int list_agents_stats=0x7f030006;
     }
     public static final class menu {
         public static final int admin_tools=0x7f080000;
-        public static final int stats=0x7f080001;
+        public static final int charts=0x7f080001;
+        public static final int stats=0x7f080002;
     }
     public static final class string {
         public static final int IP=0x7f060006;
@@ -125,6 +127,7 @@ public final class R {
         public static final int temp_divider=0x7f06001f;
         public static final int temp_path=0x7f06001e;
         public static final int temperature=0x7f060013;
+        public static final int title_activity_charts=0x7f060027;
         public static final int title_activity_stats=0x7f06000f;
         public static final int udp=0x7f060026;
         public static final int uptime=0x7f060016;

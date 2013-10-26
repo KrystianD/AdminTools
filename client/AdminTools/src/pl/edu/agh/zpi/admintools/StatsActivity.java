@@ -10,6 +10,7 @@ import pl.edu.agh.zpi.admintools.connection.packets.PacketKeyReply;
 import pl.edu.agh.zpi.admintools.connection.packets.ServiceConfig;
 import pl.edu.agh.zpi.admintools.listdata.AgentArrayAdapter;
 import pl.edu.agh.zpi.admintools.listdata.LongClickItemListener;
+import pl.edu.agh.zpi.admintools.sensors.AgentData;
 import pl.edu.agh.zpi.admintools.utils.Handable;
 import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
 import android.app.Activity;
@@ -128,6 +129,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			isServiceBinded = bindService(new Intent(this,
 					ConnectionService.class), this, Context.BIND_AUTO_CREATE);
 		}
+		sendMessageToService(ConnectionService.GET_MESSENGER);
 		sendMessageToService(ConnectionService.CONNECT, host, port);
 		super.onResume();
 	}
@@ -187,11 +189,12 @@ public class StatsActivity extends Activity implements ServiceConnection,
 				m.setData(b);
 				break;
 			case ConnectionService.REQUEST_CONFIG:
-				b.putShort(PacketConfigRequest.ID, (Short)data[0]);
+				b.putShort(PacketConfigRequest.ID, (Short) data[0]);
 				m.setData(b);
 				break;
 			case ConnectionService.SEND_CONFIG:
-				b.putSerializable(PacketConfig.PACKET_CONFIG, (PacketConfig)data[0]);
+				b.putSerializable(PacketConfig.PACKET_CONFIG,
+						(PacketConfig) data[0]);
 				m.setData(b);
 				break;
 			default:
@@ -212,7 +215,11 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			sendMessageToService(ConnectionService.REQUEST_CONFIG, id);
 			break;
 		case CHARTS:
-
+			Intent intent = new Intent(this, ChartsActivity.class);
+			intent.putExtra(AdminTools.PORT, port);
+			intent.putExtra(AdminTools.HOST, host);
+			intent.putExtra(ChartsActivity.AGENT_ID, id);
+			startActivity(intent);
 			break;
 		}
 	}
@@ -271,8 +278,9 @@ public class StatsActivity extends Activity implements ServiceConnection,
 										interval);
 
 								Log.d("qwe", pc.toString());
-								
-								sendMessageToService(ConnectionService.SEND_CONFIG, pc);
+
+								sendMessageToService(
+										ConnectionService.SEND_CONFIG, pc);
 							}
 						})
 				.setNegativeButton(R.string.cancel,
@@ -310,9 +318,9 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			servicesLayout.addView(child);
 
 			EditText name = (EditText) child
-					.findViewById(R.id.editText_dialog_agent_config_service_port);
-			EditText port = (EditText) child
 					.findViewById(R.id.editText_dialog_agent_config_service_name);
+			EditText port = (EditText) child
+					.findViewById(R.id.editText_dialog_agent_config_service_port);
 			ToggleButton isTcp = (ToggleButton) child
 					.findViewById(R.id.toggleButton_dialog_agent_config_service_isTcp);
 

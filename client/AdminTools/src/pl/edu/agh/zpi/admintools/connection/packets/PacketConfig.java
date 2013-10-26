@@ -10,7 +10,7 @@ import pl.edu.agh.zpi.admintools.connection.Header;
 public class PacketConfig implements IPacket, Serializable {
 	private static final long serialVersionUID = 1L;
 	public static final String PACKET_CONFIG = "pl.edu.agh.zpi.admintools.connection.packets.PACKET_CONFIG";
-	private final byte type = Header.PACKET_CONFIG;
+	private final byte type = Header.PACKET_CHANGE_REQUEST;
 	private short agentId;
 	private String tempPath = "";
 	private short tempDivider;

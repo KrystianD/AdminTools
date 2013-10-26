@@ -4,7 +4,7 @@
     <string name="app_name">AdminTools</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
-     <string name="save">Save</string>
+    <string name="save">Save</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="IP">Server Address</string>
@@ -40,5 +40,6 @@
     <string name="name">Name</string>
     <string name="tcp">TCP</string>
     <string name="udp">UDP</string>
+    <string name="title_activity_charts">ChartsActivity</string>
 
 </resources>

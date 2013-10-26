@@ -33,9 +33,20 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="pl.edu.agh.zpi.admintools.AdminTools" />
         </activity>
-        <service android:name="pl.edu.agh.zpi.admintools.ConnectionService" 
-            android:permission="android.permission.INTERNET">
+
+        <service
+            android:name="pl.edu.agh.zpi.admintools.ConnectionService"
+            android:permission="android.permission.INTERNET" >
         </service>
+
+        <activity
+            android:name="pl.edu.agh.zpi.admintools.ChartsActivity"
+            android:label="@string/title_activity_charts"
+            android:parentActivityName="pl.edu.agh.zpi.admintools.StatsActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="pl.edu.agh.zpi.admintools.StatsActivity" />
+        </activity>
     </application>
 
 </manifest>

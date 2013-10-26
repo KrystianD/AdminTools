@@ -323,6 +323,7 @@ public class ConnectionTask implements Runnable {
 	public void enqueueMessage(IPacket packet) {
 		try {
 			packetQueue.add(packet);
+			Log.d("qwe", "ConnectionTask.enqueueMessage() " + packet.getType());
 		} catch (Exception e) {
 			Log.e("qwe", "ConnectionTask.enqueueMessage()");
 		}
