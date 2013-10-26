@@ -14,7 +14,6 @@ extern "C" {
        #include "sigar_format.h"
 }
 
-
 void readSensors(TSensorsData& data) {   
    
     sigar_t *sigar_cpu;
@@ -49,8 +48,10 @@ void readSensors(TSensorsData& data) {
     cout << "Number of cores: " << numCPU << std::endl;
 	
     // Ustawienie temperatury
-    
-    
+    //    
+    //
+    //
+    //
     // Ca³kowita pamiêc RAM
     
     MEMORYSTATUSEX statex;
@@ -77,30 +78,38 @@ void readSensors(TSensorsData& data) {
     
     // Pobranie czasu pracy
     
-    float hrup = GetTickCount() / 1000 / 60 / 60 ;
-
     float minup = GetTickCount() / 1000 / 60 ;
-
-    float secup = GetTickCount() / 1000 ;
     
     std::cout << "Uptime: " << minup << " minutes." << std::endl;
     data.uptime = (uint32_t)minup;
     
     // Wyznaczanie zajêtoœci dysków
     
-	//ULARGE_INTEGER pulAvailable, pulTotal, pulFree;
-
-	//GetDiskFreeSpaceEx(NULL, &pulAvailable, &pulTotal, &pulFree);
+	__int64 pulAvailable, pulTotal, pulFree;
     
-    //d.totalSpace = pulTotal;
-    //d.usedSpace = pulTotal - pulAvailable;
+    sigar_t *f;
+    sigar_open(&f);
+    sigar_file_system_list_t tt;
+    sigar_file_system_list_get(f, &tt);
     
-//	TDiskUsage d;
-//	d.name = dev;
-//	d.totalSpace = blocks * blksize;
-//	d.usedSpace = (blocks - freeblks) * blksize;
-//	data.disksUsage.push_back (d);
-	
+    std::cout << "Number of disks " << tt.number << std::endl;
+    for (int i = 0; i < tt.number; i++ ) {
+        cout << "Name of disk: " << tt.data[i].dir_name << std::endl;
+        GetDiskFreeSpaceEx(tt.data[i].dir_name, (PULARGE_INTEGER)&pulAvailable, 
+                                                (PULARGE_INTEGER)&pulTotal, 
+                                                (PULARGE_INTEGER)&pulFree);
+        std::cout << "\tTotal: " << pulTotal/(1024 * 1024) << std::endl;
+        std::cout << "\tFree: " << pulFree/(1024 * 1024) << std::endl;
+        
+        TDiskUsage d;
+        
+        d.name = tt.data[i].dir_name;
+        d.totalSpace = pulTotal;
+        d.usedSpace = pulTotal - pulAvailable;
+        data.disksUsage.push_back (d);
+    }
+    
+    sigar_close(f);	
 }
 
 int main() {
@@ -111,11 +120,12 @@ int main() {
        system("pause");
        return 0;
     };
+    
+    
 
 	printf ("Port: %d\r\n", c.getInt ("port"));
 
     TSensorsData t;
- 
     readSensors(t);
 
     system("pause");
