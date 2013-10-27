@@ -41,6 +41,10 @@ public class SensorsData implements Serializable {
 		return temp;
 	}
 
+	public boolean isTempValid() {
+		return tempValid;
+	}
+	
 	public float getCpuUsage() {
 		return cpuUsage;
 	}

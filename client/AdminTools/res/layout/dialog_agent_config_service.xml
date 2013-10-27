@@ -13,7 +13,7 @@
         android:layout_below="@+id/editText_dialog_agent_config_service_name"
         android:ems="8"
         android:inputType="numberDecimal"
-        android:text="0" />
+        android:text="@string/zero" />
 
     <TextView
         android:id="@+id/textView_dialog_agent_config_service_name"
@@ -39,7 +39,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/textView_dialog_agent_config_service_name"
-        android:ems="8" >
+        android:ems="8"
+        android:inputType="text" >
 
         <requestFocus />
     </EditText>

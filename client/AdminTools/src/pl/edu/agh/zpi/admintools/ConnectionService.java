@@ -4,6 +4,7 @@ import pl.edu.agh.zpi.admintools.connection.ConnectionTask;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketConfig;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketConfigRequest;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketKeyRequest;
+import pl.edu.agh.zpi.admintools.connection.packets.PacketStart;
 import pl.edu.agh.zpi.admintools.utils.Handable;
 import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
 import android.app.Service;
@@ -23,6 +24,7 @@ public class ConnectionService extends Service implements Handable {
 	public static final int SEND_CONFIG = 4;
 	public static final int STOP = 5;
 	public static final int REQUEST_CONFIG = 6;
+	public static final int SET_INTERVAL = 7;
 	
 
 	public static final String NAME = "pl.edu.agh.zpi.admintools.ConnectionService";
@@ -68,7 +70,9 @@ public class ConnectionService extends Service implements Handable {
 			b = msg.getData();
 			String host = b.getString(AdminTools.HOST);
 			int port = b.getInt(AdminTools.PORT);
-			connectionTask.connect(host,port);
+			String key = b.getString(AdminTools.KEY);
+			int interv = b.getInt(AdminTools.INTERVAL);
+			connectionTask.connect(host,port,key, (short)interv );
 			break;
 		case DISCONNECT:
 			if(!connectionTask.isConnected()){
@@ -82,11 +86,16 @@ public class ConnectionService extends Service implements Handable {
 			b = msg.getData();
 			PacketConfig data = (PacketConfig)b.getSerializable(PacketConfig.PACKET_CONFIG);
 			connectionTask.enqueueMessage(data);
+			break;
 		case REQUEST_CONFIG:
 			b = msg.getData();
 			short id = b.getShort(PacketConfigRequest.ID);
 			connectionTask.enqueueMessage(new PacketConfigRequest(id));
 			break;
+		case SET_INTERVAL:
+			b = msg.getData();
+			int interval = b.getInt(AdminTools.INTERVAL);
+			connectionTask.enqueueMessage(new PacketStart((short) interval));
 		default:
 			break;
 		}

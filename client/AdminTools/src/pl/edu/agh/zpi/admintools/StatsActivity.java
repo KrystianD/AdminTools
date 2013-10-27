@@ -9,18 +9,15 @@ import pl.edu.agh.zpi.admintools.connection.packets.PacketConfigRequest;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketKeyReply;
 import pl.edu.agh.zpi.admintools.connection.packets.ServiceConfig;
 import pl.edu.agh.zpi.admintools.listdata.AgentArrayAdapter;
-import pl.edu.agh.zpi.admintools.listdata.LongClickItemListener;
-import pl.edu.agh.zpi.admintools.sensors.AgentData;
 import pl.edu.agh.zpi.admintools.utils.Handable;
 import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.app.Dialog;
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -33,12 +30,13 @@ import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -52,7 +50,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 	private ListView listView;
 	private AgentArrayAdapter agentsArray;
-	private LongClickItemListener longClickListener;
+	// private LongClickItemListener longClickListener;
 	private boolean isServiceBinded;
 
 	private Messenger serviceMessenger;
@@ -61,17 +59,27 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 	private String host;
 	private int port;
+	private String key;
+	private int interval;
 
 	private TextWatcher shortTextWatcher = new ShortTextWatcher();
 	private OnFocusChangeListener shortFocusChangeListener = new ShortOnFocusChangeListener();
+
+	SharedPreferences connectionSettings;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_stats_activity);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+		connectionSettings = getSharedPreferences(AdminTools.CONN_PREFS_NAME,
+				MODE_PRIVATE);
 
 		host = this.getIntent().getStringExtra(AdminTools.HOST);
 		port = this.getIntent().getIntExtra(AdminTools.PORT, 0);
+		key = this.getIntent().getStringExtra(AdminTools.KEY);
+		interval = this.getIntent().getIntExtra(AdminTools.INTERVAL, 1000);
 
 		TextView tv = (TextView) findViewById(R.id.textView_server_name);
 		String serverName = getIntent().getStringExtra(AdminTools.HOST) + ":"
@@ -79,23 +87,26 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		tv.setText(serverName);
 
 		agentsArray = new AgentArrayAdapter(this);
-		longClickListener = new LongClickItemListener(this);
+		// longClickListener = new LongClickItemListener(this);
 
 		listView = (ListView) findViewById(R.id.listView_agents_data);
 		listView.setAdapter(agentsArray);
-		listView.setLongClickable(true);
-		listView.setOnItemLongClickListener(longClickListener);
+		// listView.setLongClickable(true);
+		// listView.setOnItemLongClickListener(longClickListener);
 
 		isServiceBinded = bindService(
 				new Intent(this, ConnectionService.class), this,
 				Context.BIND_AUTO_CREATE);
+
+		setResult(RESULT_OK); // na wstępie zakładamy że jest ok
 	}
 
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
 		serviceMessenger = new Messenger(service);
 		sendMessageToService(ConnectionService.GET_MESSENGER);
-		sendMessageToService(ConnectionService.CONNECT, host, port);
+		sendMessageToService(ConnectionService.CONNECT, host, port, key,
+				interval);
 	}
 
 	@Override
@@ -130,13 +141,14 @@ public class StatsActivity extends Activity implements ServiceConnection,
 					ConnectionService.class), this, Context.BIND_AUTO_CREATE);
 		}
 		sendMessageToService(ConnectionService.GET_MESSENGER);
-		sendMessageToService(ConnectionService.CONNECT, host, port);
+		sendMessageToService(ConnectionService.CONNECT, host, port, key,
+				interval);
 		super.onResume();
 	}
 
 	@Override
 	public void handleMessage(Message msg) {
-		Log.d("qwe", "StatsActivity handleMessage");
+		Log.d("qwe", "StatsActivity handleMessage " + msg.what);
 		Bundle b;
 		switch (msg.what) {
 		case ConnectionTask.AGENTS_DATA:
@@ -172,10 +184,12 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			PacketConfig pc = (PacketConfig) b.get(PacketConfig.PACKET_CONFIG);
 			buildSettingsDialog(pc);
 			break;
+		case ConnectionTask.CONNECTION_ERROR:
+			setResult(RESULT_CANCELED);
+			finish();
 		default:
 			break;
 		}
-
 	}
 
 	private void sendMessageToService(int type, Object... data) {
@@ -186,20 +200,23 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			case ConnectionService.CONNECT:
 				b.putString(AdminTools.HOST, (String) data[0]);
 				b.putInt(AdminTools.PORT, (Integer) data[1]);
-				m.setData(b);
+				b.putString(AdminTools.KEY, (String) data[2]);
+				b.putInt(AdminTools.INTERVAL, (Integer) data[3]);
 				break;
 			case ConnectionService.REQUEST_CONFIG:
 				b.putShort(PacketConfigRequest.ID, (Short) data[0]);
-				m.setData(b);
 				break;
 			case ConnectionService.SEND_CONFIG:
 				b.putSerializable(PacketConfig.PACKET_CONFIG,
 						(PacketConfig) data[0]);
-				m.setData(b);
+				break;
+			case ConnectionService.SET_INTERVAL:
+				b.putInt(AdminTools.INTERVAL, interval);
 				break;
 			default:
 				break;
 			}
+			m.setData(b);
 			m.replyTo = activityMessenger;
 			try {
 				serviceMessenger.send(m);
@@ -218,8 +235,9 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			Intent intent = new Intent(this, ChartsActivity.class);
 			intent.putExtra(AdminTools.PORT, port);
 			intent.putExtra(AdminTools.HOST, host);
+			intent.putExtra(AdminTools.KEY, key);
 			intent.putExtra(ChartsActivity.AGENT_ID, id);
-			startActivity(intent);
+			startActivityForResult(intent, AdminTools.CHARTS_ACTIVITY_CODE);
 			break;
 		}
 	}
@@ -341,12 +359,49 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		switch (item.getItemId()) {
-		case R.id.action_settings:
-			// TODO jakieś tam settingsy
+		case R.id.action_interval:
+			LayoutInflater inflater = this.getLayoutInflater();
+			final View dialogView = inflater.inflate(
+					R.layout.dialog_refresh_interval, null);
+			builder.setTitle(R.string.dialog_set_interval);
+			builder.setView(dialogView);
+			builder.setPositiveButton(R.string.ok,
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							EditText editText = (EditText) dialogView
+									.findViewById(R.id.editText_dialog_refresh_interval);
+							double intervalDouble = Double.parseDouble(editText
+									.getText().toString());
+							interval = (int) intervalDouble;
+
+							SharedPreferences.Editor editor = connectionSettings
+									.edit();
+							editor.putInt(AdminTools.INTERVAL, interval);
+							editor.commit();
+
+							sendMessageToService(
+									ConnectionService.SET_INTERVAL, interval);
+						}
+					});
+			builder.setNegativeButton(R.string.cancel,
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+						}
+					});
+			builder.show();
+
+			EditText editText = (EditText) dialogView
+					.findViewById(R.id.editText_dialog_refresh_interval);
+			editText.setText(""
+					+ connectionSettings.getInt(AdminTools.INTERVAL, 1000));
+
 			break;
 		case R.id.action_generate_agent_key:
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
 			builder.setMessage(getString(R.string.generate_agent_dialog));
 			builder.setPositiveButton(R.string.ok, new OnClickListener() {
 				@Override
@@ -387,6 +442,16 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		agentsArray.notifyDataSetChanged();
 	}
 
+	public void manageSettings(View view) {
+		short id = (short) view.getId();
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.choose_agent_action);
+		builder.setItems(R.array.choose_agent_array,
+				new MyDialogOnClickListener(this, id));
+
+		builder.show();
+	}
+
 	public void onDialogConfigButtonClicked(View view) {
 		LinearLayout parent = (LinearLayout) view.getParent().getParent();
 		LinearLayout layout = (LinearLayout) parent.getChildAt(7); // magic
@@ -406,7 +471,22 @@ public class StatsActivity extends Activity implements ServiceConnection,
 				layout.removeViewAt(index - 1);
 		}
 	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == AdminTools.CHARTS_ACTIVITY_CODE) {
+			if (resultCode == RESULT_CANCELED) {
+				setResult(RESULT_CANCELED);
+				finish();
+			}
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
 }
+
+/************************/
+/** additional classes **/
+/************************/
 
 class ShortTextWatcher implements TextWatcher {
 	@Override
@@ -446,5 +526,19 @@ class ShortOnFocusChangeListener implements View.OnFocusChangeListener {
 			et.setText("0");
 		}
 	}
+}
 
+class MyDialogOnClickListener implements DialogInterface.OnClickListener {
+	private StatsActivity parent;
+	private short id;
+
+	public MyDialogOnClickListener(StatsActivity parent, short id) {
+		this.parent = parent;
+		this.id = id;
+	}
+
+	@Override
+	public void onClick(DialogInterface dialog, int which) {
+		parent.listenerFeedback(which, id);
+	}
 }

@@ -3,7 +3,6 @@
     android:id="@+id/LinearLayout1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:longClickable="true"
     android:orientation="vertical" >
 
     <TextView
@@ -87,6 +86,14 @@
                 android:layout_height="wrap_content" />
         </TableRow>
     </TableLayout>
+
+    <Button
+        android:id="@+id/button_list_settings"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/action_settings"
+        android:onClick="manageSettings" />
 
     <ToggleButton
         android:id="@+id/toggleButton_list_services"

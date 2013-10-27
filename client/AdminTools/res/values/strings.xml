@@ -16,7 +16,9 @@
     <string name="port_wrong_format">Wrong port format</string>
     <string name="address_unknown">Wrong IP address or host name</string>
     <string name="network_error">Network error</string>
+    <string name="network_status_error">Error! Check your internet connection</string>
     <string name="title_activity_stats">Stats</string>
+    <string name="unknown">unknown</string>
     <string name="generate_agent_key">Generate new agent\'s key</string>
     <string name="generate_agent_dialog">Do you really want to create new key?\nThis cannot be undone!</string>
     <string name="dialog_get_key_text">This is your new agent\'s key:</string>
@@ -41,5 +43,10 @@
     <string name="tcp">TCP</string>
     <string name="udp">UDP</string>
     <string name="title_activity_charts">ChartsActivity</string>
+    <string name="action_put_key">Set key</string>
+    <string name="dialog_put_key_title">Put key</string>
+    <string name="refresh_interval">Refresh interval</string>
+    <string name="zero">0</string>
+    <string name="dialog_set_interval">Set refresh interval</string>
 
 </resources>

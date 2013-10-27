@@ -1,6 +1,5 @@
 package pl.edu.agh.zpi.admintools.connection;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -26,13 +25,14 @@ public class ConnectionTask implements Runnable {
 	public static final int AGENTS_DATA = 1;
 	public static final int AGENT_KEY = 2;
 	public static final int AGENT_CONFIG = 3;
+	public static final int CONNECTION_ERROR = 4;
 
 	enum State {
 		IDLE, CONNECTING, DISCONNECTING, ACTIVE, STOPPING, STARTING
 	}
 
 	private Messenger activityMessenger;
-	private boolean endConnection = false;
+	private boolean endTask = false;
 	private long lastPing = System.currentTimeMillis();
 	private Socket socket;
 	private InputStream input;
@@ -42,10 +42,12 @@ public class ConnectionTask implements Runnable {
 	private boolean isConnected = false;
 	private String host;
 	private int port;
-
+	private String key;
+	private short interval;
+	
 	@Override
 	public void run() {
-		while (!endConnection) {
+		while (!endTask) {
 			// Log.d("qwe", "ConnectionTask.run() loop " + state);
 			switch (state) {
 			case IDLE:
@@ -63,24 +65,21 @@ public class ConnectionTask implements Runnable {
 				try {
 					processStarting();
 				} catch (Exception e) {
-					e.printStackTrace();
-					state = State.IDLE;
+					processNetworkError(e);
 				}
 				break;
 			case ACTIVE:
 				try {
 					processActive();
 				} catch (Exception e) {
-					e.printStackTrace();
-					state = State.CONNECTING;
+					processNetworkError(e);
 				}
 				break;
 			case STOPPING:
 				try {
 					processStopping();
 				} catch (Exception e) {
-					e.printStackTrace();
-					state = State.IDLE;
+					processNetworkError(e);
 				}
 				break;
 			case DISCONNECTING:
@@ -88,14 +87,16 @@ public class ConnectionTask implements Runnable {
 					processDisconnecting();
 				} catch (Exception e) {
 					e.printStackTrace();
-					endConnection = true;
+					endTask = true;
 				}
 				break;
 			default:
 				Log.e("qwe", "unknown state");
 				break;
 			}
-			sendPing();
+			if(isConnected){
+				sendPing();
+			}
 			try {
 				Thread.sleep(16);
 			} catch (InterruptedException e) {
@@ -119,7 +120,7 @@ public class ConnectionTask implements Runnable {
 	}
 
 	private void processStarting() throws Exception {
-		sendPacket(new PacketStart((short) 1000));
+		sendPacket(new PacketStart((short) interval));
 		state = State.ACTIVE;
 	}
 
@@ -143,7 +144,7 @@ public class ConnectionTask implements Runnable {
 		input.close();
 		socket.close();
 		isConnected = false;
-		endConnection = true;
+		endTask = true;
 	}
 
 	private void processActive() throws Exception {
@@ -163,13 +164,18 @@ public class ConnectionTask implements Runnable {
 				readPacket(keyReply, header.getSize());
 				callback(AGENT_KEY, keyReply);
 				break;
-			case Header.PACKET_CONFIG:
+			case Header.PACKET_CONFIG_REPLY:
 				PacketConfig pc = new PacketConfig();
 				readPacket(pc, header.getSize());
 				callback(AGENT_CONFIG, pc);
 				break;
+			case Header.PACKET_CHANGE_REPLY:
+				readPacket(new PacketReply(), header.getSize());
+				//callback(AGENT_CONFIG, pc);
+				break;
 			default:
 				Log.e("qwe", "unknown header " + header.getType());
+				readPacket(null, header.getSize());
 			}
 
 		}
@@ -184,16 +190,15 @@ public class ConnectionTask implements Runnable {
 		if (isConnected && System.currentTimeMillis() - lastPing > 1000) {
 			try {
 				sendHeader(Header.PACKET_PING);
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				 processNetworkError(e);
 			}
 			lastPing = System.currentTimeMillis();
 		}
 	}
 
 	private void processAuthKey() throws Exception {
-		String s = "PUAEODBIAGSYILOX";
-		PacketAuthKey authKey = new PacketAuthKey(s.getBytes(), false);
+		PacketAuthKey authKey = new PacketAuthKey(key.getBytes(), false);
 		sendPacket(authKey);
 		long start = System.currentTimeMillis();
 		while (input.available() < Header.HEADER_SIZE) {
@@ -217,13 +222,13 @@ public class ConnectionTask implements Runnable {
 		}
 	}
 
-	private Header readHeader() throws IOException {
+	private Header readHeader() throws Exception {
 		byte[] data = new byte[Header.HEADER_SIZE];
 		input.read(data);
 		return Header.fromByteArray(data);
 	}
 
-	private void sendHeader(byte type) throws IOException {
+	private void sendHeader(byte type) throws Exception {
 		Header header = new Header(type, (byte) 0);
 		Log.d("qwe", "header type " + type);
 		Log.d("qwe", "output null" + (output == null));
@@ -245,7 +250,7 @@ public class ConnectionTask implements Runnable {
 			packet.fromByteArray(data);
 	}
 
-	private void sendPacket(IPacket packet) throws IOException {
+	private void sendPacket(IPacket packet) throws Exception {
 		byte[] data = packet.toByteArray();
 		Header header = new Header(packet.getType(), (short) data.length);
 		output.write(header.toByteArray());
@@ -270,6 +275,9 @@ public class ConnectionTask implements Runnable {
 			case AGENT_CONFIG:
 				b.putSerializable(PacketConfig.PACKET_CONFIG, data);
 				break;
+			case CONNECTION_ERROR:
+				// nothing to send
+				break;
 			default:
 				return;
 			}
@@ -284,11 +292,13 @@ public class ConnectionTask implements Runnable {
 		}
 	}
 
-	public synchronized void connect(String host, int port) {
+	public synchronized void connect(String host, int port, String key, short interval) {
 		Log.d("qwe", "ConnectionTask.connect()" + state);
-		if ((!isConnected() && (this.port != port || this.host != host))) {
+		if ((!isConnected() && (this.port != port || this.host != host || !this.key.equals(key) || this.interval != interval))) {
 			this.host = host;
 			this.port = port;
+			this.key = key;
+			this.interval = interval;
 			state = State.CONNECTING;
 		} else {
 			if (state == State.IDLE) {
@@ -309,7 +319,7 @@ public class ConnectionTask implements Runnable {
 			state = State.STOPPING;
 		}
 	}
-
+	
 	public synchronized boolean isConnected() {
 		return isConnected;
 	}
@@ -327,5 +337,14 @@ public class ConnectionTask implements Runnable {
 		} catch (Exception e) {
 			Log.e("qwe", "ConnectionTask.enqueueMessage()");
 		}
+	}
+	
+	private void processNetworkError(Exception e){
+		e.printStackTrace();
+		state = State.IDLE;
+		host = "";
+		port = 0;
+		isConnected = false;
+		callback(CONNECTION_ERROR,null);
 	}
 }

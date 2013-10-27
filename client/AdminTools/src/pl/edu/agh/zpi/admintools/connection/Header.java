@@ -15,10 +15,11 @@ public class Header {
 	public static final byte PACKET_AGENTS_DATA = 6;
 	public static final byte PACKET_KEY_REQUEST = 7;
 	public static final byte PACKET_KEY_REPLY = 8;
-	public static final byte PACKET_CONFIG = 9;
+	public static final byte PACKET_CONFIG = 9; // unused
 	public static final byte PACKET_CONFIG_REQUEST = 10;
-	public static final byte PACKET_CONFIG_REPLY = 11; // unused
-	public static final byte PACKET_CHANGE_REQUEST = 12; // unused
+	public static final byte PACKET_CONFIG_REPLY = 11; 
+	public static final byte PACKET_CHANGE_REQUEST = 12;
+	public static final byte PACKET_CHANGE_REPLY = 13;
 	
 	private byte type;
 	private short size;

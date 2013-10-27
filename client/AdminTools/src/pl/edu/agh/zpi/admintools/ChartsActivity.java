@@ -1,5 +1,7 @@
 package pl.edu.agh.zpi.admintools;
 
+import pl.edu.agh.zpi.admintools.connection.ConnectionTask;
+import pl.edu.agh.zpi.admintools.sensors.AgentData;
 import pl.edu.agh.zpi.admintools.utils.Handable;
 import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
 import android.app.Activity;
@@ -16,6 +18,7 @@ import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 public class ChartsActivity extends Activity implements ServiceConnection,
 		Handable {
@@ -23,9 +26,12 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 
 	private boolean isServiceBinded;
 	private short agentId;
+	
 	private String host;
 	private int port;
-
+	private String key;
+	private int interval;
+	
 	private Messenger serviceMessenger;
 	private Messenger activityMessenger = new Messenger(new IncomingHandler(
 			this));
@@ -34,14 +40,19 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_charts);
-
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		
 		agentId = this.getIntent().getShortExtra(AGENT_ID, (short) 0xFFFF);
 		host = this.getIntent().getStringExtra(AdminTools.HOST);
 		port = this.getIntent().getIntExtra(AdminTools.PORT, 0);
-
+		key = this.getIntent().getStringExtra(AdminTools.KEY);
+		interval = this.getIntent().getIntExtra(AdminTools.INTERVAL, 1000);
+		
 		isServiceBinded = bindService(
 				new Intent(this, ConnectionService.class), this,
 				Context.BIND_AUTO_CREATE);
+		
+		setResult(RESULT_OK);
 	}
 
 	@Override
@@ -66,7 +77,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 			isServiceBinded = bindService(new Intent(this,
 					ConnectionService.class), this, Context.BIND_AUTO_CREATE);
 		}
-		sendMessageToService(ConnectionService.CONNECT, host, port);
+		sendMessageToService(ConnectionService.CONNECT, host, port, key, interval);
 		super.onResume();
 	}
 
@@ -74,8 +85,12 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	public void handleMessage(Message msg) {
 		Log.d("qwe", "ChartsActivity.handleMessage()");
 		switch(msg.what){
+		case ConnectionTask.CONNECTION_ERROR:
+			setResult(RESULT_CANCELED);
+			finish();
+			break;
 		default:
-			sendMessageToService(ConnectionService.STOP);
+			//sendMessageToService(ConnectionService.STOP);
 			break;
 		}
 	}
@@ -84,7 +99,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	public void onServiceConnected(ComponentName name, IBinder service) {
 		serviceMessenger = new Messenger(service);
 		sendMessageToService(ConnectionService.GET_MESSENGER);
-		sendMessageToService(ConnectionService.CONNECT, host, port);
+		sendMessageToService(ConnectionService.CONNECT, host, port, key, interval);
 	}
 
 	@Override
@@ -102,6 +117,8 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 			case ConnectionService.CONNECT:
 				b.putString(AdminTools.HOST, (String) data[0]);
 				b.putInt(AdminTools.PORT, (Integer) data[1]);
+				b.putString(AdminTools.KEY, (String) data[2]);
+				b.putInt(AdminTools.INTERVAL, (Integer) data[3]);
 				m.setData(b);
 				break;
 			default:
