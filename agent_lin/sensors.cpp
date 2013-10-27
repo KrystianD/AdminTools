@@ -18,17 +18,34 @@
 using namespace std;
 
 #include "packets.h"
+#include "kutils.h"
 
 string readFile (const string& path)
 {
 	FILE *f = fopen (path.c_str (), "rt");
 	if (!f)
 		return "";
-	char buf[500];
-	fscanf (f, "%s", buf);
+	int r;
+	string val = "";
+	do
+	{
+		char buf[500];
+		r = fread (buf, 1, 500, f);
+		// printf ("r %d\r\n", r);
+		val += string (buf, r);
+	} while (r);
 	fclose (f);
-	return buf;
+	return val;
 }
+
+inline std::string trim(const std::string& str)
+{
+	string str2 = str;
+	str2.erase(0, str2.find_first_not_of(" \r\n"));       //prefixing spaces
+	str2.erase(str2.find_last_not_of(" \r\n")+1);         //surfixing spaces
+	return str2;
+}
+
 
 void getSensorsData (TSensorsData& data, const TPacketConfig& config)
 {
@@ -54,10 +71,11 @@ void getSensorsData (TSensorsData& data, const TPacketConfig& config)
 		for (int i = 0; ; i++)
 		{
 			sprintf (path, "/sys/class/hwmon/hwmon%d/device/name", i);
-			string s = readFile (path);
+			string s = trim (readFile (path));
 			if (s.size () == 0)
 				break;
 
+			// printf ("t |%s|\r\n", s.c_str());
 			int hwmonIdx = i;
 			if (s == "coretemp")
 			{
@@ -130,44 +148,74 @@ void getSensorsData (TSensorsData& data, const TPacketConfig& config)
 	{
 		const TPacketConfig::TService& s = config.services[i];
 
-		sockaddr_in servaddr;
-
-		int fd = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
-		if (fd == -1)
+		if (s.tcp)
 		{
-			perror ("socket");
-			return;
+			sockaddr_in servaddr;
+
+			int fd;
+			fd = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
+			if (fd == -1)
+			{
+				perror ("socket");
+				return;
+			}
+
+			memset (&servaddr, 0, sizeof (servaddr));
+			servaddr.sin_family = AF_INET;
+			servaddr.sin_port = htons (0);
+			servaddr.sin_addr.s_addr = INADDR_ANY;
+
+			struct addrinfo hints;
+			struct addrinfo *servinfo;
+
+			memset (&hints, 0, sizeof (hints));
+			hints.ai_family = AF_UNSPEC;
+			hints.ai_socktype = SOCK_STREAM;
+			hints.ai_flags = AI_PASSIVE;
+
+			stringstream port;
+			string portStr;
+			port << s.port;
+			port >> portStr;
+			getaddrinfo ("127.0.0.1", portStr.c_str (), &hints, &servinfo);
+			
+			TService service;
+			service.name = s.name;
+			if (::connect (fd, servinfo->ai_addr, servinfo->ai_addrlen))
+				service.available = 0;
+			else
+				service.available = 1;
+			freeaddrinfo (servinfo);
+
+			// printf ("%d %d\r\n", s.tcp, service.available);
+			data.services.push_back (service);
+			close (fd);
 		}
-
-		memset (&servaddr, 0, sizeof (servaddr));
-		servaddr.sin_family = AF_INET;
-		servaddr.sin_port = htons (0);
-		servaddr.sin_addr.s_addr = INADDR_ANY;
-
-		struct addrinfo hints;
-		struct addrinfo *servinfo;
-
-		memset (&hints, 0, sizeof (hints));
-		hints.ai_family = AF_UNSPEC;
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_flags = AI_PASSIVE;
-
-		stringstream port;
-		string portStr;
-		port << s.port;
-		port >> portStr;
-		getaddrinfo ("127.0.0.1", portStr.c_str (), &hints, &servinfo);
-		
-		TService service;
-		service.name = s.name;
-		if (::connect (fd, servinfo->ai_addr, servinfo->ai_addrlen))
-			service.available = 0;
 		else
-			service.available = 1;
-		freeaddrinfo (servinfo);
+		{
+			string dataStr = readFile ("/proc/net/udp");
+			TService service;
+			service.name = s.name;
+			service.available = 0;
+			// printf ("%s\r\n", data.c_str());
+			vector<string> lines = explode (dataStr, "\n");
+			for (int i = 1; i < lines.size (); i++)
+			{
+				// printf ("%s\r\n", lines[i].c_str());
 
-		data.services.push_back (service);
-		close (fd);
+				int d;
+				char local_addr[64];
+				int local_port;
+
+				sscanf (lines[i].c_str (),
+						"%d: %64[0-9A-Fa-f]:%X",
+						&d, local_addr, &local_port);
+
+				if (local_port == s.port)
+					service.available = 1;
+			}
+			data.services.push_back (service);
+		}
 	}
 
 

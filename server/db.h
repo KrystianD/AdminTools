@@ -15,6 +15,7 @@ class TDBService
 {
 public:
 	string name;
+	bool tcp;
 	int port;
 };
 class TDBAgent
@@ -40,6 +41,7 @@ public:
 	static bool generateNewKey (char key[16]);
 	static bool findAgentByKey (const char key[16], TDBAgent& agent);
 	static bool findAgentById (uint16_t id, TDBAgent& agent);
+	static bool updateAgent (const TDBAgent& agent);
 	static bool insertRecord (const TDBAgent& agent, const TSensorsData& data);
 
 // private:

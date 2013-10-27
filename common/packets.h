@@ -1,16 +1,38 @@
 #ifndef __PACKETS_H__
 #define __PACKETS_H__
 
-#define PACKET_AUTH      0
-#define PACKET_REPLY     1
-#define PACKET_AGENTDATA 2
-#define PACKET_START     3
-#define PACKET_STOP      4
-#define PACKET_PING      5
-#define PACKET_AGENTSDATA 6
+#define PACKET_AUTH        0
+#define PACKET_REPLY       1
+#define PACKET_AGENTDATA   2
+#define PACKET_START       3
+#define PACKET_STOP        4
+#define PACKET_PING        5
+#define PACKET_AGENTSDATA  6
 #define PACKET_KEY_REQUEST 7
 #define PACKET_KEY_REPLY   8
-#define PACKET_CONFIG    9
+#define PACKET_CONFIG      9
+#define PACKET_CONFIG_REQUEST 10
+#define PACKET_CONFIG_REPLY   11
+#define PACKET_CONFIG_CHANGE_REQUEST 12
+#define PACKET_CONFIG_CHANGE_REPLY   13
+#define PACKET_TYPES_COUNT 14
+
+static const char* packetNames[] = {
+/* 0 */ "PACKET_AUTH",
+/* 1 */ "PACKET_REPLY",
+/* 2 */ "PACKET_AGENTDATA",
+/* 3 */ "PACKET_START",
+/* 4 */ "PACKET_STOP",
+/* 5 */ "PACKET_PING",
+/* 6 */ "PACKET_AGENTSDATA",
+/* 7 */ "PACKET_KEY_REQUEST",
+/* 8 */ "PACKET_KEY_REPLY",
+/* 9 */ "PACKET_CONFIG",
+/* 10 */ "PACKET_CONFIG_REQUEST",
+/* 11 */ "PACKET_CONFIG_REPLY",
+/* 12 */ "PACKET_CONFIG_CHANGE_REQUEST",
+/* 13 */ "PACKET_CONFIG_CHANGE_REPLY",
+};
 
 #include <string.h>
 #include <stdint.h>
@@ -18,7 +40,7 @@
 #include <vector>
 using namespace std;
 
-#include "db.h"
+// #include "db.h"
 #include "common.h"
 #include "sensors.h"
 
@@ -94,12 +116,14 @@ class TPacketAgentData : public IPacket
 {
 public:
 	uint16_t id;
+	string name;
 	TSensorsData data;
 
 	virtual int getType () { return PACKET_AGENTDATA; }
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, id);
+		append (buf, name);
 		buffer_t tmp;
 		data.toBuffer (tmp);
 		buf.insert (buf.end (), tmp.begin (), tmp.end ());
@@ -108,6 +132,7 @@ public:
 	{
 		m_pos = 0;
 		if (!fetch (buf, id)) return false;
+		if (!fetch (buf, name)) return false;
 		buffer_t tmp;
 		tmp.insert (tmp.begin (), buf.begin () + m_pos, buf.end ());
 		data.fromBuffer (tmp);
@@ -159,6 +184,7 @@ public:
 	struct TService
 	{
 		string name;
+		bool tcp;
 		uint16_t port;
 	};
 	uint16_t agentId;
@@ -178,6 +204,7 @@ public:
 		for (int i = 0; i < len; i++)
 		{
 			append (buf, services[i].name);
+			append (buf, services[i].tcp);
 			append (buf, services[i].port);
 		}
 		append (buf, interval);
@@ -195,10 +222,28 @@ public:
 		{
 			TPacketConfig::TService s;
 			if (!fetch (buf, s.name)) return false;
+			if (!fetch (buf, s.tcp)) return false;
 			if (!fetch (buf, s.port)) return false;
 			services.push_back (s);
 		}
 		if (!fetch (buf, interval)) return false;
+		return true;
+	}
+};
+class TPacketConfigRequest : public IPacket
+{
+public:
+	uint16_t agentId;
+	
+	virtual int getType () { return PACKET_CONFIG_REQUEST; }
+	virtual void toBuffer (buffer_t& buf)
+	{
+		append (buf, agentId);
+	}
+	virtual bool fromBuffer (buffer_t& buf)
+	{
+		m_pos = 0;
+		if (!fetch (buf, agentId)) return false;
 		return true;
 	}
 };

@@ -17,7 +17,7 @@
 #include "settings.h"
 #include "db.h"
 
-#define CLIENT_DEBUG(x,...) printf ("[Client #%2d id: %2d] " x "\r\n", fd, dbAgent.id, ##__VA_ARGS__)
+#define CLIENT_DEBUG(x,...) printf ("[Client #%d id: %2d] " x "\r\n", fd, dbAgent.id, ##__VA_ARGS__)
 
 Client::Client (int fd, const string& ip, int port)
 	: fd (fd), ip (ip), port (port)
@@ -134,7 +134,9 @@ void Client::process ()
 	if (sendingActive && sendDataTimer.process ())
 	{
 		TPacketAgentsData d;
-		d.agents = agentsData;
+		for (int i = 0; i < agentsData.size (); i++)
+			if (time (0) - agentsData[i].time < 10)
+				d.agents.push_back (agentsData[i].packet);
 		sendPacket (d);
 	}
 }
@@ -149,7 +151,12 @@ void Client::fetchConfig ()
 void Client::processPacket (int size)
 {
 	const THeader& h = currentHeader;
-	CLIENT_DEBUG("[READ] Processing packet of type: %d size: %d", h.type, h.size);
+
+	const char* typeStr = "(unknown)";
+	if (h.type < PACKET_TYPES_COUNT)
+		typeStr = packetNames[h.type];
+
+	CLIENT_DEBUG("[READ] Processing packet of type: %s size: %d", typeStr, h.size);
 	
 	buffer_t buf;
 	buf.insert (buf.begin (), (char*)buffer, (char*)buffer + size);
@@ -176,11 +183,10 @@ void Client::processPacket (int size)
 		}
 		sendPacket (pr);
 
-		printf ("q %d\r\n", p.sendConfig);
 		if (authorized && p.sendConfig)
 		{
 			sendConfig ();
-			printf ("config sent\r\n");
+			CLIENT_DEBUG("Config sent");
 		}
 	}
 	break;
@@ -192,6 +198,7 @@ void Client::processPacket (int size)
 		if (p.fromBuffer (buf))
 		{
 			p.id = dbAgent.id;
+			p.name = ip;
 			assignData (p);
 			DB::insertRecord (dbAgent, p.data);
 		}
@@ -207,10 +214,10 @@ void Client::processPacket (int size)
 		CLIENT_DEBUG("START");
 		sendingActive = true;
 
-		if (p.interval <= SERVER_INTERVAL_MIN)
-			p.interval = SERVER_INTERVAL_MIN;
-		if (p.interval >= SERVER_INTERVAL_MAX)
-			p.interval = SERVER_INTERVAL_MAX;
+		if (p.interval <= CLIENT_UPDATE_INTERVAL_MIN)
+			p.interval = CLIENT_UPDATE_INTERVAL_MIN;
+		if (p.interval >= CLIENT_UPDATE_INTERVAL_MAX)
+			p.interval = CLIENT_UPDATE_INTERVAL_MAX;
 
 		sendDataTimer.setInterval (p.interval);		
 	}
@@ -228,16 +235,55 @@ void Client::processPacket (int size)
 		TPacketKeyReply pr;
 		DB::generateNewKey (pr.key);
 		sendPacket (pr);
-	}		
+	}
+	break;
+	case PACKET_CONFIG_REQUEST:
+	{
+		if (!authorized) { kill (); return; }
+		TPacketConfigRequest p;
+		p.fromBuffer (buf);
+
+		TDBAgent agent;
+		TPacketConfig pc;
+		if (DB::findAgentById (p.agentId, agent))
+		{
+			agentToConfig (agent, pc);
+		}
+		else
+		{
+			pc.agentId = 0xffff;
+		}
+		sendPacket (pc, PACKET_CONFIG_REPLY);
+	}
+	break;
+	case PACKET_CONFIG_CHANGE_REQUEST:
+	{
+		if (!authorized) { kill (); return; }
+		TPacketConfig p;
+		p.fromBuffer (buf);
+
+		TDBAgent agent;
+		configToAgent (p, agent);
+		DB::updateAgent (agent);
+
+		settingsChanged = 1;
+
+		TPacketReply pr;
+		pr.value = 1;
+		sendPacket (pr, PACKET_CONFIG_CHANGE_REPLY);
+	}
 	break;
 	}
 }
-bool Client::sendPacket (IPacket& packet)
+bool Client::sendPacket (IPacket& packet, int type)
 {
 	buffer_t b;
 	packet.toBuffer (b);
 	THeader h;
-	h.type = packet.getType ();
+	if (type == -1)
+		h.type = packet.getType ();
+	else 
+		h.type = type;
 	h.size = b.size ();
 
 	dataToSend.insert (dataToSend.end (), (char*)&h, (char*)&h + sizeof (h));
@@ -253,18 +299,39 @@ void Client::kill ()
 void Client::sendConfig ()
 {
 	TPacketConfig p;
-	p.agentId = dbAgent.id;
+	agentToConfig (dbAgent, p);
+	sendPacket (p);
+}
+
+void Client::agentToConfig (const TDBAgent& dbAgent, TPacketConfig& config)
+{
+	config.agentId = dbAgent.id;
+	config.services.clear ();
 	for (int i = 0; i < dbAgent.services.size (); i++)
 	{
 		TPacketConfig::TService s;
 		s.name = dbAgent.services[i].name;
+		s.tcp = dbAgent.services[i].tcp;
 		s.port = dbAgent.services[i].port;
-		p.services.push_back (s);
+		config.services.push_back (s);
 	}
-	p.tempPath = dbAgent.tempPath;
-	p.tempDivider = dbAgent.tempDivider;
-	p.interval = dbAgent.interval;
-
-	printf ("%d\r\n", p.interval);
-	sendPacket (p);
+	config.tempPath = dbAgent.tempPath;
+	config.tempDivider = dbAgent.tempDivider;
+	config.interval = dbAgent.interval;
+}
+void Client::configToAgent (const TPacketConfig& config, TDBAgent& dbAgent)
+{
+	dbAgent.id = config.agentId;
+	dbAgent.services.clear ();
+	for (int i = 0; i < config.services.size (); i++)
+	{
+		TDBService s;
+		s.name = config.services[i].name;
+		s.tcp = config.services[i].tcp;
+		s.port = config.services[i].port;
+		dbAgent.services.push_back (s);
+	}
+	dbAgent.tempPath = config.tempPath;
+	dbAgent.tempDivider = config.tempDivider;
+	dbAgent.interval = config.interval;
 }

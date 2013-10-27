@@ -6,7 +6,14 @@ using namespace std;
 
 #include "packets.h"
 
-extern vector<TPacketAgentData> agentsData;
+class TAgentData
+{
+public:
+	uint32_t time;
+	TPacketAgentData packet;
+};
+
+extern vector<TAgentData> agentsData;
 
 void assignData (TPacketAgentData& data);
 

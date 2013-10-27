@@ -40,6 +40,24 @@ bool Config::fromFile (const string& path)
 }
 bool Config::saveToFile (const string& path)
 {
+	map<string,string>::iterator it;
+
+	string bckPath = path + ".bck";
+
+	FILE *f = fopen (bckPath.c_str (), "wt");
+
+	if (!f)
+		return false;
+
+	for (it = m_data.begin (); it != m_data.end (); it++)
+	{
+		fprintf (f, "%s=%s\r\n", it->first.c_str (), it->second.c_str ());
+	}
+	fclose (f);
+
+	rename (bckPath.c_str (), path.c_str ());
+
+	return true;
 }
 
 bool Config::hasKey (const string& key)
@@ -63,4 +81,14 @@ int Config::getInt (const string& key, int def)
 	int val;
 	ss >> val;
 	return val;
+}
+void Config::setString (const string& key, const string& value)
+{
+	m_data[key] = value;
+}
+void Config::setInt (const string& key, int val)
+{
+	stringstream ss;
+	ss << val;
+	m_data[key] = ss.str ();
 }

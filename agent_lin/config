@@ -1,5 +1,14 @@
 host=127.0.0.1
+interval=500
+key=UPDKPRHMPQRJXRET
 port=1234
-key=NZTEWSQEMPWHMMDX
+services=5
+srv0=http:1:80
+srv1=ssh:1:22
+srv2=dns:0:53
+srv3=cups:1:139
+srv4=FTP :1:21
 temp=/sys/class/hwmon/hwmon0/device/temp1_input
+tempDivider=2
+tempPath=
 temp_div=1000

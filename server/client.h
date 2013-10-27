@@ -48,9 +48,11 @@ private:
 	TDBAgent dbAgent;
 
 	void processPacket (int size);
-	bool sendPacket (IPacket& packet);
+	bool sendPacket (IPacket& packet, int type = -1);
 	void kill ();
 	void sendConfig ();
+	void agentToConfig (const TDBAgent& dAgent, TPacketConfig& config);
+	void configToAgent (const TPacketConfig& config, TDBAgent& dbAgent);
 };
 
 #endif

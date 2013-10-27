@@ -24,16 +24,11 @@ vector<Client> clients;
 
 int main (int argc, char** argv)
 {
-	int aflag = 0;
-	int bflag = 0;
-	const char *configPath = "config.cfg";
-	int index;
-	int c;
-
-	opterr = 0;
-
 	srand (time (0));
 
+	const char *configPath = "config.cfg";
+	int c;
+	opterr = 0;
 	while ((c = getopt (argc, argv, "c:")) != -1)
 	{
 		switch (c)

@@ -103,7 +103,8 @@ bool DB::findAgentByKey (const char key[16], TDBAgent& agent)
 		sqlite3_finalize (stm);
 		return false;
 	}
-}bool DB::findAgentById (uint16_t id, TDBAgent& agent)
+}
+bool DB::findAgentById (uint16_t id, TDBAgent& agent)
 {
 	string query = "SELECT id,name,services,temp,interval FROM agents WHERE id=?";
 	sqlite3_stmt *stm;
@@ -120,6 +121,47 @@ bool DB::findAgentByKey (const char key[16], TDBAgent& agent)
 	{
 		sqlite3_finalize (stm);
 		return false;
+	}
+	else
+	{
+		sqlite3_finalize (stm);
+		return false;
+	}
+}
+bool DB::updateAgent (const TDBAgent& agent)
+{
+	string query = "UPDATE agents SET name=?, services=?, temp=?, interval=? WHERE id=?";
+	sqlite3_stmt *stm;
+	int res = sqlite3_prepare_v2 (db, query.c_str (), query.size (), &stm, 0);
+
+	string srvStr = "";
+	for (int i = 0; i < agent.services.size (); i++)
+	{
+		const TDBService& s = agent.services[i];
+	
+		if (i > 0)
+			srvStr += ",";
+
+		char buf[100];
+		sprintf (buf, "%s:%d:%d", s.name.c_str (), s.tcp, s.port);
+		srvStr += buf;
+	}
+
+	sqlite3_bind_text (stm, 1, agent.name.c_str (), agent.name.size (), 0);
+	sqlite3_bind_text (stm, 2, srvStr.c_str (), srvStr.size (), 0);
+
+	char buf[100];
+	sprintf (buf, "%s:%d", agent.tempPath.c_str (), agent.tempDivider);
+	sqlite3_bind_text (stm, 3, buf, -1, 0);
+
+	sqlite3_bind_int (stm, 4, agent.interval);
+	sqlite3_bind_int (stm, 5, agent.id);
+
+	res = sqlite3_step (stm);
+	if (res == SQLITE_DONE)
+	{
+		sqlite3_finalize (stm);
+		return true;
 	}
 	else
 	{
@@ -153,7 +195,6 @@ bool DB::insertRecord (const TDBAgent& agent, const TSensorsData& data)
 
 	sqlite3_bind_text (stm, 6, disk.c_str (), disk.size (), 0);
 
-printf ("ASD\r\n");
 	res = sqlite3_step (stm);
 	if (res == SQLITE_DONE)
 	{
@@ -200,11 +241,14 @@ void DB::fetchAgent (sqlite3_stmt* stm, TDBAgent& agent)
 	for (int i = 0; i < parts.size (); i++)
 	{
 		vector<string> parts2 = explode (parts[i], ":");
-		TDBService srv;
-		srv.name = parts2[0];
-		srv.port = atoi (parts2[1].c_str ());
-		agent.services.push_back (srv);
-
+		if (parts2.size () == 3)
+		{
+			TDBService srv;
+			srv.name = parts2[0];
+			srv.tcp = atoi (parts2[1].c_str ());
+			srv.port = atoi (parts2[2].c_str ());
+			agent.services.push_back (srv);
+		}
 		// printf ("n %s p %d\r\n", srv.name.c_str(), srv.port);
 	}
 

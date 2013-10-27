@@ -2,6 +2,8 @@
 ## Eclipse
 #################
 
+data.db
+publish.sh
 *.swo
 tags
 *.pydevproject

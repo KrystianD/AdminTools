@@ -17,6 +17,8 @@ public:
 	bool hasKey (const string& key);
 	string getString (const string& key, const string& def = "");
 	int getInt (const string& key, int def = 0);
+	void setString (const string& key, const string& value);
+	void setInt (const string& key, int val);
 
 private:
 	map<string,string> m_data;

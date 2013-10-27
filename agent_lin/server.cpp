@@ -23,16 +23,18 @@ Server::Server ()
 {
 	m_state = NotConnected;
 	m_lastConnect = 0;
+	m_configChanged = false;
 }
 Server::~Server ()
 {
 }
 
 
-void Server::setup (const string& host, int port)
+void Server::setup (const string& host, int port, const string& key)
 {
 	m_host = host;
 	m_port = port;
+	m_key = key;
 }
 void Server::process ()
 {
@@ -159,7 +161,7 @@ void Server::connect ()
 
 	TPacketAuth p;
 	p.sendConfig = 1;
-	strncpy (p.key, "UPDKPRHMPQRJXRET", 16);
+	strncpy (p.key, m_key.c_str (), 16);
 
 	sendPacket (p);
 
@@ -245,6 +247,7 @@ void Server::processPacket (THeader& h, buffer_t& buf)
 	case PACKET_CONFIG:
 		{
 			m_config.fromBuffer (buf);
+			m_configChanged = true;
 			if (m_state == WaitingForConfig)
 			{
 				m_state = Connected;
