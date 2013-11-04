@@ -117,7 +117,7 @@ void Client::process ()
 
 	if (state == WAITING_FOR_PACKET && getTicks () - packetStartTime >= SERVER_PACKET_TIMEOUT)
 	{
-		CLIENT_DEBUG("[SEND] packet read timeout");
+		CLIENT_DEBUG("[READ] packet read timeout");
 		toDelete = true;
 		close (fd);
 		return;
@@ -125,7 +125,7 @@ void Client::process ()
 
 	if (getTicks () - lastPingTime >= SERVER_PING_TIME)
 	{
-		CLIENT_DEBUG("[SEND] ping timeout\r\n");
+		CLIENT_DEBUG("[READ] ping timeout\r\n");
 		toDelete = true;
 		close (fd);
 		return;
@@ -138,6 +138,16 @@ void Client::process ()
 			if (time (0) - agentsData[i].time < 10)
 				d.agents.push_back (agentsData[i].packet);
 		sendPacket (d);
+	}
+
+	if (oldData.size () > 0 && getTicks () - oldDataUpdateTime >= 2000)
+	{
+		printf("\n\n\n\n\n\n\n\n");
+		printf ("Inserting %d of old data\n", oldData.size ());
+		DB::insertRecords (dbAgent, oldData);
+		printf ("Done.\n");
+		oldData.clear ();
+		oldDataUpdateTime = getTicks ();
 	}
 }
 
@@ -199,8 +209,15 @@ void Client::processPacket (int size)
 		{
 			p.id = dbAgent.id;
 			p.name = ip;
-			assignData (p);
-			DB::insertRecord (dbAgent, p.data);
+			if (p.oldData)
+			{
+				oldData.push_back (p.data);
+			}
+			else
+			{
+				assignData (p);
+				DB::insertRecord (dbAgent, p.data);
+			}
 		}
 	}
 	break;
@@ -334,4 +351,14 @@ void Client::configToAgent (const TPacketConfig& config, TDBAgent& dbAgent)
 	dbAgent.tempPath = config.tempPath;
 	dbAgent.tempDivider = config.tempDivider;
 	dbAgent.interval = config.interval;
+}
+bool Client::generateAndSendStats (const TPacketStatsRequest& req)
+{
+	vector<TSensorsRecord> records;
+	if (!DB::getRecords (req.agentId, req.startDate, req.endDate, records))
+		return false;
+
+
+
+	return true;
 }

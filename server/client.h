@@ -47,12 +47,17 @@ private:
 
 	TDBAgent dbAgent;
 
+	// old data
+	uint32_t oldDataUpdateTime;
+	vector<TSensorsData> oldData;
+
 	void processPacket (int size);
 	bool sendPacket (IPacket& packet, int type = -1);
 	void kill ();
 	void sendConfig ();
 	void agentToConfig (const TDBAgent& dAgent, TPacketConfig& config);
 	void configToAgent (const TPacketConfig& config, TDBAgent& dbAgent);
+	bool generateAndSendStats (const TPacketStatsRequest& req);
 };
 
 #endif

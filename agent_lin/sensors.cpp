@@ -68,12 +68,12 @@ void getSensorsData (TSensorsData& data, const TPacketConfig& config)
 	}
 	else
 	{
-		for (int i = 0; ; i++)
+		for (int i = 0; i < 64; i++)
 		{
 			sprintf (path, "/sys/class/hwmon/hwmon%d/device/name", i);
 			string s = trim (readFile (path));
 			if (s.size () == 0)
-				break;
+				continue;
 
 			// printf ("t |%s|\r\n", s.c_str());
 			int hwmonIdx = i;
@@ -99,6 +99,7 @@ void getSensorsData (TSensorsData& data, const TPacketConfig& config)
 				tempAvg /= cnt;
 				data.temp = tempAvg;
 				data.tempValid = true;
+				break;
 			}
 		}
 	}

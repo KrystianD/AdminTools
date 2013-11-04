@@ -15,7 +15,9 @@
 #define PACKET_CONFIG_REPLY   11
 #define PACKET_CONFIG_CHANGE_REQUEST 12
 #define PACKET_CONFIG_CHANGE_REPLY   13
-#define PACKET_TYPES_COUNT 14
+#define PACKET_STATS_REQUEST  14
+#define PACKET_STATS_REPLY    15
+#define PACKET_TYPES_COUNT 16
 
 static const char* packetNames[] = {
 /* 0 */ "PACKET_AUTH",
@@ -32,6 +34,8 @@ static const char* packetNames[] = {
 /* 11 */ "PACKET_CONFIG_REPLY",
 /* 12 */ "PACKET_CONFIG_CHANGE_REQUEST",
 /* 13 */ "PACKET_CONFIG_CHANGE_REPLY",
+/* 14 */ "PACKET_STATS_REQUEST",
+/* 15 */ "PACKET_STATS_REPLY",
 };
 
 #include <string.h>
@@ -116,6 +120,7 @@ class TPacketAgentData : public IPacket
 {
 public:
 	uint16_t id;
+	uint8_t oldData;
 	string name;
 	TSensorsData data;
 
@@ -123,6 +128,7 @@ public:
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, id);
+		append (buf, oldData);
 		append (buf, name);
 		buffer_t tmp;
 		data.toBuffer (tmp);
@@ -132,6 +138,7 @@ public:
 	{
 		m_pos = 0;
 		if (!fetch (buf, id)) return false;
+		if (!fetch (buf, oldData)) return false;
 		if (!fetch (buf, name)) return false;
 		buffer_t tmp;
 		tmp.insert (tmp.begin (), buf.begin () + m_pos, buf.end ());
@@ -244,6 +251,49 @@ public:
 	{
 		m_pos = 0;
 		if (!fetch (buf, agentId)) return false;
+		return true;
+	}
+};
+class TPacketStatsRequest : public IPacket
+{
+public:
+	enum EType { CPU = 0, RAM, TEMP, DISK };
+	uint16_t agentId;
+	uint32_t startDate, endDate;
+	uint16_t points;
+	EType type; // 1 byte
+
+	
+	virtual int getType () { return PACKET_STATS_REQUEST; }
+	virtual void toBuffer (buffer_t& buf)
+	{
+		append (buf, agentId);
+		append (buf, startDate);
+		append (buf, endDate);
+		append (buf, points);
+		uint8_t t = (uint8_t)type;
+		append (buf, t);
+	}
+	virtual bool fromBuffer (buffer_t& buf)
+	{
+		m_pos = 0;
+		if (!fetch (buf, agentId)) return false;
+		return true;
+	}
+};
+class TPacketStatsReply : public IPacket
+{
+public:
+	vector<int16_t> points;
+
+	virtual int getType () { return PACKET_STATS_REPLY; }
+	virtual void toBuffer (buffer_t& buf)
+	{
+	}
+	virtual bool fromBuffer (buffer_t& buf)
+	{
+		m_pos = 0;
+		// if (!fetch (buf, agentId)) return false;
 		return true;
 	}
 };
