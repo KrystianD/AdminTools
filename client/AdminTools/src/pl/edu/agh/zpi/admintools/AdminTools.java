@@ -112,6 +112,7 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 		b.putInt(PORT, Integer.parseInt(editTextPort.getText().toString()));
 		b.putString(HOST, editTextHost.getText().toString());
 		b.putString(KEY, key);
+		Log.d("qwe","key "+key);
 		b.putInt(INTERVAL, interval);
 		m.setData(b);
 		try {
@@ -119,7 +120,7 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-
+		setConnectionUI(false);
 	}
 
 	private boolean validateConnection() {
@@ -266,6 +267,7 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 			intent.putExtra(PORT,
 					Integer.parseInt(editTextPort.getText().toString()));
 			intent.putExtra(HOST, editTextHost.getText().toString());
+			intent.putExtra(KEY, key);
 			
 			startActivityForResult(intent, STATS_ACTIVITY_CODE);
 			setConnectionUI(false);

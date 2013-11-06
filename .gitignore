@@ -9,8 +9,8 @@ tags
 *.pydevproject
 .project
 .metadata
-bin/
 tmp/
+bin/
 *.tmp
 *.bak
 *.swp

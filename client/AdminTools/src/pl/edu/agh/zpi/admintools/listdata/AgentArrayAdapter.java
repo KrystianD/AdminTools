@@ -147,7 +147,7 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 			layout.addView(row);
 		}
 	}
-
+	
 	private void addDisksContent(TableLayout layout,
 			ArrayList<DiskUsageData> data) {
 		TableRow.LayoutParams params = new TableRow.LayoutParams(

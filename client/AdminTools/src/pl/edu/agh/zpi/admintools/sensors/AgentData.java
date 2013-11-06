@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 public class AgentData implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private short id;
+	@SuppressWarnings("unused")
+	private boolean oldData;
 	private String name = "";
 	private SensorsData data;
 
@@ -15,6 +17,7 @@ public class AgentData implements Serializable{
 	public static AgentData fromByteBuffer(ByteBuffer buffer) {
 		AgentData agent = new AgentData();
 		agent.id = buffer.getShort();
+		agent.oldData = (buffer.get() == 1);
 		for (short i = buffer.getShort(); i > 0; i--) {
 			char c = (char) buffer.get();
 			agent.name += c;

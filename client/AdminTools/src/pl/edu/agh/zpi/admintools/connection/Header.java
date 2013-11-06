@@ -20,6 +20,8 @@ public class Header {
 	public static final byte PACKET_CONFIG_REPLY = 11; 
 	public static final byte PACKET_CHANGE_REQUEST = 12;
 	public static final byte PACKET_CHANGE_REPLY = 13;
+	public static final byte PACKET_STATS_REQUEST = 14;
+	public static final byte PACKET_STATS_REPLY = 15;
 	
 	private byte type;
 	private short size;

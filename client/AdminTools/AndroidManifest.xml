@@ -41,6 +41,7 @@
 
         <activity
             android:name="pl.edu.agh.zpi.admintools.ChartsActivity"
+         android:screenOrientation="landscape"
             android:label="@string/title_activity_charts"
             android:parentActivityName="pl.edu.agh.zpi.admintools.StatsActivity" >
             <meta-data

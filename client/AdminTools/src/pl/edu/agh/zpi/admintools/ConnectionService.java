@@ -5,6 +5,8 @@ import pl.edu.agh.zpi.admintools.connection.packets.PacketConfig;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketConfigRequest;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketKeyRequest;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketStart;
+import pl.edu.agh.zpi.admintools.connection.packets.PacketStatsReply;
+import pl.edu.agh.zpi.admintools.connection.packets.PacketStatsRequest;
 import pl.edu.agh.zpi.admintools.utils.Handable;
 import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
 import android.app.Service;
@@ -25,8 +27,8 @@ public class ConnectionService extends Service implements Handable {
 	public static final int STOP = 5;
 	public static final int REQUEST_CONFIG = 6;
 	public static final int SET_INTERVAL = 7;
+	public static final int STATS_REQUEST = 8;
 	
-
 	public static final String NAME = "pl.edu.agh.zpi.admintools.ConnectionService";
 	
 	private Messenger serviceMessenger = new Messenger(
@@ -70,8 +72,10 @@ public class ConnectionService extends Service implements Handable {
 			b = msg.getData();
 			String host = b.getString(AdminTools.HOST);
 			int port = b.getInt(AdminTools.PORT);
+			
 			String key = b.getString(AdminTools.KEY);
 			int interv = b.getInt(AdminTools.INTERVAL);
+			Log.d("qwe","key "+port+" "+host+" "+key);
 			connectionTask.connect(host,port,key, (short)interv );
 			break;
 		case DISCONNECT:
@@ -96,6 +100,10 @@ public class ConnectionService extends Service implements Handable {
 			b = msg.getData();
 			int interval = b.getInt(AdminTools.INTERVAL);
 			connectionTask.enqueueMessage(new PacketStart((short) interval));
+		case STATS_REQUEST:
+			b = msg.getData();
+			PacketStatsRequest stats = (PacketStatsRequest)b.getSerializable(PacketStatsRequest.PACKET_STATS_REQUEST);;
+			connectionTask.enqueueMessage(stats);
 		default:
 			break;
 		}

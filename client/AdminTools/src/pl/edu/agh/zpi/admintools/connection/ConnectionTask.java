@@ -14,6 +14,7 @@ import pl.edu.agh.zpi.admintools.connection.packets.PacketConfig;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketKeyReply;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketReply;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketStart;
+import pl.edu.agh.zpi.admintools.connection.packets.PacketStatsReply;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
@@ -26,7 +27,8 @@ public class ConnectionTask implements Runnable {
 	public static final int AGENT_KEY = 2;
 	public static final int AGENT_CONFIG = 3;
 	public static final int CONNECTION_ERROR = 4;
-
+	public static final int STATS_REPLY = 5;
+	
 	enum State {
 		IDLE, CONNECTING, DISCONNECTING, ACTIVE, STOPPING, STARTING
 	}
@@ -116,7 +118,7 @@ public class ConnectionTask implements Runnable {
 
 	private void processStopping() throws Exception {
 		sendHeader(Header.PACKET_STOP);
-		state = State.IDLE;
+		state = State.ACTIVE;
 	}
 
 	private void processStarting() throws Exception {
@@ -153,6 +155,7 @@ public class ConnectionTask implements Runnable {
 
 		if (input.available() >= 3) {
 			header = readHeader();
+			Log.d("qwe","ConnectionTask.processActive() " + header.getType());
 			switch (header.getType()) {
 			case Header.PACKET_AGENTS_DATA:
 				PacketAgentsData agentsData = new PacketAgentsData();
@@ -172,6 +175,12 @@ public class ConnectionTask implements Runnable {
 			case Header.PACKET_CHANGE_REPLY:
 				readPacket(new PacketReply(), header.getSize());
 				//callback(AGENT_CONFIG, pc);
+				break;
+			case Header.PACKET_STATS_REPLY:
+				Log.d("qwe","ConnectionTask.PACKET_STATS_REPLY");
+				PacketStatsReply sr = new PacketStatsReply();
+				readPacket(sr, header.getSize());
+				callback(STATS_REPLY,sr);
 				break;
 			default:
 				Log.e("qwe", "unknown header " + header.getType());
@@ -230,8 +239,8 @@ public class ConnectionTask implements Runnable {
 
 	private void sendHeader(byte type) throws Exception {
 		Header header = new Header(type, (byte) 0);
-		Log.d("qwe", "header type " + type);
-		Log.d("qwe", "output null" + (output == null));
+		//Log.d("qwe", "header type " + type);
+		//Log.d("qwe", "output null" + (output == null));
 		output.write(header.toByteArray());
 		output.flush();
 	}
@@ -278,6 +287,9 @@ public class ConnectionTask implements Runnable {
 			case CONNECTION_ERROR:
 				// nothing to send
 				break;
+			case STATS_REPLY:
+				b.putSerializable(PacketStatsReply.PACKET_STATS_REPLY, data);
+				break;
 			default:
 				return;
 			}
@@ -301,9 +313,9 @@ public class ConnectionTask implements Runnable {
 			this.interval = interval;
 			state = State.CONNECTING;
 		} else {
-			if (state == State.IDLE) {
+			//if (state == State.IDLE) {
 				state = State.STARTING;
-			}
+			//}
 			callback(CONNECTED, null);
 		}
 	}

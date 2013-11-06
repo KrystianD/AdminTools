@@ -9,6 +9,7 @@ import pl.edu.agh.zpi.admintools.connection.packets.PacketConfigRequest;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketKeyReply;
 import pl.edu.agh.zpi.admintools.connection.packets.ServiceConfig;
 import pl.edu.agh.zpi.admintools.listdata.AgentArrayAdapter;
+import pl.edu.agh.zpi.admintools.sensors.AgentData;
 import pl.edu.agh.zpi.admintools.utils.Handable;
 import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
 import android.app.Activity;
@@ -232,11 +233,19 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			sendMessageToService(ConnectionService.REQUEST_CONFIG, id);
 			break;
 		case CHARTS:
+			AgentData agent = null;
+			for(int i = 0 ; i < agentsArray.getCount() ; i++){
+				AgentData tmp = agentsArray.getItem(i);
+				if(tmp.getId() == id){
+					agent = tmp;
+					break;
+				}
+			}
 			Intent intent = new Intent(this, ChartsActivity.class);
 			intent.putExtra(AdminTools.PORT, port);
 			intent.putExtra(AdminTools.HOST, host);
 			intent.putExtra(AdminTools.KEY, key);
-			intent.putExtra(ChartsActivity.AGENT_ID, id);
+			intent.putExtra(ChartsActivity.AGENT, agent);
 			startActivityForResult(intent, AdminTools.CHARTS_ACTIVITY_CODE);
 			break;
 		}
