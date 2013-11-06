@@ -2,7 +2,7 @@
 ## Eclipse
 #################
 
-data.db
+data.db*
 publish.sh
 *.swo
 tags

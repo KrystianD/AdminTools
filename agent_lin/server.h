@@ -23,7 +23,7 @@ public:
 	void configApplied () { m_configChanged = false; }
 	bool sendPacket (IPacket& packet);
 
-	const TPacketConfig& getConfig () const { return m_config; }
+	TPacketConfig& getConfig () { return m_config; }
 
 private:
 	enum EState { NotConnected, WaitingForConfig, Connected };

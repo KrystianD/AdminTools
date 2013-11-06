@@ -28,6 +28,18 @@ public:
 	int tempDivider;
 	int interval;
 };
+struct TSensorsRecord
+{
+	struct TDisk
+	{
+		string name;
+		double usage;
+	};
+	int id;
+	uint32_t timestamp;
+	double temp, cpuUsage, ramUsage;
+	vector<TDisk> disks;
+};
 
 class DB
 {
@@ -43,6 +55,8 @@ public:
 	static bool findAgentById (uint16_t id, TDBAgent& agent);
 	static bool updateAgent (const TDBAgent& agent);
 	static bool insertRecord (const TDBAgent& agent, const TSensorsData& data);
+	static bool insertRecords (const TDBAgent& agent, const vector<TSensorsData>& data);
+	static bool getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<TSensorsRecord>& records);
 
 // private:
 	static bool execute (const string& query);

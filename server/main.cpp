@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <time.h>
 #include <stdlib.h>
+#include <cmath>
 
 // net
 #include <sys/time.h>
@@ -21,6 +22,13 @@ using namespace std;
 #include "db.h"
 
 vector<Client> clients;
+
+string ftm (uint32_t tm, uint32_t base)
+{
+	char buf[100];
+	sprintf (buf, "%02d:%02d", ((tm - base) / 3600) % 24, ((tm - base) / 60) % 60);
+	return buf;
+}
 
 int main (int argc, char** argv)
 {
@@ -90,6 +98,98 @@ int main (int argc, char** argv)
 		}
 	}
 
+	uint32_t base = 1383519600;
+	uint32_t start = 1383519600;
+	uint32_t end = start + 24 * 3600;
+	// 1383519600 2013-11-04
+
+	vector<TSensorsRecord> rec;
+	DB::getRecords (1, start, end - 1, rec);
+
+	int pointsCount = 24*3600 / 3600;
+	vector<int16_t> points;
+
+	uint32_t cur = start;
+	uint32_t step = (end - start) / pointsCount;
+	printf ("step: %d\n", step);
+	int idx = 0;
+	int pointIdx = 0;
+	string disk = "/dev/mapper/pc-data";
+	while (cur < end)
+	{
+		uint32_t rangeBegin = cur;
+		uint32_t rangeEnd = cur + step;
+
+		while (rec[idx].timestamp < rangeBegin && idx < rec.size ())
+			idx++;
+		int valid = 0, validDisks = 0;
+		int startIdx = idx;
+		while (rec[idx].timestamp < rangeEnd && idx < rec.size ())
+		{
+			TSensorsRecord& r = rec[idx];
+			valid++;
+
+			for (int j = 0; j < r.disks.size (); j++)
+			{
+				if (r.disks[j].name == disk)
+				{
+					if (r.disks[j].usage != 0.9)
+						printf("%f\n", r.disks[j].usage);
+					validDisks++;
+					break;
+				}
+			}
+
+			idx++;
+		}
+		int endIdx = idx;
+		// printf("%d\n", validDisks);
+
+		double tempAvg = 0, ramAvg = 0, cpuAvg = 0, diskAvg = 0;
+		for (int i = startIdx; i < endIdx; i++)
+		{
+			TSensorsRecord& r = rec[i];
+			tempAvg += r.temp / valid;
+			ramAvg += r.ramUsage / valid;
+			cpuAvg += r.cpuUsage / valid;
+
+			for (int j = 0; j < r.disks.size (); j++)
+			{
+				if (r.disks[j].name == disk)
+				{
+					if (r.disks[j].usage != 0.9)
+						printf("%f\n", r.disks[j].usage);
+					diskAvg += r.disks[j].usage / validDisks;
+					// if(valid==38)
+					// {
+						// printf ("%f %f %d %d\n", diskAvg, r.disks[j].usage, validDisks, (int)(round(diskAvg*100)));
+					// }
+					break;
+				}
+			}
+		}
+
+		cur += step;
+		printf ("range (%s..%s) st: %4d en: %4d cnt: %3d  temp: %5.2f  ram: %2d%% cpu: %3d%% disk: %3d%%\n",
+				ftm (rangeBegin, base).c_str (), ftm (rangeEnd, base).c_str (), startIdx, endIdx, valid,
+				tempAvg, (int)round (ramAvg * 100.0), (int)round (cpuAvg * 100.0), (int)round (diskAvg * 100.0));
+		// return 0;
+
+		if (valid)
+		{
+			points.push_back ((int)tempAvg);
+		}
+		else
+		{
+			points.push_back (-1);
+		}
+
+		pointIdx++;
+	}
+
+	printf ("size %d ptidx: %d\n", rec.size (), pointIdx);
+	return 0;
+
 	// DB::createTables ();
 	char key[16];
 	DB::generateNewKey(key);
@@ -100,7 +200,7 @@ int main (int argc, char** argv)
 
 	memset (&myaddr, 0, sizeof (myaddr));
 	myaddr.sin_family = AF_INET;
-	myaddr.sin_port = htons (1234);
+	myaddr.sin_port = htons (cfg.getInt ("port", 1234));
 	myaddr.sin_addr.s_addr = INADDR_ANY;
 
 	// create server

@@ -195,14 +195,89 @@ bool DB::insertRecord (const TDBAgent& agent, const TSensorsData& data)
 
 	sqlite3_bind_text (stm, 6, disk.c_str (), disk.size (), 0);
 
+	uint32_t s = getTicks ();
 	res = sqlite3_step (stm);
+	uint32_t e = getTicks ();
+	printf ("time: %d\n", e-s);
 	if (res == SQLITE_DONE)
 	{
 		sqlite3_finalize (stm);
+		return true;
 	}
 	else
 	{
 		sqlite3_finalize (stm);
+		return false;
+	}
+}
+bool DB::insertRecords (const TDBAgent& agent, const vector<TSensorsData>& data)
+{
+	uint32_t s = getTicks ();
+	if (!execute ("BEGIN TRANSACTION"))
+		return false;
+	
+	for (int i = 0; i < data.size (); i++)
+	{
+		if (!DB::insertRecord (agent, data[i]))
+		{
+			execute ("ROLLBACK TRANSACTION");
+			return false;
+		}
+	}
+
+	if (!execute ("COMMIT TRANSACTION"))
+		return false;
+	uint32_t e = getTicks ();
+	printf ("time all: %d\n", e-s);
+	return true;
+}
+bool DB::getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<TSensorsRecord>& records)
+{
+	string query = "SELECT id,date,temp,cpu,ram,diskUsages FROM records WHERE agentId=? AND date>=? AND date<=? ORDER BY date";
+	sqlite3_stmt *stm;
+	int res = sqlite3_prepare_v2 (db, query.c_str (), query.size (), &stm, 0);
+	sqlite3_bind_int (stm, 1, agentId);
+	sqlite3_bind_int (stm, 2, startDate);
+	sqlite3_bind_int (stm, 3, endDate);
+	printf ("s: %d e: %d\n", startDate, endDate);
+
+	res = sqlite3_step (stm);
+	while (res == SQLITE_ROW)
+	{
+		TSensorsRecord r;
+		r.id = sqlite3_column_int (stm, 0);
+		r.timestamp = sqlite3_column_int (stm, 1);
+		r.temp = sqlite3_column_double (stm, 2);
+		r.cpuUsage = sqlite3_column_double (stm, 3);
+		r.ramUsage = sqlite3_column_double (stm, 4);
+		
+		string str = (const char*)sqlite3_column_text (stm, 5); 
+
+		vector<string> parts = explode (str, ",");
+		for (int i = 0; i < parts.size (); i++)
+		{
+			vector<string> parts2 = explode (parts[i], ":");
+			if (parts2.size () == 2)
+			{
+				TSensorsRecord::TDisk d;
+				d.name = parts2[0];
+				d.usage = atof (parts2[1].c_str ());
+				r.disks.push_back (d);
+			}
+		}
+
+		records.push_back (r);
+		res = sqlite3_step (stm);
+	}
+	if (res == SQLITE_DONE)
+	{
+		sqlite3_finalize (stm);
+		return true;
+	}
+	else
+	{
+		sqlite3_finalize (stm);
+		return false;
 	}
 }
 

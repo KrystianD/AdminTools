@@ -10,7 +10,16 @@
 #include <string>
 using namespace std;
 
-typedef vector<char> buffer_t;
+class buffer_t : public vector<char>
+{
+public:
+	template<typename T>
+	bool append (T& val)
+	{
+		insert (end (), (char*)&val, (char*)&val + sizeof (T));
+	}
+};
+// typedef vector<char> buffer_t;
 
 int recvall (int sockfd, void* data, int size, int timeout);
 int sendall (int sockfd, void* data, int size);

@@ -9,6 +9,13 @@
 #include "packets.h"
 #include "kutils.h"
 
+bool end = false;
+
+void signal_handler (int signum)
+{
+	end = true;
+}
+
 int main (int argc, char** argv)
 {
 	const char *configPath = "config.cfg";
@@ -43,31 +50,97 @@ int main (int argc, char** argv)
 	c.fromFile (configPath);
 
 	signal (SIGPIPE, SIG_IGN);
+	signal (SIGINT, signal_handler);
+	// signal (SIGINT, signal_handler);
 	
 	Server serv;
 	serv.setup (c.getString ("host"), c.getInt ("port"), c.getString ("key"));
 
-	uint32_t lastSendTime = getTicks ();
+	TPacketConfig& cfg = serv.getConfig ();
+	cfg.tempPath = c.getString ("tempPath", "");
+	cfg.tempDivider = c.getInt ("tempDivider", 1);
+	
+	int srvCnt = c.getInt ("services", 0);
+	cfg.services.clear ();
+	for (int i = 0; i < srvCnt; i++)
+	{
+		TPacketConfig::TService s;
+		char key[20];
+		sprintf (key, "srv%d", i);
+		vector<string> parts = explode (c.getString (key, ""), ":");
+		if (parts.size () == 3)
+		{
+			s.name = parts[0];
+			s.tcp = atoi (parts[1].c_str ());
+			s.port = atoi (parts[2].c_str ());
+			cfg.services.push_back (s);
+		}
+	}
+	cfg.interval = c.getInt ("interval", 2000);
 
-	for (;;)
+	uint32_t lastSendTime = getTicks (), lastOldSendTime = getTicks ();
+	vector<TPacketAgentData> oldSensorsData;
+
+	FILE *f = fopen ("olddata", "rb");
+	if (f)
+	{
+		uint32_t cnt;
+		fread (&cnt, sizeof(cnt), 1, f);
+		for (int i = 0; i < cnt; i++)
+		{
+			uint32_t size;
+			fread (&size, sizeof(size), 1, f);
+
+			buffer_t buf;
+			buf.resize (size);
+			fread (buf.data (), size, 1, f);
+
+			TPacketAgentData p;
+			p.fromBuffer (buf);
+			oldSensorsData.push_back (p);
+			// printf ("w %d\n", p.data.timestamp);
+		}
+		fclose (f);
+	}
+
+	while (!end)
 	{
 		serv.process ();
 
 		usleep (10000);
 
 		TSensorsData d;
-		getSensorsData (d, serv.getConfig ());
 
-		if (serv.isValid () && getTicks () - lastSendTime >= serv.getConfig ().interval)
+		if (getTicks () - lastSendTime >= serv.getConfig ().interval)
 		{
+			getSensorsData (d, serv.getConfig ());
+
 			TPacketAgentData agentData;
-			agentData.id = 1;
+			agentData.id = 0;
 			agentData.data = d;
 			agentData.data.timestamp = time (0);
 
-			serv.sendPacket (agentData);
+			if (serv.isValid ())
+			{
+				agentData.oldData = 0;
+				serv.sendPacket (agentData);
+			}
+			else
+			{
+				oldSensorsData.push_back (agentData);
+				printf ("Packet saved\r\n");
+			}
 
 			lastSendTime = getTicks ();
+		}
+		if (oldSensorsData.size () > 0 && getTicks () - lastOldSendTime >= 10 && serv.isValid ())
+		{
+			TPacketAgentData p = oldSensorsData[0];
+			p.oldData = 1;
+			serv.sendPacket (p);
+			oldSensorsData.erase (oldSensorsData.begin ());
+			printf ("Sent old packet, %d left\n", oldSensorsData.size ());
+			lastOldSendTime = getTicks ();
 		}
 
 		if (serv.configChanged ())
@@ -89,6 +162,27 @@ int main (int argc, char** argv)
 			serv.configApplied ();
 		}
 	}
+
+	f = fopen ("olddata", "wb");
+
+	buffer_t buf;
+	uint32_t cnt = oldSensorsData.size ();
+	printf ("Saving data (%d to save)...\n", cnt);
+	buf.append (cnt);
+	fwrite (buf.data (), buf.size (), 1, f);
+	for (int i = 0; i < oldSensorsData.size (); i++)
+	{
+		buffer_t buf2;
+		oldSensorsData[i].toBuffer (buf2);
+		uint32_t size = buf2.size ();
+
+		fwrite (&size, sizeof(size), 1, f);
+		fwrite (buf2.data (), buf2.size (), 1, f);
+		// printf ("d %d\n", size);
+	}
+	printf ("Data saved\n");
+
+	fclose (f);
 
 	return 0;
 }
