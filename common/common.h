@@ -14,9 +14,23 @@ class buffer_t : public vector<char>
 {
 public:
 	template<typename T>
-	bool append (T& val)
+	bool append (const T& val)
 	{
 		insert (end (), (char*)&val, (char*)&val + sizeof (T));
+		return true;
+	}
+	template<typename T>
+	bool append (const vector<T>& array)
+	{
+		printf ("vec %d\n", array.size ());
+		uint16_t len = array.size ();
+		append (len);
+		for (int i = 0; i < len; i++)
+		{
+			const T& val = array[i];
+			insert (end (), (char*)&val, (char*)&val + sizeof (T));
+		}
+		return true;
 	}
 };
 // typedef vector<char> buffer_t;
@@ -37,7 +51,6 @@ public:
 	{
 		buf.insert (buf.end (), (char*)&val, (char*)&val + sizeof (T));
 	}
-	// template<typename T>
 	bool append (buffer_t& buf, string& val)
 	{
 		uint16_t len = val.size ();

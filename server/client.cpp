@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <cmath>
 
 #include <sys/time.h>
 #include <sys/types.h>
@@ -18,6 +19,13 @@
 #include "db.h"
 
 #define CLIENT_DEBUG(x,...) printf ("[Client #%d id: %2d] " x "\r\n", fd, dbAgent.id, ##__VA_ARGS__)
+
+string ftm (uint32_t tm, uint32_t base)
+{
+	char buf[100];
+	sprintf (buf, "%02d:%02d", ((tm - base) / 3600) % 24, ((tm - base) / 60) % 60);
+	return buf;
+}
 
 Client::Client (int fd, const string& ip, int port)
 	: fd (fd), ip (ip), port (port)
@@ -290,6 +298,15 @@ void Client::processPacket (int size)
 		sendPacket (pr, PACKET_CONFIG_CHANGE_REPLY);
 	}
 	break;
+	case PACKET_STATS_REQUEST:
+	{
+		if (!authorized) { kill (); return; }
+		TPacketStatsRequest p;
+		p.fromBuffer (buf);
+
+		generateAndSendStats (p);
+	}
+	break;
 	}
 }
 bool Client::sendPacket (IPacket& packet, int type)
@@ -354,11 +371,124 @@ void Client::configToAgent (const TPacketConfig& config, TDBAgent& dbAgent)
 }
 bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 {
-	vector<TSensorsRecord> records;
-	if (!DB::getRecords (req.agentId, req.startDate, req.endDate, records))
-		return false;
+	// vector<TSensorsRecord> records;
+	// if (!DB::getRecords (req.agentId, req.startDate, req.endDate, records))
+		// return false;
 
 
+
+
+	printf ("re %d\n", req.points);
+
+	TPacketStatsReply r;
+
+
+	uint32_t base = 1383519600;
+	uint32_t start = req.startDate;
+	uint32_t end = req.endDate;
+	// 1383519600 2013-11-04
+
+	vector<TSensorsRecord> rec;
+	DB::getRecords (1, start, end - 1, rec);
+
+	int pointsCount = req.points;
+	vector<int16_t> points;
+
+	uint32_t cur = start;
+	uint32_t step = (end - start) / pointsCount;
+	printf ("step: %d\n", step);
+	int idx = 0;
+	int pointIdx = 0;
+	string disk = req.diskName;
+	while (cur < end)
+	{
+		uint32_t rangeBegin = cur;
+		uint32_t rangeEnd = cur + step;
+
+		while (idx < rec.size () && rec[idx].timestamp < rangeBegin)
+			idx++;
+		int valid = 0, validDisks = 0;
+		int startIdx = idx;
+		while (idx < rec.size () && rec[idx].timestamp < rangeEnd)
+		{
+			TSensorsRecord& r = rec[idx];
+			valid++;
+
+			for (int j = 0; j < r.disks.size (); j++)
+			{
+				if (r.disks[j].name == disk)
+				{
+					// if (r.disks[j].usage != 0.9)
+						// printf("%f\n", r.disks[j].usage);
+					validDisks++;
+					break;
+				}
+			}
+
+			idx++;
+		}
+		int endIdx = idx;
+		// printf("%d\n", validDisks);
+
+		double tempAvg = 0, ramAvg = 0, cpuAvg = 0, diskAvg = 0;
+		for (int i = startIdx; i < endIdx; i++)
+		{
+			TSensorsRecord& r = rec[i];
+			tempAvg += r.temp / valid;
+			ramAvg += r.ramUsage / valid;
+			cpuAvg += r.cpuUsage / valid;
+
+			for (int j = 0; j < r.disks.size (); j++)
+			{
+				if (r.disks[j].name == disk)
+				{
+					if (r.disks[j].usage != 0.9)
+						printf("%f\n", r.disks[j].usage);
+					diskAvg += r.disks[j].usage / validDisks;
+					// if(valid==38)
+					// {
+						// printf ("%f %f %d %d\n", diskAvg, r.disks[j].usage, validDisks, (int)(round(diskAvg*100)));
+					// }
+					break;
+				}
+			}
+		}
+
+		cur += step;
+		printf ("range (%s..%s) st: %4d en: %4d cnt: %3d  temp: %5.2f  ram: %2d%% cpu: %3d%% disk: %3d%%\n",
+				ftm (rangeBegin, base).c_str (), ftm (rangeEnd, base).c_str (), startIdx, endIdx, valid,
+				tempAvg, (int)round (ramAvg * 100.0), (int)round (cpuAvg * 100.0), (int)round (diskAvg * 100.0));
+		// return 0;
+
+		if (valid)
+		{
+			switch (req.type)
+			{
+			case TPacketStatsRequest::CPU:
+				r.points.push_back (cpuAvg);
+				break;
+			case TPacketStatsRequest::TEMP:
+				r.points.push_back (tempAvg);
+				break;
+			case TPacketStatsRequest::RAM:
+				r.points.push_back (ramAvg);
+				break;
+			case TPacketStatsRequest::DISK:
+				r.points.push_back (diskAvg);
+				break;
+			}
+		}
+		else
+		{
+			r.points.push_back (-1);
+		}
+
+		pointIdx++;
+	}
+	printf ("size %d ptidx: %d\n", rec.size (), pointIdx);
+	
+	sendPacket (r);
+	lastPingTime = getTicks ();
 
 	return true;
 }

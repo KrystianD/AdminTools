@@ -262,38 +262,45 @@ public:
 	uint32_t startDate, endDate;
 	uint16_t points;
 	EType type; // 1 byte
+	string diskName;
 
-	
 	virtual int getType () { return PACKET_STATS_REQUEST; }
 	virtual void toBuffer (buffer_t& buf)
 	{
-		append (buf, agentId);
-		append (buf, startDate);
-		append (buf, endDate);
-		append (buf, points);
-		uint8_t t = (uint8_t)type;
-		append (buf, t);
+		// append (buf, agentId);
+		// append (buf, startDate);
+		// append (buf, endDate);
+		// append (buf, points);
+		// uint8_t t = (uint8_t)type;
+		// append (buf, t);
 	}
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
 		if (!fetch (buf, agentId)) return false;
+		if (!fetch (buf, startDate)) return false;
+		if (!fetch (buf, endDate)) return false;
+		if (!fetch (buf, points)) return false;
+		uint8_t t;
+		if (!fetch (buf, t)) return false;
+		type = (EType)t;
+		if (!fetch (buf, diskName)) return false;
 		return true;
 	}
 };
 class TPacketStatsReply : public IPacket
 {
 public:
-	vector<int16_t> points;
+	vector<float> points;
 
 	virtual int getType () { return PACKET_STATS_REPLY; }
 	virtual void toBuffer (buffer_t& buf)
 	{
+		buf.append (points);
 	}
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
-		// if (!fetch (buf, agentId)) return false;
 		return true;
 	}
 };

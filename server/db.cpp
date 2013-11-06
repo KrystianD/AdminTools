@@ -239,7 +239,10 @@ bool DB::getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<T
 	sqlite3_bind_int (stm, 1, agentId);
 	sqlite3_bind_int (stm, 2, startDate);
 	sqlite3_bind_int (stm, 3, endDate);
-	printf ("s: %d e: %d\n", startDate, endDate);
+
+
+
+	printf ("ag: %d s: %d e: %d\n", agentId, startDate, endDate);
 
 	res = sqlite3_step (stm);
 	while (res == SQLITE_ROW)
