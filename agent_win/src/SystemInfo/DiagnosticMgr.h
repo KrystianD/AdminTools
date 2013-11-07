@@ -18,6 +18,7 @@ namespace SystemInfo
 			Processes* getProcessesInfo();
 			FileSystem* getFileSystemInfo();
 
+			static double getCpuTemp();
 			static DiagnosticMgr& getInstance() {
 				static DiagnosticMgr instance;
 				return instance;
