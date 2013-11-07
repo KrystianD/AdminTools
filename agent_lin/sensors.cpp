@@ -31,21 +31,11 @@ string readFile (const string& path)
 	{
 		char buf[500];
 		r = fread (buf, 1, 500, f);
-		// printf ("r %d\r\n", r);
 		val += string (buf, r);
 	} while (r);
 	fclose (f);
 	return val;
 }
-
-inline std::string trim(const std::string& str)
-{
-	string str2 = str;
-	str2.erase(0, str2.find_first_not_of(" \r\n"));       //prefixing spaces
-	str2.erase(str2.find_last_not_of(" \r\n")+1);         //surfixing spaces
-	return str2;
-}
-
 
 void getSensorsData (TSensorsData& data, const TPacketConfig& config)
 {
@@ -75,7 +65,6 @@ void getSensorsData (TSensorsData& data, const TPacketConfig& config)
 			if (s.size () == 0)
 				continue;
 
-			// printf ("t |%s|\r\n", s.c_str());
 			int hwmonIdx = i;
 			if (s == "coretemp")
 			{
@@ -188,7 +177,6 @@ void getSensorsData (TSensorsData& data, const TPacketConfig& config)
 				service.available = 1;
 			freeaddrinfo (servinfo);
 
-			// printf ("%d %d\r\n", s.tcp, service.available);
 			data.services.push_back (service);
 			close (fd);
 		}
@@ -198,12 +186,9 @@ void getSensorsData (TSensorsData& data, const TPacketConfig& config)
 			TService service;
 			service.name = s.name;
 			service.available = 0;
-			// printf ("%s\r\n", data.c_str());
 			vector<string> lines = explode (dataStr, "\n");
 			for (int i = 1; i < lines.size (); i++)
 			{
-				// printf ("%s\r\n", lines[i].c_str());
-
 				int d;
 				char local_addr[64];
 				int local_port;
@@ -218,47 +203,4 @@ void getSensorsData (TSensorsData& data, const TPacketConfig& config)
 			data.services.push_back (service);
 		}
 	}
-
-
-	// printf ("%s\r\n", s.c_str ());
-
-	// for (int i = 'a'; i <= 'z'; i++)
-	// {
-		// sprintf (path, "/sys/block/sd%c", i);
-		// if (access (path, F_OK) != -1)
-		// {
-			// // printf ("a\r\n");
-			// for (int j = 1; ; j++)
-			// {
-				// sprintf (path, "/sys/block/sd%c/sd%c%d", i, i, j);
-				
-				// if (access (path, F_OK) != -1)
-				// {
-					// sprintf (path, "/dev/sd%c%d", i, j);
-					// printf ("%s\t ", path);
-
-					// struct statvfs stat;
-					// statvfs (path, &stat);
-
-					// unsigned long blksize, blocks, freeblks, disk_size, used, free;
-					// blksize = stat.f_bsize;
-					// blocks = stat.f_blocks;
-					// freeblks = stat.f_bfree;
-
-					// disk_size = blocks * blksize;
-					// free = freeblks * blksize;
-					// used = disk_size - free;
-
-					// printf ("%u\r\n", free /1024/1024);
-				// }
-				// else
-				// {
-					// break;
-				// }
-			// }
-		// }
-		// else
-		// {
-		// }
-	// }
 }

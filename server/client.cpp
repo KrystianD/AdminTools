@@ -150,10 +150,9 @@ void Client::process ()
 
 	if (oldData.size () > 0 && getTicks () - oldDataUpdateTime >= 2000)
 	{
-		printf("\n\n\n\n\n\n\n\n");
-		printf ("Inserting %d of old data\n", oldData.size ());
+		CLIENT_DEBUG("Inserting %d of old data", oldData.size ());
 		DB::insertRecords (dbAgent, oldData);
-		printf ("Done.\n");
+		CLIENT_DEBUG("Done.");
 		oldData.clear ();
 		oldDataUpdateTime = getTicks ();
 	}
@@ -289,6 +288,10 @@ void Client::processPacket (int size)
 
 		TDBAgent agent;
 		configToAgent (p, agent);
+		if (agent.interval < AGENT_UPDATE_INTERVAL_MIN)
+			agent.interval = AGENT_UPDATE_INTERVAL_MIN;
+		if (agent.interval > AGENT_UPDATE_INTERVAL_MAX)
+			agent.interval = AGENT_UPDATE_INTERVAL_MAX;
 		DB::updateAgent (agent);
 
 		settingsChanged = 1;
@@ -371,32 +374,25 @@ void Client::configToAgent (const TPacketConfig& config, TDBAgent& dbAgent)
 }
 bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 {
-	// vector<TSensorsRecord> records;
-	// if (!DB::getRecords (req.agentId, req.startDate, req.endDate, records))
-		// return false;
-
-
-
-
-	printf ("re %d\n", req.points);
-
 	TPacketStatsReply r;
-
 
 	uint32_t base = 1383519600;
 	uint32_t start = req.startDate;
 	uint32_t end = req.endDate;
-	// 1383519600 2013-11-04
 
+	uint32_t s = getTicks ();
 	vector<TSensorsRecord> rec;
-	DB::getRecords (1, start, end - 1, rec);
+	if (!DB::getRecords (1, start, end - 1, rec))
+		return false;
+	uint32_t e = getTicks ();
+	// printf ("fetch time: %d\n", e - s);
 
+	s = getTicks ();
 	int pointsCount = req.points;
 	vector<int16_t> points;
 
 	uint32_t cur = start;
 	uint32_t step = (end - start) / pointsCount;
-	printf ("step: %d\n", step);
 	int idx = 0;
 	int pointIdx = 0;
 	string disk = req.diskName;
@@ -418,8 +414,6 @@ bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 			{
 				if (r.disks[j].name == disk)
 				{
-					// if (r.disks[j].usage != 0.9)
-						// printf("%f\n", r.disks[j].usage);
 					validDisks++;
 					break;
 				}
@@ -428,7 +422,6 @@ bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 			idx++;
 		}
 		int endIdx = idx;
-		// printf("%d\n", validDisks);
 
 		double tempAvg = 0, ramAvg = 0, cpuAvg = 0, diskAvg = 0;
 		for (int i = startIdx; i < endIdx; i++)
@@ -442,23 +435,16 @@ bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 			{
 				if (r.disks[j].name == disk)
 				{
-					if (r.disks[j].usage != 0.9)
-						printf("%f\n", r.disks[j].usage);
 					diskAvg += r.disks[j].usage / validDisks;
-					// if(valid==38)
-					// {
-						// printf ("%f %f %d %d\n", diskAvg, r.disks[j].usage, validDisks, (int)(round(diskAvg*100)));
-					// }
 					break;
 				}
 			}
 		}
 
 		cur += step;
-		printf ("range (%s..%s) st: %4d en: %4d cnt: %3d  temp: %5.2f  ram: %2d%% cpu: %3d%% disk: %3d%%\n",
-				ftm (rangeBegin, base).c_str (), ftm (rangeEnd, base).c_str (), startIdx, endIdx, valid,
-				tempAvg, (int)round (ramAvg * 100.0), (int)round (cpuAvg * 100.0), (int)round (diskAvg * 100.0));
-		// return 0;
+		// printf ("range (%s..%s) st: %4d en: %4d cnt: %3d  temp: %5.2f  ram: %2d%% cpu: %3d%% disk: %3d%%\n",
+				// ftm (rangeBegin, base).c_str (), ftm (rangeEnd, base).c_str (), startIdx, endIdx, valid,
+				// tempAvg, (int)round (ramAvg * 100.0), (int)round (cpuAvg * 100.0), (int)round (diskAvg * 100.0));
 
 		if (valid)
 		{
@@ -485,7 +471,8 @@ bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 
 		pointIdx++;
 	}
-	printf ("size %d ptidx: %d\n", rec.size (), pointIdx);
+	e = getTicks ();
+	// printf ("parse time: %d\n", e - s);
 	
 	sendPacket (r);
 	lastPingTime = getTicks ();

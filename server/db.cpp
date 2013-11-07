@@ -77,7 +77,7 @@ bool DB::generateNewKey (char key[16])
 	sqlite3_step (stm);
 	sqlite3_finalize (stm);
 
-	printf ("New generated key: %.*s\r\n", 16, key);
+	return true;
 }
 bool DB::findAgentByKey (const char key[16], TDBAgent& agent)
 {
@@ -169,12 +169,12 @@ bool DB::updateAgent (const TDBAgent& agent)
 		return false;
 	}
 }
-bool DB::insertRecord (const TDBAgent& agent, const TSensorsData& data)
+bool DB::insertRecord (int agentId, const TSensorsData& data)
 {
 	string query = "INSERT INTO records(agentId,date,temp,cpu,ram,diskUsages) VALUES(?,?,?,?,?,?);";
 	sqlite3_stmt *stm;
 	int res = sqlite3_prepare_v2 (db, query.c_str (), query.size (), &stm, 0);
-	sqlite3_bind_int (stm, 1, agent.id);
+	sqlite3_bind_int (stm, 1, agentId);
 	sqlite3_bind_int (stm, 2, data.timestamp);
 	sqlite3_bind_double (stm, 3, data.temp);
 	sqlite3_bind_double (stm, 4, data.cpuUsage);
@@ -195,10 +195,10 @@ bool DB::insertRecord (const TDBAgent& agent, const TSensorsData& data)
 
 	sqlite3_bind_text (stm, 6, disk.c_str (), disk.size (), 0);
 
-	uint32_t s = getTicks ();
+	// uint32_t s = getTicks ();
 	res = sqlite3_step (stm);
-	uint32_t e = getTicks ();
-	printf ("time: %d\n", e-s);
+	// uint32_t e = getTicks ();
+	// printf ("time: %d\n", e-s);
 	if (res == SQLITE_DONE)
 	{
 		sqlite3_finalize (stm);
@@ -210,7 +210,7 @@ bool DB::insertRecord (const TDBAgent& agent, const TSensorsData& data)
 		return false;
 	}
 }
-bool DB::insertRecords (const TDBAgent& agent, const vector<TSensorsData>& data)
+bool DB::insertRecords (int agentId, const vector<TSensorsData>& data)
 {
 	uint32_t s = getTicks ();
 	if (!execute ("BEGIN TRANSACTION"))
@@ -218,7 +218,7 @@ bool DB::insertRecords (const TDBAgent& agent, const vector<TSensorsData>& data)
 	
 	for (int i = 0; i < data.size (); i++)
 	{
-		if (!DB::insertRecord (agent, data[i]))
+		if (!DB::insertRecord (agentId, data[i]))
 		{
 			execute ("ROLLBACK TRANSACTION");
 			return false;
@@ -228,7 +228,7 @@ bool DB::insertRecords (const TDBAgent& agent, const vector<TSensorsData>& data)
 	if (!execute ("COMMIT TRANSACTION"))
 		return false;
 	uint32_t e = getTicks ();
-	printf ("time all: %d\n", e-s);
+	fprintf (stderr, "time all: %d\n", e-s);
 	return true;
 }
 bool DB::getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<TSensorsRecord>& records)
@@ -240,10 +240,7 @@ bool DB::getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<T
 	sqlite3_bind_int (stm, 2, startDate);
 	sqlite3_bind_int (stm, 3, endDate);
 
-
-
-	printf ("ag: %d s: %d e: %d\n", agentId, startDate, endDate);
-
+	fprintf (stderr, "ag: %d s: %d e: %d\n", agentId, startDate, endDate);
 	res = sqlite3_step (stm);
 	while (res == SQLITE_ROW)
 	{
@@ -291,10 +288,7 @@ bool DB::execute (const string& query)
 	sqlite3_stmt *stm;
 	const char *tail;
 	res = sqlite3_prepare_v2 (db, query.c_str (), query.size (), &stm, &tail);
-	printf ("prepare: %d\r\n", res);
-	printf ("%s %d\r\n", tail, strlen (tail));
 	res = sqlite3_step (stm);
-	printf ("step: %d\r\n", res);
 	sqlite3_finalize (stm);
 	return res == SQLITE_DONE;
 }
@@ -303,8 +297,6 @@ sqlite3_stmt* DB::prepare (const string& query)
 	sqlite3_stmt *stm;
 	const char *tail;
 	int res = sqlite3_prepare_v2 (db, query.c_str (), query.size (), &stm, &tail);
-	printf ("prepare: %d\r\n", res);
-	printf ("%s %d\r\n", tail, strlen (tail));
 	return stm;
 }
 
@@ -327,7 +319,6 @@ void DB::fetchAgent (sqlite3_stmt* stm, TDBAgent& agent)
 			srv.port = atoi (parts2[2].c_str ());
 			agent.services.push_back (srv);
 		}
-		// printf ("n %s p %d\r\n", srv.name.c_str(), srv.port);
 	}
 
 	tmp = (const char*)sqlite3_column_text (stm, 3);
@@ -341,6 +332,4 @@ void DB::fetchAgent (sqlite3_stmt* stm, TDBAgent& agent)
 	}
 
 	agent.interval = sqlite3_column_int (stm, 4);
-
-	// printf ("%s %s %d %d\r\n", agent.name.c_str(), agent.tempPath.c_str(), agent.tempDivider, agent.interval);
 }

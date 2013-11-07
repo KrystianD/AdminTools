@@ -47,3 +47,10 @@ vector<string> explode (const string& str, const string& delim)
 
   return parts;
 }
+std::string trim (const std::string& str)
+{
+	string str2 = str;
+	str2.erase (0, str2.find_first_not_of (" \r\n"));
+	str2.erase (str2.find_last_not_of (" \r\n")+1);
+	return str2;
+}

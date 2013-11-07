@@ -54,8 +54,10 @@ public:
 	static bool findAgentByKey (const char key[16], TDBAgent& agent);
 	static bool findAgentById (uint16_t id, TDBAgent& agent);
 	static bool updateAgent (const TDBAgent& agent);
-	static bool insertRecord (const TDBAgent& agent, const TSensorsData& data);
-	static bool insertRecords (const TDBAgent& agent, const vector<TSensorsData>& data);
+	static bool insertRecord (int agentId, const TSensorsData& data);
+	static bool insertRecord (const TDBAgent& agent, const TSensorsData& data) { insertRecord (agent.id, data); }
+	static bool insertRecords (int agentId, const vector<TSensorsData>& data);
+	static bool insertRecords (const TDBAgent& agent, const vector<TSensorsData>& data) { insertRecords (agent.id, data); }
 	static bool getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<TSensorsRecord>& records);
 
 // private:

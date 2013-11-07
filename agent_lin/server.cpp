@@ -38,7 +38,6 @@ void Server::setup (const string& host, int port, const string& key)
 }
 void Server::process ()
 {
-	// printf ("S %d\r\n", m_state);
 	if (m_state == NotConnected)
 	{
 		if (getTicks () - m_lastConnect >= 500)
@@ -51,7 +50,7 @@ void Server::process ()
 	{
 		if (getTicks () > m_configTime)
 		{
-			printf ("config timeouted\r\n");
+			printf ("No config within timeout\r\n");
 			close (m_fd);
 			m_state = NotConnected;
 		}
@@ -100,7 +99,6 @@ void Server::process ()
 					}
 
 					processPacket (h, buf);
-					printf ("got packet!\r\n");
 				}
 			}
 		}
@@ -173,7 +171,7 @@ void Server::connect ()
 		return;
 	}
 
-	printf ("auth reply: %d\r\n", r.value);
+	printf ("Auth reply: %s\r\n", r.value == 1 ? "Access granted" : "Access denied");
 
 	if (r.value == 1)
 	{
@@ -236,24 +234,14 @@ void Server::processPacket (THeader& h, buffer_t& buf)
 {
 	switch (h.type)
 	{
-	case PACKET_REPLY:
-		{
-			TPacketReply p;
-			p.fromBuffer (buf);
-
-			printf ("reply: %d\r\n", p.value);
-		}		
-		break;
 	case PACKET_CONFIG:
 		{
 			m_config.fromBuffer (buf);
 			m_configChanged = true;
 			if (m_state == WaitingForConfig)
-			{
 				m_state = Connected;
-			}
 
-			printf ("cfg\r\n");
+			printf ("Config received\r\n");
 		}
 		break;
 	}

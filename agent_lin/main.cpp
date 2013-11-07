@@ -46,12 +46,13 @@ int main (int argc, char** argv)
 		return 1;
 	}
 
-	Config c;
-	c.fromFile (configPath);
-
 	signal (SIGPIPE, SIG_IGN);
 	signal (SIGINT, signal_handler);
 	// signal (SIGINT, signal_handler);
+
+	// load config file
+	Config c;
+	c.fromFile (configPath);
 	
 	Server serv;
 	serv.setup (c.getString ("host"), c.getInt ("port"), c.getString ("key"));
@@ -81,6 +82,7 @@ int main (int argc, char** argv)
 	uint32_t lastSendTime = getTicks (), lastOldSendTime = getTicks ();
 	vector<TPacketAgentData> oldSensorsData;
 
+	// load old sensors data
 	FILE *f = fopen ("olddata", "rb");
 	if (f)
 	{
@@ -98,7 +100,6 @@ int main (int argc, char** argv)
 			TPacketAgentData p;
 			p.fromBuffer (buf);
 			oldSensorsData.push_back (p);
-			// printf ("w %d\n", p.data.timestamp);
 		}
 		fclose (f);
 	}
@@ -111,6 +112,7 @@ int main (int argc, char** argv)
 
 		TSensorsData d;
 
+		// gather data from senosors and send it to server or save in memory depending on connectino state
 		if (getTicks () - lastSendTime >= serv.getConfig ().interval)
 		{
 			getSensorsData (d, serv.getConfig ());
@@ -133,6 +135,7 @@ int main (int argc, char** argv)
 
 			lastSendTime = getTicks ();
 		}
+		// send old sensors data in periods of 10ms
 		if (oldSensorsData.size () > 0 && getTicks () - lastOldSendTime >= 10 && serv.isValid ())
 		{
 			TPacketAgentData p = oldSensorsData[0];
@@ -143,6 +146,7 @@ int main (int argc, char** argv)
 			lastOldSendTime = getTicks ();
 		}
 
+		// config file update
 		if (serv.configChanged ())
 		{
 			const TPacketConfig& cfg = serv.getConfig ();
@@ -163,6 +167,7 @@ int main (int argc, char** argv)
 		}
 	}
 
+	// save old data in order to send it to server when connected
 	f = fopen ("olddata", "wb");
 
 	buffer_t buf;
@@ -178,7 +183,6 @@ int main (int argc, char** argv)
 
 		fwrite (&size, sizeof(size), 1, f);
 		fwrite (buf2.data (), buf2.size (), 1, f);
-		// printf ("d %d\n", size);
 	}
 	printf ("Data saved\n");
 

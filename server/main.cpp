@@ -29,30 +29,34 @@ int main (int argc, char** argv)
 	srand (time (0));
 
 	const char *configPath = "config.cfg";
+	bool generateKey = false;
 	int c;
 	opterr = 0;
-	while ((c = getopt (argc, argv, "c:")) != -1)
+	while ((c = getopt (argc, argv, "c:k")) != -1)
 	{
 		switch (c)
 		{
 		case 'c':
 			configPath = optarg;
 			break;
+		case 'k':
+			generateKey = true;
+			break;
 		default:
 			break;
 		}
 	}
 
-	printf ("using config: %s\r\n", configPath);
+	fprintf (stderr, "using config: %s\r\n", configPath);
 
 	if (!fileExists (configPath))
 	{
-		printf ("No config file\r\n");
+		fprintf (stderr, "No config file\r\n");
 		return 1;
 	}
 	if (!fileAccessible (configPath))
 	{
-		printf ("Config file not writable\r\n");
+		fprintf (stderr, "Config file not writable\r\n");
 		return 1;
 	}
 
@@ -61,20 +65,20 @@ int main (int argc, char** argv)
 
 	string dbPath = cfg.getString ("db", "data.db");
 
-	printf ("using database: %s\r\n", dbPath.c_str ());
+	fprintf (stderr, "using database: %s\r\n", dbPath.c_str ());
 
 	if (!fileExists (dbPath))
 	{
-		printf ("No database file, creating...\r\n");
+		fprintf (stderr, "No database file, creating...\r\n");
 		if (!DB::open (dbPath))
 		{
-			printf ("Unable to open database\r\n");
+			fprintf (stderr, "Unable to open database\r\n");
 			return 1;
 		}
 		if (!DB::createTables ())
 		{
 			unlink (dbPath.c_str ());
-			printf ("Unable to create database\r\n");
+			fprintf (stderr, "Unable to create database\r\n");
 			return 1;
 		}
 	}
@@ -82,21 +86,48 @@ int main (int argc, char** argv)
 	{
 		if (!fileAccessible (dbPath))
 		{
-			printf ("Database not writable\r\n");
+			fprintf (stderr, "Database not writable\r\n");
 			return 1;
 		}
 		if (!DB::open (dbPath))
 		{
-			printf ("Unable to open database\r\n");
+			fprintf (stderr, "Unable to open database\r\n");
 			return 1;
 		}
 	}
 
-	// return 0;
+	if (generateKey)
+	{
+		char key[16];
+		if (DB::generateNewKey (key))
+		{
+			printf ("key=%.*s\n", 16, key);
+			return 0;
+		}
+	}
 
-	// DB::createTables ();
-	char key[16];
-	DB::generateNewKey(key);
+	TSensorsData data;
+	data.tempValid = false;
+	data.uptime = 3000000;
+	data.freeRam = 4000000;
+	data.totalRam = 8000000;
+	data.cpuUsage = 2.0;
+
+	vector<TSensorsData> a;
+	int s = 1381096800;
+	while (s < 1383865200)
+	{
+		data.timestamp = s;
+
+		a.push_back (data);
+
+		s += 2;
+	}
+
+	// printf("aa %d\n", a.size ());
+		// DB::insertRecords (1, a);
+	// exit(1);
+
 
 	signal (SIGPIPE, SIG_IGN);
 
@@ -131,7 +162,7 @@ int main (int argc, char** argv)
 		return 1;
 	}
 
-	printf ("ok\r\n");
+	fprintf (stderr, "ok\r\n");
 
 	for (;;)
 	{
@@ -163,7 +194,7 @@ int main (int argc, char** argv)
 			if (FD_ISSET(serverFd, &fds))
 			{
 				// new incoming connection
-				printf ("newcon\r\n");
+				fprintf (stderr, "newcon\r\n");
 				sockaddr_in clientaddr;
 				socklen_t addrsize = sizeof (clientaddr);
 				int clientFd = accept (serverFd, (sockaddr*)&clientaddr, &addrsize);
@@ -209,7 +240,7 @@ int main (int argc, char** argv)
 			{
 				close (clients[i].fd);
 				clients.erase (clients.begin () + i);
-				printf ("Client deleted\r\n");
+				fprintf (stderr, "Client deleted\r\n");
 			}
 		}
 	}

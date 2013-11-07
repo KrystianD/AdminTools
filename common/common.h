@@ -22,7 +22,6 @@ public:
 	template<typename T>
 	bool append (const vector<T>& array)
 	{
-		printf ("vec %d\n", array.size ());
 		uint16_t len = array.size ();
 		append (len);
 		for (int i = 0; i < len; i++)
@@ -33,7 +32,6 @@ public:
 		return true;
 	}
 };
-// typedef vector<char> buffer_t;
 
 int recvall (int sockfd, void* data, int size, int timeout);
 int sendall (int sockfd, void* data, int size);

@@ -13,6 +13,7 @@ uint32_t getTicks ();
 uint32_t getTicksUS ();
 
 vector<string> explode (const string& str, const string& delim);
+string trim (const string& str);
 
 class Timer
 {
