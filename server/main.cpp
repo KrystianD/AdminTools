@@ -106,29 +106,6 @@ int main (int argc, char** argv)
 		}
 	}
 
-	TSensorsData data;
-	data.tempValid = false;
-	data.uptime = 3000000;
-	data.freeRam = 4000000;
-	data.totalRam = 8000000;
-	data.cpuUsage = 2.0;
-
-	vector<TSensorsData> a;
-	int s = 1381096800;
-	while (s < 1383865200)
-	{
-		data.timestamp = s;
-
-		a.push_back (data);
-
-		s += 2;
-	}
-
-	// printf("aa %d\n", a.size ());
-		// DB::insertRecords (1, a);
-	// exit(1);
-
-
 	signal (SIGPIPE, SIG_IGN);
 
 	sockaddr_in myaddr;
