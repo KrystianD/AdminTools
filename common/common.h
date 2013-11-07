@@ -50,6 +50,7 @@ public:
 	bool append (buffer_t& buf, T& val)
 	{
 		buf.insert (buf.end (), (char*)&val, (char*)&val + sizeof (T));
+		return true;
 	}
 	bool append (buffer_t& buf, string& val)
 	{
@@ -58,6 +59,7 @@ public:
 		const char *c = &val[0];
 		while (len--)
 			append (buf, *c++);
+		return true;
 	}
 	template<typename T>
 	bool fetch (buffer_t& buf, T& val)
@@ -75,7 +77,7 @@ public:
 		val = "";
 		while (len--)
 		{
-			char c; 
+			char c;
 			fetch (buf, c);
 			val += c;
 		}
