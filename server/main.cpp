@@ -23,7 +23,6 @@ using namespace std;
 
 vector<Client> clients;
 
-
 int main (int argc, char** argv)
 {
 	srand (time (0));
