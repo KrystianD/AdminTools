@@ -9,16 +9,16 @@ namespace SystemInfo
 {
 	class Cpu : public ModuleInfo
 	{
-		public:	
-			Cpu() 
+		public:
+			Cpu()
 				:	generalTimes(new Times()),
 					coreTimes(std::vector<Times*>()),
-					coreDetails(std::vector<Details*>()) {}			
-			
+					coreDetails(std::vector<Details*>()) {}
+
 			struct Times
 			{
 				Times() {
-					user = sys = nice = idle = wait = 
+					user = sys = nice = idle = wait =
 						irq = soft_irq = stolen = total = 0;
 				}
 				uint64 user;
@@ -55,12 +55,12 @@ namespace SystemInfo
 			void displayCombinedInfo()
 			{
 				displayModuleHeader("Cpu");
-				
+
 				displayGroupHeader("General Times");
 				displayTimesInfo(generalTimes);
 
 				for(uint16 i = 0; i < coreTimes.size(); ++i) {
-					displayGroupHeader("Times Core #" 
+					displayGroupHeader("Times Core #"
 						+ lexical_cast<std::string>(i+1));
 					displayTimesInfo(coreTimes[i]);
 				}

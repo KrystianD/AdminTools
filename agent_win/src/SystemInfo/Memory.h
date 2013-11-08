@@ -8,12 +8,12 @@ namespace SystemInfo
 	class Memory : public ModuleInfo
 	{
 		public:
-			Memory() 
+			Memory()
 			{
 				used_percent = free_percent = 0.0;
 				ram = total = used = free = used_actual =
 					free_actual = total_swap = used_swap =
-					free_swap = page_in = page_out = 0;					
+					free_swap = page_in = page_out = 0;
 			}
 
 			// general memory info
@@ -54,6 +54,6 @@ namespace SystemInfo
 				displaySingleInfo("Page In", page_in);
 				displaySingleInfo("Page Out", page_out);
 			}
-	};	
+	};
 
 }

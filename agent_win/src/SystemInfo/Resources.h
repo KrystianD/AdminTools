@@ -8,12 +8,12 @@ namespace SystemInfo
 	class Resources : public ModuleInfo
 	{
 		public:
-			Resources() 
+			Resources()
 			{
 				cpuCurrent = cpuMax = fileSizeCurrent = fileSizeMax =
 					pipeSizeCurrent = pipeSizeMax = dataCurrent = dataMax =
 					stackCurrent = stackMax = coreCurrent = coreMax =
-					memoryCurrent = memoryMax = processesCurrent = 
+					memoryCurrent = memoryMax = processesCurrent =
 					processesMax = openFilesCurrent = openFilesMax =
 					virtualMemoryCurrent = virtualMemoryMax = 0;
 			}

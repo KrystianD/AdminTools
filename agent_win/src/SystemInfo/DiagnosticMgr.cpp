@@ -15,9 +15,9 @@ DiagnosticMgr::DiagnosticMgr()
 	sigar_open(&sigarCore);
 
 	if(sigarCore != NULL)
-		initialized = true;		
+		initialized = true;
 	else
-		std::cout << "Error while opening SIGAR core" << std::endl;		
+		std::cout << "Error while opening SIGAR core" << std::endl;
 }
 
 DiagnosticMgr::~DiagnosticMgr()
@@ -38,10 +38,10 @@ Memory* DiagnosticMgr::getMemoryInfo()
 	}
 	sigar_swap_t* swapData = new sigar_swap_t();
 	if(sigar_swap_get(sigarCore, swapData)) {
-		std::cout << "SIGAR couldn't acquire swap info" << std::endl;		
+		std::cout << "SIGAR couldn't acquire swap info" << std::endl;
 		return NULL;
-	}	
-	return InfoMapper::sigarMemAndSwapToMemory(memData, swapData);	
+	}
+	return InfoMapper::sigarMemAndSwapToMemory(memData, swapData);
 }
 
 Resources* DiagnosticMgr::getResourcesInfo()
@@ -71,7 +71,7 @@ Cpu* DiagnosticMgr::getCpuInfo()
 		return NULL;
 	}
 	Cpu* result = new Cpu();
-	result -> generalTimes = InfoMapper::sigarCpuToCpuTimes(cpuData);	
+	result -> generalTimes = InfoMapper::sigarCpuToCpuTimes(cpuData);
 
 	sigar_cpu_list_t* coreTimes = new sigar_cpu_list_t();
 	if(sigar_cpu_list_get(sigarCore, coreTimes)) {
@@ -81,7 +81,7 @@ Cpu* DiagnosticMgr::getCpuInfo()
 	for(uint16 i = 0; i < coreTimes -> number; ++i) {
 		result -> coreTimes.push_back(
 			InfoMapper::sigarCpuToCpuTimes(&(coreTimes -> data[i])));
-	}		
+	}
 
 	sigar_cpu_info_list_t* coreDetails = new sigar_cpu_info_list_t();
 	if(sigar_cpu_info_list_get(sigarCore, coreDetails)) {
@@ -131,7 +131,7 @@ Processes::Details* DiagnosticMgr::getProcessDetails( uint64 pid )
 
 	sigar_proc_state_t* procState = new sigar_proc_state_t();
 	if(sigar_proc_state_get(sigarCore, pid, procState)) {
-		std::cout << "SIGAR couldn't acquire process state for pid: " 
+		std::cout << "SIGAR couldn't acquire process state for pid: "
 			<< pid << std::endl;
 		return result;
 	}
@@ -174,7 +174,7 @@ FileSystem* SystemInfo::DiagnosticMgr::getFileSystemInfo()
 	if(sigar_file_system_list_get(sigarCore, fsAvail)) {
 		std::cout << "SIGAR couldn't acquire file system list info" << std::endl;
 		return NULL;
-	}	
+	}
 	FileSystem* result = new FileSystem();
 	for(uint16 i = 0; i < fsAvail -> number; ++i) {
 		result -> dirDetails.push_back(
@@ -190,7 +190,7 @@ FileSystem* SystemInfo::DiagnosticMgr::getFileSystemInfo()
 				<< currentDir << std::endl;
 		} else {
 
-		}		
+		}
 	}
 
 	return result;
@@ -199,7 +199,7 @@ FileSystem* SystemInfo::DiagnosticMgr::getFileSystemInfo()
 /*
  *	Solution by: Simon Mourier
  *	From: http://stackoverflow.com/questions/5327203/how-to-access-cpus-heat-sensors
- *	
+ *
  *	For linking use: Wbemuuid.lib
  *	Running info: application must run under administrator privileges!
  */
@@ -209,8 +209,8 @@ double SystemInfo::DiagnosticMgr::getCpuTemp()
 	LPLONG pTemperature = &result;
 	*pTemperature = -1;
 	HRESULT ci = CoInitialize(NULL); // needs comdef.h
-	HRESULT hr = CoInitializeSecurity(NULL, -1, NULL, NULL, 
-		RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, 
+	HRESULT hr = CoInitializeSecurity(NULL, -1, NULL, NULL,
+		RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
 		NULL, EOAC_NONE, NULL);
 	if (SUCCEEDED(hr))
 	{

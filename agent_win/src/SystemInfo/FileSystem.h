@@ -9,8 +9,8 @@ namespace SystemInfo
 {
 	class FileSystem : public ModuleInfo
 	{
-		public:		
-			FileSystem() 
+		public:
+			FileSystem()
 				:	dirDetails(std::vector<Details*>()),
 					dirUsages(std::vector<Usage*>())	{}
 
@@ -80,9 +80,9 @@ namespace SystemInfo
 
 			void displayCombinedInfo()
 			{
-				displayModuleHeader("HDD");				
+				displayModuleHeader("HDD");
 				for(uint16 i = 0; i < dirDetails.size(); ++i) {
-					displayGroupHeader("Disc details #" 
+					displayGroupHeader("Disc details #"
 						+ lexical_cast<std::string>(i+1));
 					displayDetailsInfo(dirDetails[i]);
 				}

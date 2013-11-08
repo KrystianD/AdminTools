@@ -30,15 +30,15 @@ namespace SystemInfo
 				uint64 threads;
 			} *stats;
 
-			std::vector<uint64> pids;			
+			std::vector<uint64> pids;
 
-			struct Details 
+			struct Details
 			{
 				Details() {
 					name = state = "";
 					tty = priority = nice = processor = 0;
 					parentPid = threads = cpu_start_time = cpu_user =
-						cpu_sys = cpu_total = cpu_last_time = 
+						cpu_sys = cpu_total = cpu_last_time =
 						time_start_time = time_user = time_sys =
 						time_total = mem_size = mem_resident =
 						mem_share = mem_minor_faults = pid =
@@ -91,7 +91,7 @@ namespace SystemInfo
 			void displayCombinedInfo()
 			{
 				displayModuleHeader("Processes");
-				
+
 				displayGroupHeader("Statistics");
 				displaySingleInfo("Total", stats -> total);
 				displaySingleInfo("Sleeping", stats -> sleeping);
@@ -107,7 +107,7 @@ namespace SystemInfo
 				}
 			}
 
-			void displayDetailsInfo(Details* details) 
+			void displayDetailsInfo(Details* details)
 			{
 				displaySingleInfo("PID", details -> pid);
 				displaySingleInfo("Name", details -> name);

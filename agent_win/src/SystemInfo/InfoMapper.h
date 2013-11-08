@@ -18,8 +18,8 @@ namespace SystemInfo
 			static Resources* sigarResourcesLimitToResources(sigar_resource_limit_t* resData);
 			static Processes::Stats* sigarProcStatToProcessesStats(sigar_proc_stat_t* procData);
 			static FileSystem::Details* sigarFileSystemToFsDetails(sigar_file_system_t* fsData);
-			static FileSystem::Usage* sigarFileSystemUsageToFsUsage(sigar_file_system_usage_t* fsData);			
-			
+			static FileSystem::Usage* sigarFileSystemUsageToFsUsage(sigar_file_system_usage_t* fsData);
+
 			static void fillProcessDetailsWithSigarProcState(Processes::Details* details, sigar_proc_state_t* state);
 			static void fillProcessDetailsWithSigarProcCpu(Processes::Details* details, sigar_proc_cpu_t* cpu);
 			static void fillProcessDetailsWithSigarProcTime(Processes::Details* details, sigar_proc_time_t* time);
