@@ -7,34 +7,62 @@
 
 namespace SystemInfo
 {
+	/**
+	 *	\class Cpu
+	 *	\brief Contains Cpu related information (times, cpu model details).
+	 */
 	class Cpu : public ModuleInfo
 	{
 		public:
+			/**
+			 *	\fn Cpu()
+			 *	\brief Default constructor, initialize general times information and core times / details info.
+			 */
 			Cpu()
 				:	generalTimes(new Times()),
 					coreTimes(std::vector<Times*>()),
 					coreDetails(std::vector<Details*>()) {}
 
+			/**
+			 *	\struct Times
+			 *	\brief Represents times that Cpu used on various operations and states.
+			 */
 			struct Times
 			{
+				/**
+				 *	\fn Times()
+				 *	\brief Default constructor, zeroes times variables.
+				 */
 				Times() {
 					user = sys = nice = idle = wait =
 						irq = soft_irq = stolen = total = 0;
 				}
-				uint64 user;
-				uint64 sys;
-				uint64 nice;
-				uint64 idle;
-				uint64 wait;
-				uint64 irq;
-				uint64 soft_irq;
-				uint64 stolen;
-				uint64 total;
-			} *generalTimes;
+				uint64 user;	//! Time spent outside kernel.
+				uint64 sys;		//! Time spent inside kernel.
+				uint64 nice;	//! Nice time.
+				uint64 idle;	//! Time spent idleing, without jobs.
+				uint64 wait;	//! Time spent waiting for other tasks.
+				uint64 irq;		//!	Time spent on handling hardware irq (interrupt).
+				uint64 soft_irq;	//! Time spent on handling software irq (interrupt).
+				uint64 stolen;	//! Time stolen.
+				uint64 total;	//! Total time spent on every tasks.
+			};
+
+			//! Times combined with all the cores.
+			Times *generalTimes;
+			//! Times information per core.
 			std::vector<Times*> coreTimes;
 
+			/**
+			 *	\struct Details
+			 *	\brief Represents basic Cpu/core information (vendor, mhz etc.).
+			 */
 			struct Details
 			{
+				/**
+				 *	\fn Details()
+				 *	\brief Default constructor, zeroes details variables.
+				 */
 				Details() {
 					vendor = model = "";
 					mhz = total_sockets = total_cores =
@@ -42,16 +70,22 @@ namespace SystemInfo
 					cache_size = 0;
 				}
 
-				std::string vendor;
-				std::string model;
-				uint16 mhz;
-				uint64 cache_size;
-				uint16 total_sockets;
-				uint16 total_cores;
-				uint16 cores_per_socket;
+				std::string vendor;	//! Vendor name.
+				std::string model;	//! Cpu model.
+				uint16 mhz;	//! Clock rate in MHZ.
+				uint64 cache_size;	//! Cache size in bits.
+				uint16 total_sockets;	//! Total number of available sockets.
+				uint16 total_cores;	//! Total number of available cores.
+				uint16 cores_per_socket;	//! Number of cores per available sockets.
 			};
+			//! Model Details per core.
 			std::vector<Details*> coreDetails;
 
+			/**
+			 *	\fn void displayCombinedInfo()
+			 *	\brief Display all information about cpu/cores using standard output (std::cout).
+			 *	\return None
+			 */
 			void displayCombinedInfo()
 			{
 				displayModuleHeader("Cpu");
@@ -71,6 +105,11 @@ namespace SystemInfo
 				}
 			}
 
+			/**
+			 *	\fn void displayTimesInfo(Times* times)
+			 *	\brief Display information about times using standard output (std::cout).
+			 *	\return None
+			 */
 			void displayTimesInfo(Times* times)
 			{
 				displaySingleInfo("User", times -> user);
@@ -84,6 +123,11 @@ namespace SystemInfo
 				displaySingleInfo("Total", times -> total);
 			}
 
+			/**
+			 *	\fn void displayDetailsInfo(Details* details)
+			 *	\brief Display information about details using standard output (std::cout).
+			 *	\return None
+			 */
 			void displayDetailsInfo(Details* details)
 			{
 				displaySingleInfo("Vendor", details -> vendor);

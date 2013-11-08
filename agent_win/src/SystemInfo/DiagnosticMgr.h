@@ -9,51 +9,53 @@
 
 /**
  *	\namespace SystemInfo
- *	\brief Namespace for system information gathering module
+ *	\brief System information gathering module
  */
 namespace SystemInfo
 {
 	/**
 	 *	\class DiagnosticMgr
-	 *	\brief Diagnostic Manager class managing information gathering, singleton.
+	 *	\brief Singleton manager for information gathering and visualization.
+	 *
+	 *	Simple wrapper around Sigar and WMI libraries.
 	 */
 	class DiagnosticMgr
 	{
 		public:
 			/**
-			 *	\brief Get informations about memory (RAM/Swap)
-			 *	\return Memory informations
+			 *	\brief Get informations about memory (RAM/Swap).
+			 *	\return Memory informations.
 			 */
 			Memory* getMemoryInfo();
 			/**
-			 *	\brief Get informations about resources used and its limits
-			 *	\return Resources informations
+			 *	\brief Get informations about resources used and its limits.
+			 *	\return Resources informations.
 			 */
 			Resources* getResourcesInfo();
 			/**
-			 *	\brief Get informations about CPUs/Cores
-			 *	\return CPU and cores informations
+			 *	\brief Get informations about CPUs/Cores.
+			 *	\return Cpu and cores informations.
 			 */
 			Cpu* getCpuInfo();
 			/**
-			 * 	\brief Get informations about processes currently running on system
-			 *	\return Processes informations
+			 * 	\brief Get informations about processes currently running on system.
+			 *	\return Processes informations.
 			 */
 			Processes* getProcessesInfo();
 			/**
-			 *	\brief Get informations about file system (HDD, virtual, external drives)
-			 *	\return File system informations
+			 *	\brief Get informations about file system (HDD, virtual, external drives).
+			 *	\return FileSystem informations.
 			 */
 			FileSystem* getFileSystemInfo();
 
 			/**
-			 *	\brief Get CPU temeprature
-			 *	\return Current CPU temperature in celsius degree
+			 *	\brief Get CPU temeprature.
+			 *	\return Current CPU temperature in celsius degree.
 			 */
 			static double getCpuTemp();
 			/**
-			 *	\brief Get instance of DiagnosticMgr singleton class
-			 *	\return Instance of DiagnosticMgr
+			 *	\brief Get instance of DiagnosticMgr singleton class.
+			 *	\return Instance of DiagnosticMgr.
 			 */
 			static DiagnosticMgr& getInstance() {
 				static DiagnosticMgr instance;

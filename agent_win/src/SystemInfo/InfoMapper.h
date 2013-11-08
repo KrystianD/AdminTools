@@ -9,9 +9,19 @@
 
 namespace SystemInfo
 {
+	/**
+	 *	\class InfoMapper
+	 *	\brief Utils for easy Sigar to SystemInfo data mapping.
+	 */
 	class InfoMapper
 	{
 		public:
+			/**
+			 *	\fn static Cpu::Times* sigarCpuToCpuTimes(sigar_cpu_t* cpuData)
+			 *	\brief Mapping cpu times data.
+			 *	\param cpuData Sigar Cpu times data.
+			 *	\return Cpu::Times data.
+			 */
 			static Cpu::Times* sigarCpuToCpuTimes(sigar_cpu_t* cpuData);
 			static Cpu::Details* sigarCpuInfoToDetails(sigar_cpu_info_t* cpuData);
 			static Memory* sigarMemAndSwapToMemory(sigar_mem_t* memData, sigar_swap_t* swapData);
