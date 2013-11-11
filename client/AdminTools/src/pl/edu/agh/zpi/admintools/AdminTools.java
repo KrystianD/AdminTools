@@ -5,6 +5,7 @@ TODO obsługa headerTimeout - teraz zawiesza się przy próbie zalogowania
 
 package pl.edu.agh.zpi.admintools;
 
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -49,6 +50,7 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 	public static final String KEY = "pl.edu.agh.zpi.admintools.key";
 	public static final String INTERVAL = "pl.edu.agh.zpi.admintools.interval";
 	public static final String CONN_PREFS_NAME = "connection_prefs_file";
+	public static final String NETWORK_ERROR = "pl.edu.agh.zpi.admintools.network_error";
 
 	
 	public static final int STATS_ACTIVITY_CODE = 1;
@@ -271,6 +273,10 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 			
 			startActivityForResult(intent, STATS_ACTIVITY_CODE);
 			setConnectionUI(false);
+			break;
+		case ConnectionTask.CONNECTION_ERROR:
+			Exception e = (Exception)msg.getData().get(NETWORK_ERROR);
+			showAlertToast(e.getMessage());
 			break;
 		default:
 			break;
