@@ -1,17 +1,21 @@
 #define _WIN32_WINNT  0x0501
 
+#include <vector>
 #include <cstdlib>
 #include <iostream>
-#include "windows.h"
-#include "Config.h"
-#include "Config.cpp"
-#include "sensors.h"
-#include "windows.h"
-#include "winbase.h"
+#include <windows.h>
+#include <winbase.h>
+
+#include "../../common/config.h"
+#include "../../common/sensors.h"
+#include "SystemInfo/DiagnosticMgr.h"
+
+using SystemInfo::DiagnosticMgr;
+using SystemInfo::FileSystem;
 
 extern "C" {
-       #include "sigar.h"
-       #include "sigar_format.h"
+       #include "SystemInfo/sigar/sigar.h"
+       #include "SystemInfo/sigar/sigar_format.h"
 }
 
 void readSensors(TSensorsData& data) {   
@@ -81,35 +85,26 @@ void readSensors(TSensorsData& data) {
     float minup = GetTickCount() / 1000 / 60 ;
     
     std::cout << "Uptime: " << minup << " minutes." << std::endl;
-    data.uptime = (uint32_t)minup;
+    data.uptime = (uint32_t)minup;       
+
+	// Current CPU temperature
+	std::cout << "CPU temperature: " << DiagnosticMgr::getCpuTemp() << std::endl;
     
-    // Wyznaczanie zajêtoœci dysków
-    
-	__int64 pulAvailable, pulTotal, pulFree;
-    
-    sigar_t *f;
-    sigar_open(&f);
-    sigar_file_system_list_t tt;
-    sigar_file_system_list_get(f, &tt);
-    
-    std::cout << "Number of disks " << tt.number << std::endl;
-    for (int i = 0; i < tt.number; i++ ) {
-        cout << "Name of disk: " << tt.data[i].dir_name << std::endl;
-        GetDiskFreeSpaceEx(tt.data[i].dir_name, (PULARGE_INTEGER)&pulAvailable, 
-                                                (PULARGE_INTEGER)&pulTotal, 
-                                                (PULARGE_INTEGER)&pulFree);
-        std::cout << "\tTotal: " << pulTotal/(1024 * 1024) << std::endl;
-        std::cout << "\tFree: " << pulFree/(1024 * 1024) << std::endl;
-        
-        TDiskUsage d;
-        
-        d.name = tt.data[i].dir_name;
-        d.totalSpace = pulTotal;
-        d.usedSpace = pulTotal - pulAvailable;
-        data.disksUsage.push_back (d);
-    }
-    
-    sigar_close(f);	
+	// Discs usage	
+	std::vector<FileSystem::Usage*> discsUsage = 
+		DiagnosticMgr::getInstance().getFileSystemInfo() -> dirUsages;
+
+	for(auto it = discsUsage.begin(); it != discsUsage.end(); ++it) {
+		TDiskUsage currentDisc;
+		currentDisc.name = (*it) -> dir;
+		currentDisc.totalSpace = (*it) -> total;
+		currentDisc.usedSpace = (*it) -> used;
+		data.disksUsage.push_back(currentDisc);
+		
+		std::cout << "\tName: " << currentDisc.name << std::endl;
+		std::cout << "\tTotal: " << currentDisc.totalSpace /(1024 * 1024) << "GB" << std::endl;
+		std::cout << "\tUsed: " << currentDisc.usedSpace /(1024 * 1024) << "GB" << std::endl;
+	}
 }
 
 int main() {
