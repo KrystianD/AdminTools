@@ -189,7 +189,8 @@ FileSystem* SystemInfo::DiagnosticMgr::getFileSystemInfo()
 			std::cout << "SIGAR couldn't acquire file system usage for dir: "
 				<< currentDir << std::endl;
 		} else {
-
+			result -> dirUsages.push_back(
+				InfoMapper::sigarFileSystemUsageToFsUsage(fsDirUsage));
 		}
 	}
 
@@ -260,5 +261,6 @@ double SystemInfo::DiagnosticMgr::getCpuTemp()
 			}
 		}
 	}
-	return ((double)*pTemperature / 10.0) - 273.15;
+	double tempInTensOfKelvins = (double)*pTemperature;
+	return (tempInTensOfKelvins > 0.0) ? ((double)*pTemperature / 10.0) - 273.15 : 0.0;
 }
