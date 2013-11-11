@@ -3,6 +3,7 @@ package pl.edu.agh.zpi.admintools;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import pl.edu.agh.zpi.admintools.connection.ConnectionTask;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketConfig;
@@ -147,6 +148,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		}
 		sendMessageToService(ConnectionService.CONNECT, host, port, key,
 				interval);
+		sendMessageToService(ConnectionService.STOP);
 		super.onResume();
 	}
 
@@ -174,6 +176,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		sendMessageToService(ConnectionService.GET_MESSENGER);
 		sendMessageToService(ConnectionService.CONNECT, host, port, key,
 				interval);
+		sendMessageToService(ConnectionService.STOP);
 	}
 
 	@Override
@@ -266,13 +269,13 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		end += c.get(Calendar.MONTH) + "-";
 		end += c.get(Calendar.YEAR);
 		timeEnd.setText(end);
-		
+
 		c.setTimeInMillis((long) statsRequest.getStartDate() * 1000);
 		start += c.get(Calendar.DAY_OF_MONTH) + "-";
 		start += c.get(Calendar.MONTH) + "-";
 		start += c.get(Calendar.YEAR);
 		timeStart.setText(start);
-		
+
 		submit(null);
 	}
 
@@ -435,6 +438,16 @@ class DatePickerFragment extends DialogFragment implements
 	@Override
 	public void onDateSet(DatePicker view, int year, int monthOfYear,
 			int dayOfMonth) {
+		Calendar currentDate = Calendar.getInstance();
+		currentDate.set(Calendar.HOUR_OF_DAY, 0);
+		currentDate.set(Calendar.MINUTE, 0);
+		Calendar tomorrow = Calendar.getInstance();
+		tomorrow.setTimeInMillis(currentDate.getTimeInMillis());
+		tomorrow.add(Calendar.DAY_OF_MONTH, 1);
+		Calendar monthAgo = Calendar.getInstance();
+		monthAgo.setTimeInMillis(currentDate.getTimeInMillis());
+		monthAgo.add(Calendar.MONTH, -1);
+
 		final Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(0l);
 		c.set(Calendar.YEAR, year);
@@ -442,9 +455,29 @@ class DatePickerFragment extends DialogFragment implements
 		c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
 		if (isStartTime) {
-			packet.setStartDate((int) (c.getTimeInMillis() / 1000));
+			if (c.getTimeInMillis() < monthAgo.getTimeInMillis()) {
+				packet.setStartDate((int) (monthAgo.getTimeInMillis() / 1000));
+			} else if ((int) (c.getTimeInMillis() / 1000) >= packet
+					.getStartDate()) {
+				long time = (long) packet.getEndDate();
+				time *= 1000;
+				c.setTimeInMillis(time);
+				c.add(Calendar.DAY_OF_MONTH, -1);
+				packet.setStartDate((int) (c.getTimeInMillis() / 1000));
+			} else
+				packet.setStartDate((int) (c.getTimeInMillis() / 1000));
 		} else {
-			packet.setEndDate((int) (c.getTimeInMillis() / 1000));
+			if (c.getTimeInMillis() > tomorrow.getTimeInMillis()) {
+				packet.setEndDate((int) (tomorrow.getTimeInMillis() / 1000));
+			} else if ((int) (c.getTimeInMillis() / 1000) <= packet
+					.getEndDate()) {
+				long time = (long) packet.getStartDate();
+				time *= 1000;
+				c.setTimeInMillis(time);
+				c.add(Calendar.DAY_OF_MONTH, 1);
+				packet.setEndDate((int) (c.getTimeInMillis() / 1000));
+			} else
+				packet.setEndDate((int) (c.getTimeInMillis() / 1000));
 		}
 		parent.updateDate();
 	}

@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
+import android.util.Log;
+
 import pl.edu.agh.zpi.admintools.connection.Header;
 
 public class PacketStatsReply implements IPacket, Serializable {
@@ -25,7 +27,9 @@ public class PacketStatsReply implements IPacket, Serializable {
 	public void fromByteArray(byte[] array) {
 		ByteBuffer bArray = ByteBuffer.wrap(array);
 		bArray.order(ByteOrder.LITTLE_ENDIAN);
-		for (short i = bArray.getShort(); i > 0; i--) {
+		short i = bArray.getShort();
+		Log.d("qwe", "PacketStatsReply size = " + i);
+		for (; i > 0; i--) {
 			points.add(bArray.getFloat());
 		}
 	}
