@@ -190,10 +190,9 @@ FileSystem* SystemInfo::DiagnosticMgr::getFileSystemInfo()
 				<< currentDir << std::endl;
 		} else {
 			result -> dirUsages.push_back(
-				InfoMapper::sigarFileSystemUsageToFsUsage(fsDirUsage));
+				InfoMapper::sigarFileSystemUsageToFsUsage(fsDirUsage, currentDir));			
 		}
 	}
-
 	return result;
 }
 
