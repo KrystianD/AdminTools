@@ -174,6 +174,7 @@ public:
 	}
 
 protected:
+	//! Buffer cursor
 	int m_pos;
 };
 
