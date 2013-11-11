@@ -51,11 +51,6 @@ void readSensors(TSensorsData& data) {
     
     cout << "Number of cores: " << numCPU << std::endl;
 	
-    // Ustawienie temperatury
-    //    
-    //
-    //
-    //
     // Ca³kowita pamiêc RAM
     
     MEMORYSTATUSEX statex;
@@ -89,6 +84,8 @@ void readSensors(TSensorsData& data) {
 
 	// Current CPU temperature
 	std::cout << "CPU temperature: " << DiagnosticMgr::getCpuTemp() << std::endl;
+	data.temp = (float) DiagnosticMgr::getCpuTemp();
+	data.tempValid = true;
     
 	// Discs usage	
 	std::vector<FileSystem::Usage*> discsUsage = 
