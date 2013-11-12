@@ -84,7 +84,7 @@ struct THeader
 class TPacketAuth : public IPacket
 {
 public:
-	//! Public key.
+	//! Key.
 	char key[16];
 	//! Config data.
 	uint8_t sendConfig;
@@ -304,12 +304,12 @@ public:
 
 /**
  *	\class TPacketKeyReply
- *	\brief Packet with public key.
+ *	\brief Packet with authentication key.
  */
 class TPacketKeyReply : public IPacket
 {
 public:
-	//! Public key.
+	//! Key.
 	char key[16];
 
 	/**
@@ -364,9 +364,9 @@ public:
 	};
 	//! Agent id.
 	uint16_t agentId;
-	//! Temporary path.
+	//! Temperature path.
 	string tempPath;
-	//! Temporary divider.
+	//! Temperature divider.
 	uint16_t tempDivider;
 	//! Agent services.
 	vector<TPacketConfig::TService> services;
