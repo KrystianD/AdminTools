@@ -10,6 +10,28 @@
 #include "../../common/sensors.h"
 #include "SystemInfo/DiagnosticMgr.h"
 
+#include <cstdlib>
+#include <iostream>
+#include "windows.h"
+#include "Config.h"
+#include "Config.cpp"
+#include "sensors.h"
+#include "windows.h"
+#include "winbase.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <signal.h>
+#include <unistd.h>
+
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <stdio.h>
+
+#pragma comment(lib, "Ws2_32.lib")
+
+#include "serverWin.cpp"
+
 using SystemInfo::DiagnosticMgr;
 using SystemInfo::FileSystem;
 
@@ -104,21 +126,37 @@ void readSensors(TSensorsData& data) {
 	}
 }
 
-int main() {
-    Config c;
-    
-	if (!c.fromFile ("config")) {
-       printf("Brak pliku konfiguracyjnego lub plik uszkodzony! \n");
-       system("pause");
-       return 0;
-    };
-    
-    
+int main(int argc, char** argv) {
+    const char *configPath = "config.cfg";
+	
+    int cc;
+	opterr = 0;
+	while ((cc = getopt (argc, argv, "c:")) != -1) {
+		switch (cc) {
+		
+        case 'c':
+			configPath = optarg;
+			break;
+        default:
+			break;
+        }
+	}
 
-	printf ("Port: %d\r\n", c.getInt ("port"));
+	printf ("Using config: %s\r\n", configPath);
+	
+	Config c;
+	
+    if (! c.fromFile (configPath)) {
+        std::cout << "Plik uszkodzony lub nie istnieje!" << std::endl;  
+    }
+
+    Server serv;
+	serv.setup (c.getString ("host"), c.getInt ("port"), c.getString ("key"));
 
     TSensorsData t;
     readSensors(t);
+    
+    
 
     system("pause");
     return 0;
