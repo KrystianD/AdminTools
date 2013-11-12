@@ -1,13 +1,10 @@
 #ifndef __SERVER_H__
 #define __SERVER_H__
 
-#include <stdint.h>
-
 #include <string>
 using namespace std;
 
-#include "packets.h"
-// #include "db.h"
+#include "../../common/packets.h"
 
 class Server
 {

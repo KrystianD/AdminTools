@@ -1,23 +1,6 @@
 #include "serverWin.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-
-#include <sstream>
-
-#include "kutils.h"
-#include "packets.h"
-#include "settings.h"
-
 #include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <iphlpapi.h>
-#include <stdio.h>
-
-#pragma comment(lib, "Ws2_32.lib")
 
 Server::Server ()
 {
@@ -28,7 +11,6 @@ Server::Server ()
 Server::~Server ()
 {
 }
-
 
 void Server::setup (const string& host, int port, const string& key)
 {
@@ -53,6 +35,7 @@ bool Server::sendHeader (int type)
 	h.type = type;
 	h.size = 0;
 	//send (m_fd, &h, sizeof (h), 0);
+	return true;
 }
 bool Server::sendPacket (IPacket& packet)
 {
@@ -63,10 +46,11 @@ bool Server::sendPacket (IPacket& packet)
 	h.size = b.size ();
 	//send (m_fd, &h, sizeof (h), 0);
 	//send (m_fd, &b[0], b.size (), 0);
+	return true;
 }
 bool Server::readPacket (int replyType, IPacket& p, int timeout)
 {
-
+	return true;
 }
 
 void Server::processPacket (THeader& h, buffer_t& buf)

@@ -1,26 +1,13 @@
 #define _WIN32_WINNT  0x0501
 
 #include <vector>
-#include <cstdlib>
 #include <iostream>
 #include <windows.h>
-#include <winbase.h>
 
 #include "../../common/config.h"
 #include "../../common/sensors.h"
 #include "SystemInfo/DiagnosticMgr.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <signal.h>
-#include <unistd.h>
-
-#include <winsock2.h>
-#include <ws2tcpip.h>
-
-#pragma comment(lib, "Ws2_32.lib")
-
-#include "serverWin.cpp"
+#include "serverWin.h"
 
 using SystemInfo::DiagnosticMgr;
 using SystemInfo::FileSystem;
@@ -50,7 +37,7 @@ void readSensors(TSensorsData& data) {
     avg = perc.combined * 100;
    
     cout << "Cpu Usage: " << avg << std::endl;
-    data.cpuUsage = avg;
+    data.cpuUsage = (float)avg;
     
     sigar_close(sigar_cpu);
     
@@ -89,7 +76,7 @@ void readSensors(TSensorsData& data) {
     
     // Pobranie czasu pracy
     
-    float minup = GetTickCount() / 1000 / 60 ;
+    float minup = (float)GetTickCount() / 1000 / 60 ;
     
     std::cout << "Uptime: " << minup << " minutes." << std::endl;
     data.uptime = (uint32_t)minup;       
@@ -120,8 +107,8 @@ int main(int argc, char** argv) {
     const char *configPath = "config.cfg";
 	
     int cc;
-	opterr = 0;
-	while ((cc = getopt (argc, argv, "c:")) != -1) {
+	//opterr = 0;
+	/*while ((cc = getopt (argc, argv, "c:")) != -1) {
 		switch (cc) {
 		
         case 'c':
@@ -130,24 +117,19 @@ int main(int argc, char** argv) {
         default:
 			break;
         }
-	}
+	}*/
 
-	printf ("Using config: %s\r\n", configPath);
-	
-	Config c;
-	
+	printf ("Using config: %s\r\n", configPath);	
+	Config c;	
     if (! c.fromFile (configPath)) {
         std::cout << "Plik uszkodzony lub nie istnieje!" << std::endl;  
     }
-
     Server serv;
 	serv.setup (c.getString ("host"), c.getInt ("port"), c.getString ("key"));
 
     TSensorsData t;
     readSensors(t);
-    
-    
-
+       
     system("pause");
     return 0;
 }
