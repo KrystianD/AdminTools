@@ -48,32 +48,70 @@ using namespace std;
 #include "common.h"
 #include "sensors.h"
 
+/**
+ *	\class IPacket
+ *	\brief Packet data base class.
+ */
 class IPacket : public ISerializable
 {
 public:
+	/**
+	 *	\fn virtual int getType() = 0
+	 *	\brief Get packet type.
+	 *	\return Packet type.
+	 */
 	virtual int getType () = 0;
 };
 
 #pragma pack(1)
+/**
+ *	\struct THeader
+ *	\brief Packet header.
+ */
 struct THeader
 {
+	//! Packet type.
 	uint8_t type;
+	//! Packet size.
 	uint16_t size;
 };
 #pragma pack()
 
+/**
+ *	\class TPacketAuth
+ *	\brief Authentication packet.
+ */
 class TPacketAuth : public IPacket
 {
 public:
+	//! Key.
 	char key[16];
+	//! Config data.
 	uint8_t sendConfig;
-	
+
+	/**
+	 *	\fn virtual int getType()
+	 *	\brief Get packet type.
+	 *	\return PACKET_AUTH.
+	 */
 	virtual int getType () { return PACKET_AUTH; }
+	/**
+	 *	\fn	virtual void toBuffer(buffer_t& buf)
+	 *	\brief Get byte buffer representation.
+	 *	\param[out] buf Target buffer.
+	 *	\return None.
+	 */
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, key);
 		append (buf, sendConfig);
 	}
+	/**
+	 *	\fn virtual bool fromBuffer(buffer_t& buf)
+	 *	\brief Fill object with buffer data.
+	 *	\param[in] buf Buffer data.
+	 *	\return If succeeded.
+	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
@@ -82,16 +120,39 @@ public:
 		return true;
 	}
 };
+
+/**
+ *	\class TPacketReply
+ *	\brief Reply packet.
+ */
 class TPacketReply : public IPacket
 {
 public:
+	//! Reply value.
 	int value;
-	
+
+	/**
+	 *	\fn virtual int getType()
+	 *	\brief Get packet type.
+	 *	\return PACKET_REPLY.
+	 */
 	virtual int getType () { return PACKET_REPLY; }
+	/**
+	 *	\fn	virtual void toBuffer(buffer_t& buf)
+	 *	\brief Get byte buffer representation.
+	 *	\param[out] buf Target buffer.
+	 *	\return None.
+	 */
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, value);
 	}
+	/**
+	 *	\fn virtual bool fromBuffer(buffer_t& buf)
+	 *	\brief Fill object with buffer data.
+	 *	\param[in] buf Buffer data.
+	 *	\return If succeeded.
+	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
@@ -99,16 +160,39 @@ public:
 		return true;
 	}
 };
+
+/**
+ *	\class TPacketStart
+ *	\brief Starting packet.
+ */
 class TPacketStart : public IPacket
 {
 public:
+	//! Time interval.
 	uint16_t interval;
 
+	/**
+	 *	\fn virtual int getType()
+	 *	\brief Get packet type.
+	 *	\return PACKET_START.
+	 */
 	virtual int getType () { return PACKET_START; }
+	/**
+	 *	\fn	virtual void toBuffer(buffer_t& buf)
+	 *	\brief Get byte buffer representation.
+	 *	\param[out] buf Target buffer.
+	 *	\return None.
+	 */
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, interval);
 	}
+	/**
+	 *	\fn virtual bool fromBuffer(buffer_t& buf)
+	 *	\brief Fill object with buffer data.
+	 *	\param[in] buf Buffer data.
+	 *	\return If succeeded.
+	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
@@ -116,15 +200,35 @@ public:
 		return true;
 	}
 };
+
+/**
+ *	\class TPacketAgentData
+ *	\brief Data from agent.
+ */
 class TPacketAgentData : public IPacket
 {
 public:
+	//! Packet id.
 	uint16_t id;
+	//! Old data.
 	uint8_t oldData;
+	//! Agent name.
 	string name;
+	//! Sensors data.
 	TSensorsData data;
 
+	/**
+	 *	\fn virtual int getType()
+	 *	\brief Get packet type.
+	 *	\return PACKET_AGENTDATA.
+	 */
 	virtual int getType () { return PACKET_AGENTDATA; }
+	/**
+	 *	\fn	virtual void toBuffer(buffer_t& buf)
+	 *	\brief Get byte buffer representation.
+	 *	\param[out] buf Target buffer.
+	 *	\return None.
+	 */
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, id);
@@ -134,6 +238,12 @@ public:
 		data.toBuffer (tmp);
 		buf.insert (buf.end (), tmp.begin (), tmp.end ());
 	}
+	/**
+	 *	\fn virtual bool fromBuffer(buffer_t& buf)
+	 *	\brief Fill object with buffer data.
+	 *	\param[in] buf Buffer data.
+	 *	\return If succeeded.
+	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
@@ -146,12 +256,29 @@ public:
 		return true;
 	}
 };
+
+/**
+ *	\class TPacketAgentsData
+ *	\brief Combined agents data.
+ */
 class TPacketAgentsData : public IPacket
 {
 public:
+	//! Agents data.
 	vector<TPacketAgentData> agents;
 
+	/**
+	 *	\fn virtual int getType()
+	 *	\brief Get packet type.
+	 *	\return PACKET_AGENTSDATA.
+	 */
 	virtual int getType () { return PACKET_AGENTSDATA; }
+	/**
+	 *	\fn	virtual void toBuffer(buffer_t& buf)
+	 *	\brief Get byte buffer representation.
+	 *	\param[out] buf Target buffer.
+	 *	\return None.
+	 */
 	virtual void toBuffer (buffer_t& buf)
 	{
 		uint16_t len = agents.size ();
@@ -163,21 +290,50 @@ public:
 			buf.insert (buf.end (), tmp.begin (), tmp.end ());
 		}
 	}
+	/**
+	 *	\fn virtual bool fromBuffer(buffer_t& buf)
+	 *	\brief Fill object with buffer data.
+	 *	\param[in] buf Buffer data.
+	 *	\return If succeeded.
+	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		return true;
 	}
 };
+
+/**
+ *	\class TPacketKeyReply
+ *	\brief Packet with authentication key.
+ */
 class TPacketKeyReply : public IPacket
 {
 public:
+	//! Key.
 	char key[16];
-	
+
+	/**
+	 *	\fn virtual int getType()
+	 *	\brief Get packet type.
+	 *	\return PACKET_KEY_REPLY.
+	 */
 	virtual int getType () { return PACKET_KEY_REPLY; }
+	/**
+	 *	\fn	virtual void toBuffer(buffer_t& buf)
+	 *	\brief Get byte buffer representation.
+	 *	\param[out] buf Target buffer.
+	 *	\return None.
+	 */
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, key);
 	}
+	/**
+	 *	\fn virtual bool fromBuffer(buffer_t& buf)
+	 *	\brief Fill object with buffer data.
+	 *	\param[in] buf Buffer data.
+	 *	\return If succeeded.
+	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
@@ -185,22 +341,50 @@ public:
 		return true;
 	}
 };
+
+/**
+ *	\class TPacketConfig
+ *	\brief Agent configuration.
+ */
 class TPacketConfig : public IPacket
 {
 public:
+	/**
+	 *	\struct TService
+	 *	\brief Networ service data.
+	 */
 	struct TService
 	{
+		//! Service name.
 		string name;
+		//! Service transport type (TCP/UDP)
 		bool tcp;
+		//! Service port.
 		uint16_t port;
 	};
+	//! Agent id.
 	uint16_t agentId;
+	//! Temperature path.
 	string tempPath;
+	//! Temperature divider.
 	uint16_t tempDivider;
+	//! Agent services.
 	vector<TPacketConfig::TService> services;
+	//! Time interval.
 	uint16_t interval;
 
+	/**
+	 *	\fn virtual int getType()
+	 *	\brief Get packet type.
+	 *	\return PACKET_CONFIG.
+	 */
 	virtual int getType () { return PACKET_CONFIG; }
+	/**
+	 *	\fn	virtual void toBuffer(buffer_t& buf)
+	 *	\brief Get byte buffer representation.
+	 *	\param[out] buf Target buffer.
+	 *	\return None.
+	 */
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, agentId);
@@ -216,6 +400,12 @@ public:
 		}
 		append (buf, interval);
 	}
+	/**
+	 *	\fn virtual bool fromBuffer(buffer_t& buf)
+	 *	\brief Fill object with buffer data.
+	 *	\param[in] buf Buffer data.
+	 *	\return If succeeded.
+	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
@@ -237,16 +427,39 @@ public:
 		return true;
 	}
 };
+
+/**
+ *	\class TPacketConfigRequest
+ *	\brief Requet for agent configuration.
+ */
 class TPacketConfigRequest : public IPacket
 {
 public:
+	//! Requested agent id.
 	uint16_t agentId;
-	
+
+	/**
+	 *	\fn virtual int getType()
+	 *	\brief Get packet type.
+	 *	\return PACKET_CONFIG_REQUEST.
+	 */
 	virtual int getType () { return PACKET_CONFIG_REQUEST; }
+	/**
+	 *	\fn	virtual void toBuffer(buffer_t& buf)
+	 *	\brief Get byte buffer representation.
+	 *	\param[out] buf Target buffer.
+	 *	\return None.
+	 */
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, agentId);
 	}
+	/**
+	 *	\fn virtual bool fromBuffer(buffer_t& buf)
+	 *	\brief Fill object with buffer data.
+	 *	\param[in] buf Buffer data.
+	 *	\return If succeeded.
+	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
@@ -254,17 +467,44 @@ public:
 		return true;
 	}
 };
+
+/**
+ *	\class TPacketStatsRequest
+ *	\brief Stats request from agent.
+ */
 class TPacketStatsRequest : public IPacket
 {
 public:
+	/**
+	 *	\enum EType
+	 *	\brief Statistic types based on origin.
+	 */
 	enum EType { CPU = 0, RAM, TEMP, DISK };
+	//! Agent id.
 	uint16_t agentId;
-	uint32_t startDate, endDate;
+	//! Start date.
+	uint32_t startDate;
+	//! End date.
+	uint32_t endDate;
+	//! Number of points.
 	uint16_t points;
+	//! Stats type.
 	EType type; // 1 byte
+	//! Disc name.
 	string diskName;
 
+	/**
+	 *	\fn virtual int getType()
+	 *	\brief Get packet type.
+	 *	\return PACKET_STATS_REQUEST.
+	 */
 	virtual int getType () { return PACKET_STATS_REQUEST; }
+	/**
+	 *	\fn	virtual void toBuffer(buffer_t& buf)
+	 *	\brief Get byte buffer representation.
+	 *	\param[out] buf Target buffer.
+	 *	\return None.
+	 */
 	virtual void toBuffer (buffer_t& buf)
 	{
 		// append (buf, agentId);
@@ -274,6 +514,12 @@ public:
 		// uint8_t t = (uint8_t)type;
 		// append (buf, t);
 	}
+	/**
+	 *	\fn virtual bool fromBuffer(buffer_t& buf)
+	 *	\brief Fill object with buffer data.
+	 *	\param[in] buf Buffer data.
+	 *	\return If succeeded.
+	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
@@ -288,16 +534,39 @@ public:
 		return true;
 	}
 };
+
+/**
+ *	\class TPacketStatsReply
+ *	\brief Reply for stats request.
+ */
 class TPacketStatsReply : public IPacket
 {
 public:
+	//! Given points.
 	vector<float> points;
 
+	/**
+	 *	\fn virtual int getType()
+	 *	\brief Get packet type.
+	 *	\return PACKET_STATS_REPLY.
+	 */
 	virtual int getType () { return PACKET_STATS_REPLY; }
+	/**
+	 *	\fn	virtual void toBuffer(buffer_t& buf)
+	 *	\brief Get byte buffer representation.
+	 *	\param[out] buf Target buffer.
+	 *	\return None.
+	 */
 	virtual void toBuffer (buffer_t& buf)
 	{
 		append (buf, points);
 	}
+	/**
+	 *	\fn virtual bool fromBuffer(buffer_t& buf)
+	 *	\brief Fill object with buffer data.
+	 *	\param[in] buf Buffer data.
+	 *	\return If succeeded.
+	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;

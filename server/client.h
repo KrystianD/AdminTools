@@ -10,19 +10,50 @@ using namespace std;
 #include "packets.h"
 #include "kutils.h"
 
+/**
+ *	\class Client
+ *	\brief Represents handled client-agent.
+ */
 class Client
 {
 public:
+	//! Client id, mostly socket descriptor used for its communication.
 	int fd;
+	//! Client ip address.
 	string ip;
+	//! Client port.
 	int port;
+	//! If client is not used.
 	bool toDelete;
+	//! If client settings changed.
 	bool settingsChanged;
 
+	/**
+	 *	\fn Client (int fd, const string& ip, int port)
+	 *	\brief Constructor, initialize data with incoming connection returns.
+	 *	\param id Socket descriptor.
+	 *	\param ip Client ip address.
+	 *	\param port Client port.
+	 */
 	Client (int fd, const string& ip, int port);
 
+	/**
+	 *	\fn void readData ()
+	 *	\brief Read data from client-agent.
+	 *	\return None.
+	 */
 	void readData ();
+	/**
+	 *	\fn void process ()
+	 *	\brief Process all waiting request.
+	 *	\return None.
+	 */
 	void process ();
+	/**
+	 *	\fn void fetchConfig ()
+	 *	\biref Fetch client-agent current configuration.
+	 *	\return None.
+	 */
 	void fetchConfig ();
 
 private:

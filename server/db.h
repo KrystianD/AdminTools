@@ -11,39 +11,81 @@ using namespace std;
 
 #include "sensors.h"
 
+/**
+ *	\class TDBService
+ *	\brief Service DTO for database use.
+ */
 class TDBService
 {
 public:
+	//! Service name.
 	string name;
+	//! Service tranport type (TCP/UDP).
 	bool tcp;
+	//! Service port number.
 	int port;
 };
+
+/**
+ *	\class TDBAgent
+ *	\brief Client-agent DTO for database use.
+ */
 class TDBAgent
 {
 public:
+	//! Agent id.
 	int id;
+	//! Agent name.
 	string name;
+	//! List of agent services.
 	vector<TDBService> services;
+	//! Temperature path.
 	string tempPath;
+	//! Temperature divider.
 	int tempDivider;
+	//! Time interval.
 	int interval;
 };
+
+/**
+ *	\class TSensorsRecord
+ *	\brief Client-agent sensors DTO for database use.
+ */
 struct TSensorsRecord
 {
+	/**
+	 *	\struct TDisk
+	 *	\brief Simple disc data.
+	 */
 	struct TDisk
 	{
+		//! Disc name.
 		string name;
+		//! Percent disc usage.
 		double usage;
 	};
+	//! Agent id.
 	int id;
+	//! Time of sensors read.
 	uint32_t timestamp;
-	double temp, cpuUsage, ramUsage;
+	//! Temperature value.
+	double temp;
+	//! Cpu percent usage.
+	double cpuUsage;
+	//! RAM percent usage.
+	double ramUsage;
+	//! List of discs data.
 	vector<TDisk> disks;
 };
 
+/**
+ *	\class DB
+ *	\brief Database handler. Uses SQLite.
+ */
 class DB
 {
 public:
+	//! Current database handle.
 	static sqlite3 *db;
 
 	static bool open (const string& path);
