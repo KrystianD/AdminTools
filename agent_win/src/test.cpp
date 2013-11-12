@@ -10,15 +10,6 @@
 #include "../../common/sensors.h"
 #include "SystemInfo/DiagnosticMgr.h"
 
-#include <cstdlib>
-#include <iostream>
-#include "windows.h"
-#include "Config.h"
-#include "Config.cpp"
-#include "sensors.h"
-#include "windows.h"
-#include "winbase.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
@@ -26,7 +17,6 @@
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <stdio.h>
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -73,7 +63,7 @@ void readSensors(TSensorsData& data) {
     
     cout << "Number of cores: " << numCPU << std::endl;
 	
-    // Ca³kowita pamiêc RAM
+    // Caï¿½kowita pamiï¿½c RAM
     
     MEMORYSTATUSEX statex;
 
@@ -84,7 +74,7 @@ void readSensors(TSensorsData& data) {
      
     data.totalRam = (uint64_t)statex.ullTotalPhys/(1024*1024);
 
-    // Pobranie wolnej pamiêci RAM
+    // Pobranie wolnej pamiï¿½ci RAM
 
     MEMORYSTATUS m;
    	
