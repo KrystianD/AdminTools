@@ -176,7 +176,8 @@ bool Server::sendHeader (int type) {
 	THeader h;
 	h.type = type;
 	h.size = 0;
-	//send (m_fd, &h, sizeof (h), 0);
+	THeader* tHPtr = &h;
+	send (ConnectSocket,  reinterpret_cast<char*>(tHPtr), sizeof (h), 0);//uwaga, do ogarniêcia przes³anie struktury uint16 i uint32 (choc wydaje mi siê ze tak jest ok)
 	return true;
 }
 
