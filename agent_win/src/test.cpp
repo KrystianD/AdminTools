@@ -2,11 +2,13 @@
 
 #include <vector>
 #include <iostream>
+#include <time.h>
 
 #include "../../common/config.h"
 #include "../../common/sensors.h"
 #include "SystemInfo/DiagnosticMgr.h"
 #include "serverWin.h"
+#include "kutilsWin.h"
 
 using SystemInfo::DiagnosticMgr;
 using SystemInfo::FileSystem;
@@ -138,16 +140,110 @@ int main(int argc, char** argv) {
 	cfg.interval = c.getInt ("interval", 2000);
 	uint32_t lastSendTime = getTicks (), lastOldSendTime = getTicks ();
 	vector<TPacketAgentData> oldSensorsData;
-	//brak wczytania z pliku olddata starych danych z sensorów
+	
+	FILE *f = fopen ("olddata", "rb");
+	if (f)
+	{
+		uint32_t cnt;
+		fread (&cnt, sizeof(cnt), 1, f);
+		for (int i = 0; i < cnt; i++)
+		{
+			uint32_t size;
+			fread (&size, sizeof(size), 1, f);
+
+			buffer_t buf;
+			buf.resize (size);
+			fread (buf.data (), size, 1, f);
+
+			TPacketAgentData p;
+			p.fromBuffer (buf);
+			oldSensorsData.push_back (p);
+		}
+		fclose (f);
+	}
 
 	while(1)
 	{
 		serv.process();
+		usleep(10000);
+		TSensorsData d;
+
+		// gather data from senosors and send it to server or save in memory depending on connectino state
+		if (getTicks () - lastSendTime >= serv.getConfig ().interval)
+		{
+			readSensors(d);
+			//Krystian tu używa funkcji która jest w sensors.cpp postaci getSensorsData (d, serv.getConfig ());
+		
+			TPacketAgentData agentData;
+			agentData.id = 0;
+			agentData.data = d;
+			agentData.data.timestamp = time (0);
+
+			if (serv.isValid ())
+			{
+				agentData.oldData = 0;
+				serv.sendPacket (agentData);
+			}
+			else
+			{
+				oldSensorsData.push_back (agentData);
+				printf ("Packet saved\r\n");
+			}
+			lastSendTime = getTicks ();
+		}
+		// send old sensors data in periods of 10ms
+		if (oldSensorsData.size () > 0 && getTicks () - lastOldSendTime >= 10 && serv.isValid ())
+		{
+			TPacketAgentData p = oldSensorsData[0];
+			p.oldData = 1;
+			serv.sendPacket (p);
+			oldSensorsData.erase (oldSensorsData.begin ());
+			printf ("Sent old packet, %d left\n", oldSensorsData.size ());
+			lastOldSendTime = getTicks ();
+		}
+
+		// config file update
+		if (serv.configChanged ())
+		{
+			const TPacketConfig& cfg = serv.getConfig ();
+			c.setString ("tempPath", cfg.tempPath);
+			c.setInt ("tempDivider", cfg.tempDivider);
+			c.setInt ("services", cfg.services.size ());
+			for (int i = 0; i < cfg.services.size (); i++)
+			{
+				const TPacketConfig::TService s = cfg.services[i];
+				char key[20], val[100];
+				sprintf (key, "srv%d", i);
+				sprintf (val, "%s:%d:%d", s.name.c_str (), s.tcp, s.port);
+				c.setString (key, val);
+			}
+			c.setInt ("interval", cfg.interval);
+			c.saveToFile (configPath);
+			serv.configApplied ();
+		}
 	}
 
-    //TSensorsData t;
-    //readSensors(t);
-       
-    system("pause");
+	// save old data in order to send it to server when connected
+	f = fopen ("olddata", "wb");
+
+	buffer_t buf;
+	uint32_t cnt = oldSensorsData.size ();
+	printf ("Saving data (%d to save)...\n", cnt);
+	buf.append (cnt);
+	fwrite (buf.data (), buf.size (), 1, f);
+	for (int i = 0; i < oldSensorsData.size (); i++)
+	{
+		buffer_t buf2;
+		oldSensorsData[i].toBuffer (buf2);
+		uint32_t size = buf2.size ();
+
+		fwrite (&size, sizeof(size), 1, f);
+		fwrite (buf2.data (), buf2.size (), 1, f);
+	}
+	printf ("Data saved\n");
+
+	fclose (f);
+
+    //system("pause");
     return 0;
 }

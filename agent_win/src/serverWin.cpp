@@ -1,7 +1,7 @@
 #include "serverWin.h"
 
 #include <sstream>
-
+#include <iostream>
 #include "commonWin.h"
 
 #pragma comment(lib, "Ws2_32.lib")
@@ -33,11 +33,61 @@ void Server::process() {
 	} 
 	else if (m_state == WaitingForConfig) 
 	{
-		
+		if (getTicks () > m_configTime)
+		{
+			printf ("No config within timeout\r\n");
+			closesocket (ConnectSocket);
+			WSACleanup();
+			m_state = NotConnected;
+		}
 	}
 	if (m_state == Connected || m_state == WaitingForConfig) 
 	{
-		
+		timeval tv;
+		fd_set fds;
+
+		tv.tv_sec = 0;
+		tv.tv_usec = 10000;
+		//o select na windzie
+		//http://msdn.microsoft.com/en-us/library/windows/desktop/ms740141(v=vs.85).aspx
+		FD_ZERO(&fds);
+		FD_SET(ConnectSocket, &fds);
+		int res = select (0,&fds,0,0,&tv); //deskryptor = 0, wg info z linka wy¿ej, pierwszy argument jest ignorowany
+		if(res == -1)
+		{
+			std::cerr << "Select error\n" ;
+			return;
+		}
+		else
+		{
+			if(FD_ISSET(ConnectSocket, &fds))
+			{
+				THeader h;
+				int rd = recvallWin(ConnectSocket, &h, sizeof(h), 1000);
+				if(rd == 0)
+				{
+					closesocket(ConnectSocket);
+					WSACleanup();
+					m_state = NotConnected;
+					return;
+				}
+
+				if(h.size > 0)
+				{
+					buffer_t buf;
+					buf.resize(h.size);
+					rd = recvallWin(ConnectSocket, &buf[0], h.size, 1000);
+					if(rd == 0)
+					{
+						closesocket(ConnectSocket);
+						WSACleanup();
+						m_state = NotConnected;
+						return;
+					}
+					processPacket(h,buf);
+				}
+			}
+		}
 	}
 }
 
@@ -176,6 +226,16 @@ bool Server::readPacket (int replyType, IPacket& p, int timeout)
 	return false;
 }
 
-void Server::processPacket (THeader& h, buffer_t& buf) {
-
+void Server::processPacket (THeader& h, buffer_t& buf) 
+{
+	switch (h.type)
+	{
+	case PACKET_CONFIG:
+		m_config.fromBuffer(buf);
+		m_configChanged = true;
+		if(m_state == WaitingForConfig)
+			m_state = Connected;
+		printf("Config received\n");
+		break;
+	}
 }

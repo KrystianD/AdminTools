@@ -22,4 +22,11 @@ vector<string> explode (const string& str, const string& delim);
  */
 uint32_t getTicks ();
 
+/**
+  *  \fn void usleep(__int64 usec)
+  *  \brief holds for usec microseconds
+  *  \param usec microseconds
+ */
+void usleep(__int64 usec);
+
 #endif
