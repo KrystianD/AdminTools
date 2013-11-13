@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <iostream>
-#include <windows.h>
 
 #include "../../common/config.h"
 #include "../../common/sensors.h"
@@ -105,27 +104,19 @@ void readSensors(TSensorsData& data) {
 
 int main(int argc, char** argv) {
     const char *configPath = "config.cfg";
-	
-    int cc;
-	//opterr = 0;
-	/*while ((cc = getopt (argc, argv, "c:")) != -1) {
-		switch (cc) {
-		
-        case 'c':
-			configPath = optarg;
-			break;
-        default:
-			break;
-        }
-	}*/
 
 	printf ("Using config: %s\r\n", configPath);	
 	Config c;	
-    if (! c.fromFile (configPath)) {
-        std::cout << "Plik uszkodzony lub nie istnieje!" << std::endl;  
+    
+	if (! c.fromFile (configPath)) {
+        std::cout << "Plik uszkodzony lub nie istnieje!" << std::endl; 
+		return 1;
     }
     Server serv;
-	serv.setup (c.getString ("host"), c.getInt ("port"), c.getString ("key"));
+	serv.connectServer();
+	
+	
+	//serv.setup (c.getString ("host"), c.getInt ("port"), c.getString ("key"));
 
     TSensorsData t;
     readSensors(t);

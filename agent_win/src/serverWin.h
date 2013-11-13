@@ -5,6 +5,9 @@
 using namespace std;
 
 #include "../../common/packets.h"
+#include "winsock2.h"
+#include "ws2tcpip.h"
+#include "windows.h"
 
 class Server
 {
@@ -20,6 +23,9 @@ public:
 	void configApplied () { m_configChanged = false; }
 	bool sendPacket (IPacket& packet);
 
+	
+	void connectServer ();
+
 	TPacketConfig& getConfig () { return m_config; }
 
 private:
@@ -28,15 +34,14 @@ private:
 	string m_host, m_key;
 	int m_port;
 
-	int m_fd;
+	SOCKET ConnectSocket;
+
 	uint32_t m_lastConnect;
 	EState m_state;
 	uint32_t m_configTime;
 
 	TPacketConfig m_config;
 	bool m_configChanged;
-
-	void connect ();
 
 	bool sendHeader (int type);
 	bool readPacket (int replyType, IPacket& p, int timeout);
