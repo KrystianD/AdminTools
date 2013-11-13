@@ -5,9 +5,12 @@
 using namespace std;
 
 #include "../../common/packets.h"
+#include "commonWin.h"
+#include "kutilsWin.h"
 #include "winsock2.h"
 #include "ws2tcpip.h"
 #include "windows.h"
+#include "settingsWin.h"
 
 class Server
 {
@@ -25,7 +28,6 @@ public:
 
 	
 	void connectServer ();
-
 	TPacketConfig& getConfig () { return m_config; }
 
 private:

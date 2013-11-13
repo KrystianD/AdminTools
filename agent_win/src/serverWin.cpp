@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "commonWin.h"
+
 #pragma comment(lib, "Ws2_32.lib")
 
 
@@ -21,15 +23,25 @@ void Server::setup (const string& host, int port, const string& key) {
 }
 
 void Server::process() {
-	if (m_state == NotConnected) {
-		
-	} else if (m_state == WaitingForConfig) {
+	if (m_state == NotConnected) 
+	{
+		if (getTicks () - m_lastConnect >= 500)
+		{
+			connectServer ();
+			m_lastConnect = getTicks ();
+		}
+	} 
+	else if (m_state == WaitingForConfig) 
+	{
 		
 	}
-	if (m_state == Connected || m_state == WaitingForConfig) {
+	if (m_state == Connected || m_state == WaitingForConfig) 
+	{
 		
 	}
 }
+
+
 
 void Server::connectServer() {
     
@@ -89,16 +101,25 @@ void Server::connectServer() {
 		return;
 	}
 
-
-
-
-
 	TPacketAuth p;
 	p.sendConfig = 1;
 	strncpy (p.key, m_key.c_str (), 16);
 
 	sendPacket (p);
 
+	TPacketReply r;
+	if (!readPacket (PACKET_REPLY, r, 1000))
+	{
+		closesocket(ConnectSocket);
+		printf ("unable to read reply packet\r\n");
+		return;
+	}
+	printf ("Auth reply: %s\r\n", r.value == 1 ? "Access granted" : "Access denied");
+	if (r.value == 1)
+	{
+		m_state = WaitingForConfig;
+		m_configTime = getTicks () + CONFIG_TIMEOUT;
+	}
 }
 
 bool Server::sendHeader (int type) {
@@ -115,13 +136,44 @@ bool Server::sendPacket (IPacket& packet) {
 	THeader h;
 	h.type = packet.getType ();
 	h.size = b.size ();
-	//send (m_fd, &h, sizeof (h), 0);
-	//send (m_fd, &b[0], b.size (), 0);
+	THeader* tHPtr = &h;
+	send (ConnectSocket, reinterpret_cast<char*>(tHPtr), sizeof (h), 0); //uwaga, do ogarniêcia przes³anie struktury uint16 i uint32 (choc wydaje mi siê ze tak jest ok)
+	send (ConnectSocket, &b[0], b.size (), 0);
 	return true;
 }
 
-bool Server::readPacket (int replyType, IPacket& p, int timeout) {
-	return true;
+bool Server::readPacket (int replyType, IPacket& p, int timeout) 
+{
+	THeader h;
+	int rd = recvallWin(ConnectSocket, &h, sizeof(h), 1000);
+	if(rd == 0)
+	{
+		closesocket(ConnectSocket);
+		WSACleanup();
+		m_state = NotConnected;
+		return false;
+	}
+
+	if(h.size > 0)
+	{
+		buffer_t buf;
+		buf.resize (h.size);
+		rd = recvallWin (ConnectSocket, &buf[0], h.size, 1000);
+		if(rd == 0)
+		{
+			closesocket(ConnectSocket);
+			WSACleanup();
+			m_state = NotConnected;
+			return false;
+		}
+
+		if(h.type == replyType)
+		{
+			p.fromBuffer(buf);
+			return true;
+		}
+	}
+	return false;
 }
 
 void Server::processPacket (THeader& h, buffer_t& buf) {

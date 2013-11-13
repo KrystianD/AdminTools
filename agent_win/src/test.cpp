@@ -112,14 +112,41 @@ int main(int argc, char** argv) {
         std::cout << "Plik uszkodzony lub nie istnieje!" << std::endl; 
 		return 1;
     }
-    Server serv;
-	serv.connectServer();
-	
-	
-	//serv.setup (c.getString ("host"), c.getInt ("port"), c.getString ("key"));
 
-    TSensorsData t;
-    readSensors(t);
+    Server serv;
+	//serv.connectServer();
+	serv.setup (c.getString ("host"), c.getInt ("port"), c.getString ("key"));
+	TPacketConfig& cfg = serv.getConfig ();
+	cfg.tempPath = c.getString ("tempPath", "");
+	cfg.tempDivider = c.getInt ("tempDivider", 1);
+	int srvCnt = c.getInt ("services", 0);
+	cfg.services.clear ();
+	for (int i = 0; i < srvCnt; i++)
+	{
+		TPacketConfig::TService s;
+		char key[20];
+		sprintf (key, "srv%d", i);
+		vector<string> parts = explode (c.getString (key, ""), ":");
+		if (parts.size () == 3)
+		{
+			s.name = parts[0];
+			s.tcp = atoi (parts[1].c_str ());
+			s.port = atoi (parts[2].c_str ());
+			cfg.services.push_back (s);
+		}
+	}
+	cfg.interval = c.getInt ("interval", 2000);
+	uint32_t lastSendTime = getTicks (), lastOldSendTime = getTicks ();
+	vector<TPacketAgentData> oldSensorsData;
+	//brak wczytania z pliku olddata starych danych z sensorów
+
+	while(1)
+	{
+		serv.process();
+	}
+
+    //TSensorsData t;
+    //readSensors(t);
        
     system("pause");
     return 0;
