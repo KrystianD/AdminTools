@@ -75,12 +75,14 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_charts);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+		
 		agent = (AgentData) this.getIntent().getSerializableExtra(AGENT);
 		host = this.getIntent().getStringExtra(AdminTools.HOST);
 		port = this.getIntent().getIntExtra(AdminTools.PORT, 0);
 		key = this.getIntent().getStringExtra(AdminTools.KEY);
 		interval = this.getIntent().getIntExtra(AdminTools.INTERVAL, 1000);
+		
+		getActionBar().setTitle("ChartsActivity\t"+agent.getName());
 		
 		surface = (ChartsSurface) findViewById(R.id.surfaceView_charts);
 		timeStart = (Button) findViewById(R.id.button_date_start);

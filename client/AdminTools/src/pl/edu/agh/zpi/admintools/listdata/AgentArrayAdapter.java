@@ -4,15 +4,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import pl.edu.agh.zpi.admintools.R;
+import pl.edu.agh.zpi.admintools.StatsActivity;
 import pl.edu.agh.zpi.admintools.sensors.AgentData;
 import pl.edu.agh.zpi.admintools.sensors.DiskUsageData;
 import pl.edu.agh.zpi.admintools.sensors.SensorsData;
 import pl.edu.agh.zpi.admintools.sensors.ServiceData;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,8 +72,9 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 				.findViewById(R.id.toggleButton_list_disks);
 		ToggleButton toggleButtonServices = (ToggleButton) convertView
 				.findViewById(R.id.toggleButton_list_services);
-		LinearLayout agentLayout = (LinearLayout) convertView.findViewById(R.id.linearLayout_list_agent_data);
-		
+		LinearLayout agentLayout = (LinearLayout) convertView
+				.findViewById(R.id.linearLayout_list_agent_data);
+
 		addDisksContent(disksTab, diskUsage, agent.getName());
 		addServicesContent(servicesTab, serviceData);
 
@@ -90,15 +95,14 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 		} else {
 			agentLayout.setVisibility(View.GONE);
 		}
-		
+
 		toggleButtonName.setText("" + agent.getName());
 		toggleButtonName.setTextOn("" + agent.getName());
 		toggleButtonName.setTextOff("" + agent.getName());
 
 		if (sensors.isTempValid()) {
 			if (sensors.getTemp() > tempAlertLevel) {
-				createAlertNotification("TEMP " + agent.getName() + " "
-						+ sensors.getTemp() + "°C", sensors.getTemp(), 110);
+				createAlertNotification();
 				temp.setTextColor(Color.RED);
 			} else {
 				temp.setTextColor(Color.BLACK);
@@ -128,7 +132,7 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 				.findViewById(R.id.button_list_settings);
 		if (settingsButton != null) { // why do I even need that? :(
 										// everything else works!
-			//settingsButton.setId(agent.getId());
+			// settingsButton.setId(agent.getId());
 			settingsButton.setTag(agent.getId());
 		}
 
@@ -236,9 +240,7 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 			layout.addView(row);
 
 			if (usedSpaceGB / totalSpaceGB > HDDAlertLevel) {
-				createAlertNotification("HDD " + agentName + " " + nameString
-						+ " " + (usedSpaceGB / totalSpaceGB) * 100 + "%",
-						(usedSpaceGB / totalSpaceGB) * 100, 100);
+				createAlertNotification();
 				name.setTextColor(Color.RED);
 				usage.setTextColor(Color.RED);
 			} else {
@@ -248,24 +250,26 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 		}
 	}
 
-	private void createAlertNotification(String msg, double level,
-			double levelMax) {
-		Log.d("qwe", "alert!");
+	private void createAlertNotification() {
+		Intent resultIntent = new Intent(context, StatsActivity.class);
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+		// Adds the back stack
+		stackBuilder.addParentStack(StatsActivity.class);
+		// Adds the Intent to the top of the stack
+		stackBuilder.addNextIntent(resultIntent);
+		// Gets a PendingIntent containing the entire back stack
+		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
+				PendingIntent.FLAG_UPDATE_CURRENT);
 
-		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-				context).setSmallIcon(R.drawable.ic_launcher)
-				.setContentTitle("Admin Tools Alert!").setContentText(msg)
-				.setProgress((int) levelMax, (int) level, false);
-		Notification notification = mBuilder.build();
-		notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-		notification.flags |= Notification.FLAG_INSISTENT;
-		notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
-		notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(
+				context);
+		builder.setContentIntent(resultPendingIntent)
+				.setContentTitle("Admin Tools")
+				.setContentText("Something is wrong!")
+				.setAutoCancel(true)
+				.setSmallIcon(R.drawable.ic_launcher);
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-
-		// mId allows you to update the notification later on.
-		mNotificationManager.notify(1, mBuilder.build());
+		mNotificationManager.notify(1, builder.build());
 	}
 }

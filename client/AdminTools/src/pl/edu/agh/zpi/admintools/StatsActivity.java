@@ -77,6 +77,8 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		connectionSettings = getSharedPreferences(AdminTools.CONN_PREFS_NAME,
 				MODE_MULTI_PROCESS);
 
+		Log.d("qwe", "StatsActivity.onCreate()");
+
 		// host = this.getIntent().getStringExtra(AdminTools.HOST);
 		// port = this.getIntent().getIntExtra(AdminTools.PORT, 0);
 		// key = this.getIntent().getStringExtra(AdminTools.KEY);
@@ -89,8 +91,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		interval = connectionSettings.getInt(AdminTools.INTERVAL, 0);
 
 		TextView tv = (TextView) findViewById(R.id.textView_server_name);
-		String serverName = getIntent().getStringExtra(AdminTools.HOST) + ":"
-				+ getIntent().getIntExtra(AdminTools.PORT, 0);
+		String serverName = host + ":" + port;
 		tv.setText(serverName);
 
 		agentsArray = new AgentArrayAdapter(this);
@@ -136,7 +137,6 @@ public class StatsActivity extends Activity implements ServiceConnection,
 	@Override
 	protected void onStop() {
 		sendMessageToService(ConnectionService.STOP);
-
 		super.onStop();
 	}
 
@@ -348,7 +348,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		tempDivider.setText("" + pc.getTempDivider());
 		interval.setText("" + pc.getInterval());
 		name.setText(pc.getName());
-		
+
 		ArrayList<ServiceConfig> serviceArray = pc.getServicesConfig();
 		for (ServiceConfig sc : serviceArray) {
 			View child = getLayoutInflater()
@@ -476,7 +476,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 	public void onDialogConfigButtonClicked(View view) {
 		LinearLayout parent = (LinearLayout) view.getParent().getParent();
-		LinearLayout layout = (LinearLayout) parent.getChildAt(7); // magic
+		LinearLayout layout = (LinearLayout) parent.getChildAt(9); // magic
 																	// number!!
 		if (view.getId() == R.id.button_dialog_config_add_service) {
 			View child = getLayoutInflater().inflate(
