@@ -1,17 +1,21 @@
 #define _WIN32_WINNT  0x0501
 
-#include <cstdlib>
+#include <vector>
 #include <iostream>
-#include "windows.h"
-#include "Config.h"
-#include "Config.cpp"
-#include "sensors.h"
-#include "windows.h"
-#include "winbase.h"
+#include <time.h>
+
+#include "../../common/config.h"
+#include "../../common/sensors.h"
+#include "SystemInfo/DiagnosticMgr.h"
+#include "serverWin.h"
+#include "kutilsWin.h"
+
+using SystemInfo::DiagnosticMgr;
+using SystemInfo::FileSystem;
 
 extern "C" {
-       #include "sigar.h"
-       #include "sigar_format.h"
+       #include "SystemInfo/sigar/sigar.h"
+       #include "SystemInfo/sigar/sigar_format.h"
 }
 
 void readSensors(TSensorsData& data) {   
@@ -34,7 +38,7 @@ void readSensors(TSensorsData& data) {
     avg = perc.combined * 100;
    
     cout << "Cpu Usage: " << avg << std::endl;
-    data.cpuUsage = avg;
+    data.cpuUsage = (float)avg;
     
     sigar_close(sigar_cpu);
     
@@ -47,12 +51,7 @@ void readSensors(TSensorsData& data) {
     
     cout << "Number of cores: " << numCPU << std::endl;
 	
-    // Ustawienie temperatury
-    //    
-    //
-    //
-    //
-    // Ca³kowita pamiêc RAM
+    // Caï¿½kowita pamiï¿½c RAM
     
     MEMORYSTATUSEX statex;
 
@@ -63,7 +62,7 @@ void readSensors(TSensorsData& data) {
      
     data.totalRam = (uint64_t)statex.ullTotalPhys/(1024*1024);
 
-    // Pobranie wolnej pamiêci RAM
+    // Pobranie wolnej pamiï¿½ci RAM
 
     MEMORYSTATUS m;
    	
@@ -78,56 +77,173 @@ void readSensors(TSensorsData& data) {
     
     // Pobranie czasu pracy
     
-    float minup = GetTickCount() / 1000 / 60 ;
+    float minup = (float)GetTickCount() / 1000 / 60 ;
     
     std::cout << "Uptime: " << minup << " minutes." << std::endl;
-    data.uptime = (uint32_t)minup;
+    data.uptime = (uint32_t)minup;       
+
+	// Current CPU temperature
+	std::cout << "CPU temperature: " << DiagnosticMgr::getCpuTemp() << std::endl;
+	data.temp = (float) DiagnosticMgr::getCpuTemp();
+	data.tempValid = true;
     
-    // Wyznaczanie zajêtoœci dysków
-    
-	__int64 pulAvailable, pulTotal, pulFree;
-    
-    sigar_t *f;
-    sigar_open(&f);
-    sigar_file_system_list_t tt;
-    sigar_file_system_list_get(f, &tt);
-    
-    std::cout << "Number of disks " << tt.number << std::endl;
-    for (int i = 0; i < tt.number; i++ ) {
-        cout << "Name of disk: " << tt.data[i].dir_name << std::endl;
-        GetDiskFreeSpaceEx(tt.data[i].dir_name, (PULARGE_INTEGER)&pulAvailable, 
-                                                (PULARGE_INTEGER)&pulTotal, 
-                                                (PULARGE_INTEGER)&pulFree);
-        std::cout << "\tTotal: " << pulTotal/(1024 * 1024) << std::endl;
-        std::cout << "\tFree: " << pulFree/(1024 * 1024) << std::endl;
-        
-        TDiskUsage d;
-        
-        d.name = tt.data[i].dir_name;
-        d.totalSpace = pulTotal;
-        d.usedSpace = pulTotal - pulAvailable;
-        data.disksUsage.push_back (d);
-    }
-    
-    sigar_close(f);	
+	// Discs usage	
+	std::vector<FileSystem::Usage*> discsUsage = 
+		DiagnosticMgr::getInstance().getFileSystemInfo() -> dirUsages;
+
+	for(auto it = discsUsage.begin(); it != discsUsage.end(); ++it) {
+		TDiskUsage currentDisc;
+		currentDisc.name = (*it) -> dir;
+		currentDisc.totalSpace = (*it) -> total;
+		currentDisc.usedSpace = (*it) -> used;
+		data.disksUsage.push_back(currentDisc);
+		
+		std::cout << "\tName: " << currentDisc.name << std::endl;
+		std::cout << "\tTotal: " << currentDisc.totalSpace /(1024 * 1024) << "GB" << std::endl;
+		std::cout << "\tUsed: " << currentDisc.usedSpace /(1024 * 1024) << "GB" << std::endl;
+	}
 }
 
-int main() {
-    Config c;
-    
-	if (!c.fromFile ("config")) {
-       printf("Brak pliku konfiguracyjnego lub plik uszkodzony! \n");
-       system("pause");
-       return 0;
-    };
-    
-    
+int main(int argc, char** argv) {
+    const char *configPath = "config.cfg";
 
-	printf ("Port: %d\r\n", c.getInt ("port"));
+	printf ("Using config: %s\r\n", configPath);	
+	Config c;	
+    
+	if (! c.fromFile (configPath)) {
+        std::cout << "Plik uszkodzony lub nie istnieje!" << std::endl; 
+		return 1;
+    }
 
-    TSensorsData t;
-    readSensors(t);
+    Server serv;
+	//serv.connectServer();
+	serv.setup (c.getString ("host"), c.getInt ("port"), c.getString ("key"));
+	TPacketConfig& cfg = serv.getConfig ();
+	cfg.tempPath = c.getString ("tempPath", "");
+	cfg.tempDivider = c.getInt ("tempDivider", 1);
+	int srvCnt = c.getInt ("services", 0);
+	cfg.services.clear ();
+	for (int i = 0; i < srvCnt; i++)
+	{
+		TPacketConfig::TService s;
+		char key[20];
+		sprintf (key, "srv%d", i);
+		vector<string> parts = explode (c.getString (key, ""), ":");
+		if (parts.size () == 3)
+		{
+			s.name = parts[0];
+			s.tcp = atoi (parts[1].c_str ());
+			s.port = atoi (parts[2].c_str ());
+			cfg.services.push_back (s);
+		}
+	}
+	cfg.interval = c.getInt ("interval", 2000);
+	uint32_t lastSendTime = getTicks (), lastOldSendTime = getTicks ();
+	vector<TPacketAgentData> oldSensorsData;
+	
+	FILE *f = fopen ("olddata", "rb");
+	if (f)
+	{
+		uint32_t cnt;
+		fread (&cnt, sizeof(cnt), 1, f);
+		for (int i = 0; i < cnt; i++)
+		{
+			uint32_t size;
+			fread (&size, sizeof(size), 1, f);
 
-    system("pause");
+			buffer_t buf;
+			buf.resize (size);
+			fread (buf.data (), size, 1, f);
+
+			TPacketAgentData p;
+			p.fromBuffer (buf);
+			oldSensorsData.push_back (p);
+		}
+		fclose (f);
+	}
+
+	while(1)
+	{
+		serv.process();
+		usleep(10000);
+		TSensorsData d;
+
+		// gather data from senosors and send it to server or save in memory depending on connectino state
+		if (getTicks () - lastSendTime >= serv.getConfig ().interval)
+		{
+			readSensors(d);
+			//Krystian tu uÅ¼ywa funkcji ktÃ³ra jest w sensors.cpp postaci getSensorsData (d, serv.getConfig ());
+		
+			TPacketAgentData agentData;
+			agentData.id = 0;
+			agentData.data = d;
+			agentData.data.timestamp = time (0);
+
+			if (serv.isValid ())
+			{
+				agentData.oldData = 0;
+				serv.sendPacket (agentData);
+			}
+			else
+			{
+				oldSensorsData.push_back (agentData);
+				printf ("Packet saved\r\n");
+			}
+			lastSendTime = getTicks ();
+		}
+		// send old sensors data in periods of 10ms
+		if (oldSensorsData.size () > 0 && getTicks () - lastOldSendTime >= 10 && serv.isValid ())
+		{
+			TPacketAgentData p = oldSensorsData[0];
+			p.oldData = 1;
+			serv.sendPacket (p);
+			oldSensorsData.erase (oldSensorsData.begin ());
+			printf ("Sent old packet, %d left\n", oldSensorsData.size ());
+			lastOldSendTime = getTicks ();
+		}
+
+		// config file update
+		if (serv.configChanged ())
+		{
+			const TPacketConfig& cfg = serv.getConfig ();
+			c.setString ("tempPath", cfg.tempPath);
+			c.setInt ("tempDivider", cfg.tempDivider);
+			c.setInt ("services", cfg.services.size ());
+			for (int i = 0; i < cfg.services.size (); i++)
+			{
+				const TPacketConfig::TService s = cfg.services[i];
+				char key[20], val[100];
+				sprintf (key, "srv%d", i);
+				sprintf (val, "%s:%d:%d", s.name.c_str (), s.tcp, s.port);
+				c.setString (key, val);
+			}
+			c.setInt ("interval", cfg.interval);
+			c.saveToFile (configPath);
+			serv.configApplied ();
+		}
+	}
+
+	// save old data in order to send it to server when connected
+	f = fopen ("olddata", "wb");
+
+	buffer_t buf;
+	uint32_t cnt = oldSensorsData.size ();
+	printf ("Saving data (%d to save)...\n", cnt);
+	buf.append (cnt);
+	fwrite (buf.data (), buf.size (), 1, f);
+	for (int i = 0; i < oldSensorsData.size (); i++)
+	{
+		buffer_t buf2;
+		oldSensorsData[i].toBuffer (buf2);
+		uint32_t size = buf2.size ();
+
+		fwrite (&size, sizeof(size), 1, f);
+		fwrite (buf2.data (), buf2.size (), 1, f);
+	}
+	printf ("Data saved\n");
+
+	fclose (f);
+
+    //system("pause");
     return 0;
 }

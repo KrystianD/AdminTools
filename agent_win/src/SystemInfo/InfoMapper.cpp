@@ -162,10 +162,12 @@ FileSystem::Details* InfoMapper::sigarFileSystemToFsDetails( sigar_file_system_t
 	return result;
 }
 
-FileSystem::Usage* SystemInfo::InfoMapper::sigarFileSystemUsageToFsUsage( sigar_file_system_usage_t* fsData )
+FileSystem::Usage* SystemInfo::InfoMapper::sigarFileSystemUsageToFsUsage( sigar_file_system_usage_t* fsData, std::string dirName )
 {
 	FileSystem::Usage* result = new FileSystem::Usage();
 	if(!fsData) return result;
+
+	result -> dir = dirName;
 
 	result -> percent_use = fsData -> use_percent;
 	result -> total = fsData -> total;

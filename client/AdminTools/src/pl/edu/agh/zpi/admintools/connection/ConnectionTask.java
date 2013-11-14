@@ -4,9 +4,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import pl.edu.agh.zpi.admintools.AdminTools;
 import pl.edu.agh.zpi.admintools.connection.packets.IPacket;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketAgentsData;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketAuthKey;
@@ -59,7 +62,7 @@ public class ConnectionTask implements Runnable {
 				try {
 					processConnecting();
 				} catch (Exception e) {
-					e.printStackTrace();
+					processNetworkError(e);
 					state = State.IDLE;
 				}
 				break;
@@ -127,8 +130,11 @@ public class ConnectionTask implements Runnable {
 	}
 
 	private void processConnecting() throws Exception {
+		Log.d("qwe", "ConnectionTask.processConnecting() " + host + " " + port);
 		InetAddress address = InetAddress.getByName(host);
-		socket = new Socket(address, port);
+		InetSocketAddress socketAddress = new InetSocketAddress(address, port);
+		socket = new Socket();
+		socket.connect(socketAddress, 1500);
 
 		input = socket.getInputStream();
 		output = socket.getOutputStream();
@@ -136,7 +142,7 @@ public class ConnectionTask implements Runnable {
 		processAuthKey();
 
 		callback(CONNECTED, null);
-
+		
 		state = State.STARTING;
 	}
 
@@ -246,6 +252,7 @@ public class ConnectionTask implements Runnable {
 	}
 
 	private void readPacket(IPacket packet, short size) throws Exception {
+		Log.d("qwe", "ConnectionTask.readPacket() size = " + size);
 		byte[] data = new byte[size];
 		long start = System.currentTimeMillis();
 		while (input.available() < size) {
@@ -285,7 +292,7 @@ public class ConnectionTask implements Runnable {
 				b.putSerializable(PacketConfig.PACKET_CONFIG, data);
 				break;
 			case CONNECTION_ERROR:
-				// nothing to send
+				b.putSerializable(AdminTools.NETWORK_ERROR, data);
 				break;
 			case STATS_REPLY:
 				b.putSerializable(PacketStatsReply.PACKET_STATS_REPLY, data);
@@ -306,16 +313,15 @@ public class ConnectionTask implements Runnable {
 
 	public synchronized void connect(String host, int port, String key, short interval) {
 		Log.d("qwe", "ConnectionTask.connect()" + state);
-		if ((!isConnected() && (this.port != port || this.host != host || !this.key.equals(key) || this.interval != interval))) {
+		Log.d("qwe", "ConnectionTask.connect() " + host + " " + port + " " + key + " " + interval);
+		if ((!isConnected || this.port != port || this.host != host || !this.key.equals(key) || this.interval != interval)) {
 			this.host = host;
 			this.port = port;
 			this.key = key;
 			this.interval = interval;
 			state = State.CONNECTING;
 		} else {
-			//if (state == State.IDLE) {
-				state = State.STARTING;
-			//}
+			state = State.STARTING;
 			callback(CONNECTED, null);
 		}
 	}
@@ -357,6 +363,6 @@ public class ConnectionTask implements Runnable {
 		host = "";
 		port = 0;
 		isConnected = false;
-		callback(CONNECTION_ERROR,null);
+		callback(CONNECTION_ERROR,e);
 	}
 }
