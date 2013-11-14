@@ -215,7 +215,10 @@ void Client::processPacket (int size)
 		if (p.fromBuffer (buf))
 		{
 			p.id = dbAgent.id;
-			p.name = ip;
+			if (dbAgent.name.size () == 0)
+				p.name = ip;
+			else
+				p.name = dbAgent.name + " (" + ip + ")";
 			if (p.oldData)
 			{
 				oldData.push_back (p.data);
@@ -343,6 +346,7 @@ void Client::sendConfig ()
 void Client::agentToConfig (const TDBAgent& dbAgent, TPacketConfig& config)
 {
 	config.agentId = dbAgent.id;
+	config.name = dbAgent.name;
 	config.services.clear ();
 	for (int i = 0; i < dbAgent.services.size (); i++)
 	{
@@ -359,6 +363,7 @@ void Client::agentToConfig (const TDBAgent& dbAgent, TPacketConfig& config)
 void Client::configToAgent (const TPacketConfig& config, TDBAgent& dbAgent)
 {
 	dbAgent.id = config.agentId;
+	dbAgent.name = config.name;
 	dbAgent.services.clear ();
 	for (int i = 0; i < config.services.size (); i++)
 	{
@@ -376,18 +381,13 @@ bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 {
 	TPacketStatsReply r;
 
-	uint32_t base = 1383519600;
 	uint32_t start = req.startDate;
 	uint32_t end = req.endDate;
 
-	uint32_t s = getTicks ();
 	vector<TSensorsRecord> rec;
 	if (!DB::getRecords (req.agentId, start, end - 1, rec))
 		return false;
-	uint32_t e = getTicks ();
-	// printf ("fetch time: %d\n", e - s);
 
-	s = getTicks ();
 	int pointsCount = req.points;
 	if (pointsCount == 0)
 		return false;
@@ -473,9 +473,6 @@ bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 
 		pointIdx++;
 	}
-	e = getTicks ();
-	printf ("pts: %d\n", r.points.size ());
-	// printf ("parse time: %d\n", e - s);
 	
 	sendPacket (r);
 	lastPingTime = getTicks ();

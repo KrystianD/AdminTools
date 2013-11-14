@@ -372,6 +372,8 @@ public:
 	vector<TPacketConfig::TService> services;
 	//! Time interval.
 	uint16_t interval;
+	//! Agent name.
+	string name;
 
 	/**
 	 *	\fn virtual int getType()
@@ -399,6 +401,7 @@ public:
 			append (buf, services[i].port);
 		}
 		append (buf, interval);
+		append (buf, name);
 	}
 	/**
 	 *	\fn virtual bool fromBuffer(buffer_t& buf)
@@ -424,6 +427,7 @@ public:
 			services.push_back (s);
 		}
 		if (!fetch (buf, interval)) return false;
+		if (!fetch (buf, name)) return false;
 		return true;
 	}
 };

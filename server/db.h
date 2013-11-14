@@ -183,6 +183,7 @@ public:
 	 */
 	static bool getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<TSensorsRecord>& records);
 
+private:
 	/**
 	 *	\fn static bool execute (const string& query)
 	 *	\brief Execute given SQL query.
