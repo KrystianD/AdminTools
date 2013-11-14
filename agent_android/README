@@ -1,0 +1,13 @@
+- skompilowana binarka dla ARM'a, wystarczy wrzucić na partycję
+  podmontowaną bez noexec czyli:
+
+na kompie:
+adb push config /storage/sdcard0/
+adb push client /storage/sdcard0/
+
+w adb shell (zrootowanym):
+su
+mount -oremount,rw /storage/sdcard0
+cd /storage/sdcard0
+chmod 777 client
+./client -c config

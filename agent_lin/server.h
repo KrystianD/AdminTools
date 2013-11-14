@@ -56,7 +56,7 @@ public:
 	bool configChanged () { return m_configChanged; }
 	/**
 	 *	\fn void configApplied()
-	 *	\brief Set configuration change flag if new congif applied.
+	 *	\brief Set configuration change flag if new config applied.
 	 *	\return None.
 	 */
 	void configApplied () { m_configChanged = false; }

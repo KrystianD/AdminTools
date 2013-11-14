@@ -1,0 +1,14 @@
+host=89.69.157.145
+interval=4000
+key=PRMQAMKTDIMZWFGI
+port=1234
+services=3
+srv0=http:1:80
+srv1=adminT:0:1234
+srv2=udp test:0:1234
+srv3=cups:1:139
+srv4=FTP
+temp=/sys/class/hwmon/hwmon0/device/temp1_input
+tempDivider=1
+tempPath=
+temp_div=1000
