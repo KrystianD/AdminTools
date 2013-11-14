@@ -472,6 +472,7 @@ bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 		pointIdx++;
 	}
 	e = getTicks ();
+	printf ("pts: %d\n", r.points.size ());
 	// printf ("parse time: %d\n", e - s);
 	
 	sendPacket (r);

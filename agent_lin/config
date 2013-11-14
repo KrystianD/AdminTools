@@ -1,11 +1,11 @@
 host=127.0.0.1
-interval=2000
+interval=4000
 key=UPDKPRHMPQRJXRET
 port=1234
-services=1
+services=3
 srv0=http:1:80
-srv1=ssh:1:22
-srv2=dns:0:53
+srv1=adminT:1:1234
+srv2=udp test:0:1234
 srv3=cups:1:139
 srv4=FTP
 temp=/sys/class/hwmon/hwmon0/device/temp1_input

@@ -296,7 +296,7 @@ public:
 	virtual int getType () { return PACKET_STATS_REPLY; }
 	virtual void toBuffer (buffer_t& buf)
 	{
-		append (buf, points);
+		buf.append (points);
 	}
 	virtual bool fromBuffer (buffer_t& buf)
 	{
