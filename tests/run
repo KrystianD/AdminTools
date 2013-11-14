@@ -1,0 +1,6 @@
+make
+./config_unittest
+./sensors_unittest
+./kutils_unittest
+./common_unittest
+./packets_unittest
