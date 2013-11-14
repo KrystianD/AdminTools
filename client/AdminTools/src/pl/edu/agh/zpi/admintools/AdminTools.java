@@ -5,7 +5,6 @@ TODO obsługa headerTimeout - teraz zawiesza się przy próbie zalogowania
 
 package pl.edu.agh.zpi.admintools;
 
-import java.net.ConnectException;
 import java.net.InetAddress;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -79,7 +78,7 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		
 		connectionSettings = getSharedPreferences(
-					CONN_PREFS_NAME, MODE_PRIVATE);
+					CONN_PREFS_NAME, MODE_MULTI_PROCESS);
 		
 		editTextHost = (EditText) findViewById(R.id.editText_IP);
 		editTextPort = (EditText) findViewById(R.id.editText_Port);
@@ -317,11 +316,12 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 						public void onClick(DialogInterface dialog, int which) {
 							EditText editText = (EditText) dialogView
 									.findViewById(R.id.editText_dialog_put_key);
-							String key = editText.getText().toString();
+							String newKey = editText.getText().toString();
 							SharedPreferences.Editor editor = connectionSettings
 									.edit();
-							editor.putString(KEY, key);
+							editor.putString(KEY, newKey);
 							editor.commit();
+							key = newKey;
 						}
 					});
 			builder.setNegativeButton(R.string.cancel,

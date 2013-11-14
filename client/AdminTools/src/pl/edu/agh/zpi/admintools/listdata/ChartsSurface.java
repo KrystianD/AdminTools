@@ -1,6 +1,7 @@
 package pl.edu.agh.zpi.admintools.listdata;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import pl.edu.agh.zpi.admintools.ChartsActivity;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketStatsReply;
@@ -58,22 +59,31 @@ public class ChartsSurface extends SurfaceView implements
 		switch(type){
 		case PacketStatsRequest.CPU:
 			minVal = 0;
-			maxVal = 10;
+			maxVal = Collections.max(data)*10+20;
 			context.setAxis((int)minVal, (int)maxVal);
+			for(int i = 0; i < data.size() ; i++ ){
+				data.set(i, data.get(i)*10);
+			}
 			break;
 		case PacketStatsRequest.DISK:
 			minVal = 0;
-			maxVal = 1;
-			context.setAxis((int)minVal*100, (int)maxVal*100);
+			maxVal = 100;
+			for(int i = 0; i < data.size() ; i++ ){
+				data.set(i, data.get(i)*100);
+			}
+			context.setAxis((int)minVal, (int)maxVal);
 			break;
 		case PacketStatsRequest.RAM:
 			minVal = 0;
-			maxVal = 1;
-			context.setAxis((int)minVal*100, (int)maxVal*100);
+			maxVal = 100;
+			context.setAxis((int)minVal, (int)maxVal);
+			for(int i = 0; i < data.size() ; i++ ){
+				data.set(i, data.get(i)*100);
+			}
 			break;
 		case PacketStatsRequest.TEMP:
 			minVal = 0;
-			maxVal = 110;
+			maxVal = 130;
 			context.setAxis((int)minVal, (int)maxVal);
 			break;
 		default:
@@ -91,8 +101,6 @@ public class ChartsSurface extends SurfaceView implements
 	}
 	
 	private void draw() {
-		if (values == null || values.size() == 0)
-			return;
 		Canvas c = null;
 		Paint paint = new Paint();
 		paint.setColor(Color.WHITE);
@@ -101,14 +109,25 @@ public class ChartsSurface extends SurfaceView implements
 
 			c.drawRect(new Rect(0, 0, c.getWidth(), c.getHeight()), paint);
 
+			if (values == null || values.size() == 0)
+				return;
+			
+			paint.setColor(Color.rgb(100,100,100));
+			
+			for(int i = c.getHeight() ; i > 0 ; i-= (c.getHeight()/maxVal)*10 ){
+				c.drawLine(0, i, c.getWidth(), i, paint);
+			}
+			
 			paint.setColor(Color.BLUE);
 			paint.setStyle(Paint.Style.STROKE);
-
+			paint.setFlags(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
+			paint.setStrokeWidth(2.0f);
+			
 			boolean isEmpty = true;
 			Path linePath = new Path();
 			for (int i = 2; i < values.size() - 1; i++) {
-				if (values.get(i) == -1 || values.get(i + 1) == -1
-						|| values.get(i - 1) == -1 || values.get(i - 2) == -1) {
+				if (values.get(i) < 0 || values.get(i + 1) < 0
+						|| values.get(i - 1) < 0 || values.get(i - 2) < 0) {
 					isEmpty = true;
 					continue;
 				}
@@ -149,7 +168,9 @@ public class ChartsSurface extends SurfaceView implements
 			}
 			c.drawPath(linePath, paint);
 		} finally {
-			holder.unlockCanvasAndPost(c);
+			if(c!=null){
+				holder.unlockCanvasAndPost(c);
+			}
 			c = null;
 		}
 	}
