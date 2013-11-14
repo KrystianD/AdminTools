@@ -382,13 +382,15 @@ bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 
 	uint32_t s = getTicks ();
 	vector<TSensorsRecord> rec;
-	if (!DB::getRecords (1, start, end - 1, rec))
+	if (!DB::getRecords (req.agentId, start, end - 1, rec))
 		return false;
 	uint32_t e = getTicks ();
 	// printf ("fetch time: %d\n", e - s);
 
 	s = getTicks ();
 	int pointsCount = req.points;
+	if (pointsCount == 0)
+		return false;
 	vector<int16_t> points;
 
 	uint32_t cur = start;

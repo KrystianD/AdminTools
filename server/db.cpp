@@ -54,20 +54,13 @@ bool DB::createTables ()
 	if (!execute (str))
 		return false;
 
-	str = "INSERT INTO agents VALUES (1, 'c980f323bba3186f7093176f46c883fc', '192.168.1.2', 'http:80,ssh:22,dns:53', '', 2000);";
-
-	if (!execute (str))
-		return false;
-
 	return true;
 }
 
 bool DB::generateNewKey (char key[16])
 {
 	for (int i = 0; i < 16; i++)
-	{
 		key[i] = rand () % ('Z' - 'A' + 1) + 'A';
-	}
 
 	string query = "INSERT INTO agents(key) VALUES (?);";
 	sqlite3_stmt *stm;

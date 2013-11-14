@@ -99,6 +99,7 @@ void getSensorsData (TSensorsData& data, const TPacketConfig& config)
 	data.uptime = info.uptime;
 	data.freeRam = info.freeram + info.bufferram;
 	data.totalRam = info.totalram;
+	// printf ("%d\n", info.mem_unit);
 	data.cpuUsage = info.loads[0] / 65536.0f;
 
 	FILE *f = fopen ("/proc/mounts", "rt");
