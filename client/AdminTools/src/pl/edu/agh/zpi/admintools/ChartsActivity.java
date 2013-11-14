@@ -81,7 +81,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		port = this.getIntent().getIntExtra(AdminTools.PORT, 0);
 		key = this.getIntent().getStringExtra(AdminTools.KEY);
 		interval = this.getIntent().getIntExtra(AdminTools.INTERVAL, 1000);
-
+		
 		surface = (ChartsSurface) findViewById(R.id.surfaceView_charts);
 		timeStart = (Button) findViewById(R.id.button_date_start);
 		timeEnd = (Button) findViewById(R.id.button_date_end);
@@ -111,6 +111,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		timeStart.setText(today);
 		timeEnd.setText(tomorrow);
 
+		Log.d("qwe", "charts agent ID "+agent.getId() + "name " + agent.getName());
 		statsRequest.setAgentId(agent.getId());
 		statsRequest.setDataType(PacketStatsRequest.TEMP);
 		statsRequest.setDiskName("");
@@ -120,7 +121,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		isServiceBinded = bindService(
 				new Intent(this, ConnectionService.class), this,
 				Context.BIND_AUTO_CREATE);
-
+		
 		setResult(RESULT_OK);
 	}
 
@@ -177,6 +178,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		sendMessageToService(ConnectionService.CONNECT, host, port, key,
 				interval);
 		sendMessageToService(ConnectionService.STOP);
+		submit(null);
 	}
 
 	@Override

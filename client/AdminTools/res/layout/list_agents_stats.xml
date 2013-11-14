@@ -5,124 +5,137 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/textView_list_agent_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TableLayout
-        android:id="@+id/tableLayout_list_table"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp" >
-
-        <TableRow
-            android:id="@+id/tableRow_list_temp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <TextView
-                android:id="@+id/textView_list_temp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/temperature" />
-
-            <TextView
-                android:id="@+id/textView_list_temp_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow_list_cpu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <TextView
-                android:id="@+id/textView_list_cpu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/cpu" />
-
-            <TextView
-                android:id="@+id/textView_list_cpu_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow_list_ram"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <TextView
-                android:id="@+id/textView_list_ram"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ram" />
-
-            <TextView
-                android:id="@+id/textView_list_ram_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow_list_uptime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <TextView
-                android:id="@+id/textView_list_uptime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/uptime" />
-
-            <TextView
-                android:id="@+id/textView_list_uptime_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </TableRow>
-    </TableLayout>
-
-    <Button
-        android:id="@+id/button_list_settings"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/action_settings"
-        android:onClick="manageSettings" />
-
     <ToggleButton
-        android:id="@+id/toggleButton_list_services"
+        android:id="@+id/toggleButton_list_agent_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="toggleTable"
-        android:textOff="@string/services"
-        android:textOn="@string/services" />
+        android:onClick="toggleTable" />
 
-    <TableLayout
-        android:id="@+id/tableLayout_list_services"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/linearLayout_list_agent_data"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:visibility="gone" >
-    </TableLayout>
 
-    <ToggleButton
-        android:id="@+id/toggleButton_list_disks"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="toggleTable"
-        android:textOff="@string/disks"
-        android:textOn="@string/disks" />
+        <TableLayout
+            android:id="@+id/tableLayout_list_table"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" >
 
-    <TableLayout
-        android:id="@+id/tableLayout_list_disks"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone" >
-    </TableLayout>
+            <TableRow
+                android:id="@+id/tableRow_list_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textView_list_temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/temperature" />
+
+                <TextView
+                    android:id="@+id/textView_list_temp_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRow_list_cpu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textView_list_cpu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cpu" />
+
+                <TextView
+                    android:id="@+id/textView_list_cpu_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRow_list_ram"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textView_list_ram"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ram" />
+
+                <TextView
+                    android:id="@+id/textView_list_ram_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/tableRow_list_uptime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textView_list_uptime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/uptime" />
+
+                <TextView
+                    android:id="@+id/textView_list_uptime_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+        </TableLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/button_list_settings"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="manageSettings"
+                android:text="@string/more" />
+
+            <ToggleButton
+                android:id="@+id/toggleButton_list_services"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="toggleTable"
+                android:textOff="@string/services"
+                android:textOn="@string/services" />
+
+            <ToggleButton
+                android:id="@+id/toggleButton_list_disks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="toggleTable"
+                android:textOff="@string/disks"
+                android:textOn="@string/disks" />
+        </LinearLayout>
+
+        <TableLayout
+            android:id="@+id/tableLayout_list_services"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" >
+        </TableLayout>
+
+        <TableLayout
+            android:id="@+id/tableLayout_list_disks"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" >
+        </TableLayout>
+    </LinearLayout>
 
 </LinearLayout>

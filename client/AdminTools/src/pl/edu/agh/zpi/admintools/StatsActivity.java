@@ -66,7 +66,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 	private TextWatcher shortTextWatcher = new ShortTextWatcher();
 	private OnFocusChangeListener shortFocusChangeListener = new ShortOnFocusChangeListener();
 
-	SharedPreferences connectionSettings;
+	private SharedPreferences connectionSettings;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -75,12 +75,18 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		connectionSettings = getSharedPreferences(AdminTools.CONN_PREFS_NAME,
-				MODE_PRIVATE);
+				MODE_MULTI_PROCESS);
 
-		host = this.getIntent().getStringExtra(AdminTools.HOST);
-		port = this.getIntent().getIntExtra(AdminTools.PORT, 0);
-		key = this.getIntent().getStringExtra(AdminTools.KEY);
-		interval = this.getIntent().getIntExtra(AdminTools.INTERVAL, 1000);
+		// host = this.getIntent().getStringExtra(AdminTools.HOST);
+		// port = this.getIntent().getIntExtra(AdminTools.PORT, 0);
+		// key = this.getIntent().getStringExtra(AdminTools.KEY);
+		// interval = this.getIntent().getIntExtra(AdminTools.INTERVAL, 1000);
+
+		host = connectionSettings.getString(AdminTools.HOST, "");
+		port = Integer.parseInt(connectionSettings.getString(AdminTools.PORT,
+				""));
+		key = connectionSettings.getString(AdminTools.KEY, "");
+		interval = connectionSettings.getInt(AdminTools.INTERVAL, 0);
 
 		TextView tv = (TextView) findViewById(R.id.textView_server_name);
 		String serverName = getIntent().getStringExtra(AdminTools.HOST) + ":"
@@ -234,9 +240,9 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			break;
 		case CHARTS:
 			AgentData agent = null;
-			for(int i = 0 ; i < agentsArray.getCount() ; i++){
+			for (int i = 0; i < agentsArray.getCount(); i++) {
 				AgentData tmp = agentsArray.getItem(i);
-				if(tmp.getId() == id){
+				if (tmp.getId() == id) {
 					agent = tmp;
 					break;
 				}
@@ -273,6 +279,9 @@ public class StatsActivity extends Activity implements ServiceConnection,
 								String intervalStr = ((EditText) dialogView
 										.findViewById(R.id.editText_dialog_config_interval))
 										.getText().toString();
+								String agentName = ((EditText) dialogView
+										.findViewById(R.id.editText_dialog_config_name))
+										.getText().toString();
 
 								short tempDivider = Short
 										.parseShort(tempDivStr);
@@ -302,7 +311,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 								PacketConfig pc = new PacketConfig(agentId,
 										tempPath, tempDivider, servicesConfig,
-										interval);
+										interval, agentName);
 
 								Log.d("qwe", pc.toString());
 
@@ -325,6 +334,8 @@ public class StatsActivity extends Activity implements ServiceConnection,
 				.findViewById(R.id.editText_dialog_config_tempDivider);
 		EditText interval = (EditText) d
 				.findViewById(R.id.editText_dialog_config_interval);
+		EditText name = (EditText) d
+				.findViewById(R.id.editText_dialog_config_name);
 		LinearLayout servicesLayout = (LinearLayout) d
 				.findViewById(R.id.linearLayout_dialog_config_services);
 
@@ -336,7 +347,8 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		tempPath.setText(pc.getTempPath());
 		tempDivider.setText("" + pc.getTempDivider());
 		interval.setText("" + pc.getInterval());
-
+		name.setText(pc.getName());
+		
 		ArrayList<ServiceConfig> serviceArray = pc.getServicesConfig();
 		for (ServiceConfig sc : serviceArray) {
 			View child = getLayoutInflater()
@@ -344,7 +356,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 							servicesLayout, false);
 			servicesLayout.addView(child);
 
-			EditText name = (EditText) child
+			EditText serviceName = (EditText) child
 					.findViewById(R.id.editText_dialog_agent_config_service_name);
 			EditText port = (EditText) child
 					.findViewById(R.id.editText_dialog_agent_config_service_port);
@@ -354,7 +366,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			port.addTextChangedListener(shortTextWatcher);
 			port.setOnFocusChangeListener(shortFocusChangeListener);
 
-			name.setText(sc.getName());
+			serviceName.setText(sc.getName());
 			port.setText("" + sc.getPort());
 			isTcp.setChecked(sc.isTCP());
 		}
@@ -452,7 +464,8 @@ public class StatsActivity extends Activity implements ServiceConnection,
 	}
 
 	public void manageSettings(View view) {
-		short id = (short) view.getId();
+		short id = (Short) view.getTag();
+		// Log.d("qwe","MANAGESETIING" + id);
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.choose_agent_action);
 		builder.setItems(R.array.choose_agent_array,

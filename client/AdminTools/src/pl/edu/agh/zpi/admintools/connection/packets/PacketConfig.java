@@ -16,22 +16,25 @@ public class PacketConfig implements IPacket, Serializable {
 	private short tempDivider;
 	private ArrayList<ServiceConfig> servicesConfig = new ArrayList<ServiceConfig>();
 	private short interval;
+	private String name = "";
 
 	public PacketConfig() {
 	}
 
 	public PacketConfig(short agentId, String tempPath, short tempDivider,
-			ArrayList<ServiceConfig> servicesConfig, short interval) {
+			ArrayList<ServiceConfig> servicesConfig, short interval, String name) {
 		this.agentId = agentId;
 		this.tempPath = tempPath;
 		this.tempDivider = tempDivider;
 		this.servicesConfig = servicesConfig;
 		this.interval = interval;
+		this.name = name;
 	}
 
 	@Override
 	public byte[] toByteArray() {
 		byte[] tempPath = this.tempPath.getBytes();
+		byte[] name = this.name.getBytes();
 		short servicesConfigAmount = (short) servicesConfig.size();
 		short servicesConfigSize = 0;
 
@@ -40,7 +43,7 @@ public class PacketConfig implements IPacket, Serializable {
 		}
 
 		ByteBuffer bArray = ByteBuffer.allocate(2 + 2 + tempPath.length + 2 + 2
-				+ servicesConfigSize + 2);
+				+ servicesConfigSize + 2 + 2 + name.length);
 		bArray.order(ByteOrder.LITTLE_ENDIAN);
 
 		bArray.putShort(agentId);
@@ -52,7 +55,9 @@ public class PacketConfig implements IPacket, Serializable {
 			bArray.put(sc.toByteArray());
 		}
 		bArray.putShort(interval);
-
+		bArray.putShort((short) name.length);
+		bArray.put(name);
+		
 		return bArray.array();
 	}
 
@@ -71,6 +76,10 @@ public class PacketConfig implements IPacket, Serializable {
 			servicesConfig.add(ServiceConfig.fromByteBuffer(bArray));
 		}
 		interval = bArray.getShort();
+		for(short i = bArray.getShort(); i > 0 ; i--){
+			char c = (char)bArray.get();
+			name += c;
+		}
 	}
 
 	public void addServiceConfig(ServiceConfig sc){
@@ -102,6 +111,10 @@ public class PacketConfig implements IPacket, Serializable {
 		return interval;
 	}
 
+	public String getName(){
+		return name;
+	}
+	
 	@Override
 	public String toString() {
 		return "PacketConfig [agentId=" + agentId + ", tempPath=" + tempPath

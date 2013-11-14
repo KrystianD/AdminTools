@@ -58,5 +58,6 @@
     <string name="TEMP">TEMP</string>
     <string name="DISK">DISK</string>
     <string name="refresh">Refresh</string>
+    <string name="more">More</string>
 
 </resources>
