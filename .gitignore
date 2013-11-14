@@ -2,6 +2,7 @@
 ## Eclipse
 #################
 
+*.gch
 data.db*
 publish.sh
 *.swo
