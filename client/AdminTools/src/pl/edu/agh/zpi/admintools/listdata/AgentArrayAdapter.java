@@ -30,10 +30,22 @@ import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+/**
+ *	\class AgentArrayAdapter
+ *	\brief Adapter for AgentData arrays for easy agent data visualization.
+ */
 public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
+	//! App environment context.
 	private final Context context;
+	//! Memory divider (for byte to gigabyte calculations).
 	private final double divider = 1024 * 1024 * 1024; // GB
+<<<<<<< HEAD
 	private final double tempAlertLevel = 85;
+=======
+	//! Temperature alert threshold.
+	private final double tempAlertLevel = 65;
+	//! HDD usage alert percent threshold.
+>>>>>>> 079f7010a30cf4b534ca5febc24be1a237ffd890
 	private final double HDDAlertLevel = 0.95;
 
 	public AgentArrayAdapter(Context context) {
