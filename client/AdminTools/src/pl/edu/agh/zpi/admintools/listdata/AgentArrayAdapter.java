@@ -33,7 +33,7 @@ import android.widget.ToggleButton;
 public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 	private final Context context;
 	private final double divider = 1024 * 1024 * 1024; // GB
-	private final double tempAlertLevel = 65;
+	private final double tempAlertLevel = 85;
 	private final double HDDAlertLevel = 0.95;
 
 	public AgentArrayAdapter(Context context) {
@@ -268,8 +268,10 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 				.setContentText("Something is wrong!")
 				.setAutoCancel(true)
 				.setSmallIcon(R.drawable.ic_launcher);
+		Notification noti = builder.build();
+		noti.flags |= Notification.FLAG_AUTO_CANCEL;
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(1, builder.build());
+		mNotificationManager.notify(1, noti);
 	}
 }

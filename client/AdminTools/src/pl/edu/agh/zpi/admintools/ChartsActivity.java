@@ -191,6 +191,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	}
 
 	public void submit(View view) {
+		Log.d("qwe", "ChartsActivity.submit()");
 		statsRequest
 				.setPoints((short) (surface.getWidth() / ChartsSurface.ACCURACY));
 		lastSend = statsRequest;
@@ -226,6 +227,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	}
 
 	public void setAxis(int minVal, int maxVal) {
+		Log.d("qwe", "ChartsActivity.setAxis()");
 		String start = "", end = "";
 		Calendar c = Calendar.getInstance();
 
@@ -265,6 +267,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	}
 
 	public void updateDate() {
+		Log.d("qwe", "ChartsActivity.updateDate()");
 		String start = "", end = "";
 		Calendar c = Calendar.getInstance();
 
@@ -284,6 +287,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	}
 
 	public void setDate(View view) {
+		Log.d("qwe", "ChartsActivity.setDate()");
 		DialogFragment dateFragment = null;
 		if (view.getId() == R.id.button_date_start) {
 			dateFragment = new DatePickerFragment(statsRequest, this, true);
@@ -294,6 +298,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	}
 
 	public void setDataType(View view) {
+		Log.d("qwe", "ChartsActivity.setDataType()");
 		final LayoutInflater inflater = this.getLayoutInflater();
 		final View dialogView = inflater.inflate(R.layout.charts_config, null);
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -419,6 +424,7 @@ class DatePickerFragment extends DialogFragment implements
 	public DatePickerFragment(PacketStatsRequest packet, ChartsActivity parent,
 			boolean isStartTime) {
 		super();
+		Log.d("qwe", "DatePicker()");
 		this.isStartTime = isStartTime;
 		this.packet = packet;
 		this.parent = parent;
@@ -426,6 +432,7 @@ class DatePickerFragment extends DialogFragment implements
 
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
+		Log.d("qwe", "DatePicker.onCreateDialog()");
 		final Calendar c = Calendar.getInstance();
 		if (isStartTime) {
 			c.setTimeInMillis((long) packet.getStartDate() * 1000);
@@ -442,6 +449,7 @@ class DatePickerFragment extends DialogFragment implements
 	@Override
 	public void onDateSet(DatePicker view, int year, int monthOfYear,
 			int dayOfMonth) {
+		Log.d("qwe", "DatePicker.onDateSet()");
 		Calendar currentDate = Calendar.getInstance();
 		currentDate.set(Calendar.HOUR_OF_DAY, 0);
 		currentDate.set(Calendar.MINUTE, 0);
