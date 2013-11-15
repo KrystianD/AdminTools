@@ -1,6 +1,7 @@
 package pl.edu.agh.zpi.admintools;
 
 import java.util.ArrayList;
+import java.util.zip.Inflater;
 
 import pl.edu.agh.zpi.admintools.connection.ConnectionTask;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketAgentsData;
@@ -10,6 +11,8 @@ import pl.edu.agh.zpi.admintools.connection.packets.PacketKeyReply;
 import pl.edu.agh.zpi.admintools.connection.packets.ServiceConfig;
 import pl.edu.agh.zpi.admintools.listdata.AgentArrayAdapter;
 import pl.edu.agh.zpi.admintools.sensors.AgentData;
+import pl.edu.agh.zpi.admintools.sensors.DiskUsageData;
+import pl.edu.agh.zpi.admintools.sensors.SensorsData;
 import pl.edu.agh.zpi.admintools.utils.Handable;
 import pl.edu.agh.zpi.admintools.utils.IncomingHandler;
 import android.app.Activity;
@@ -22,6 +25,7 @@ import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
@@ -40,6 +44,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -48,6 +53,11 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		Handable {
 	private final static int SETTINGS = 0;
 	private final static int CHARTS = 1;
+
+	// ! Temperature alert threshold.
+	public static double tempAlertLevel = 85;
+	// ! HDD usage alert percent threshold.
+	public static double HDDAlertLevel = 0.95;
 
 	private ListView listView;
 	private AgentArrayAdapter agentsArray;
@@ -67,6 +77,9 @@ public class StatsActivity extends Activity implements ServiceConnection,
 	private OnFocusChangeListener shortFocusChangeListener = new ShortOnFocusChangeListener();
 
 	private SharedPreferences connectionSettings;
+
+	private LinearLayout linearLayoutAlertsInternal;
+	private LinearLayout linearLayoutAlertsBounding;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -94,6 +107,9 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		String serverName = host + ":" + port;
 		tv.setText(serverName);
 
+		linearLayoutAlertsInternal = (LinearLayout) findViewById(R.id.linearLayout_alerts_internal);
+		linearLayoutAlertsBounding = (LinearLayout) findViewById(R.id.linearLayout_alerts);
+		
 		agentsArray = new AgentArrayAdapter(this);
 		// longClickListener = new LongClickItemListener(this);
 
@@ -164,8 +180,13 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			PacketAgentsData pad = (PacketAgentsData) b
 					.get(PacketAgentsData.PACKET_AGENTS_DATA);
 
-			agentsArray.clear();
-			agentsArray.addAll(pad.getAgentsList());
+			ArrayList<AgentData> agents = pad.getAgentsList();
+			for (int i = 0; i < agents.size(); i++) {
+				AgentData agent = agents.get(i);
+				boolean isAlerted = checkAlert(agent, i);
+				agentsArray.set(i, agent, isAlerted);
+			}
+
 			agentsArray.notifyDataSetChanged();
 			break;
 		case ConnectionTask.AGENT_KEY:
@@ -233,12 +254,11 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		}
 	}
 
-	public void listenerFeedback(int which, short id) {
-		switch (which) {
-		case SETTINGS:
+	public void manageAgentListButtons(View view) {
+		short id = (Short) ((Button) view).getTag();
+		if (view.getId() == R.id.button_list_settings) {
 			sendMessageToService(ConnectionService.REQUEST_CONFIG, id);
-			break;
-		case CHARTS:
+		} else {
 			AgentData agent = null;
 			for (int i = 0; i < agentsArray.getCount(); i++) {
 				AgentData tmp = agentsArray.getItem(i);
@@ -253,18 +273,29 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			intent.putExtra(AdminTools.KEY, key);
 			intent.putExtra(ChartsActivity.AGENT, agent);
 			startActivityForResult(intent, AdminTools.CHARTS_ACTIVITY_CODE);
-			break;
 		}
 	}
 
 	private void buildSettingsDialog(PacketConfig pc) {
 		Log.d("qwe", pc.toString());
+
+		AgentData agent = null;
+		for (int i = 0; i < agentsArray.getCount(); i++) {
+			AgentData tmp = agentsArray.getItem(i);
+			if (tmp.getId() == pc.getAgentId()) {
+				agent = tmp;
+				break;
+			}
+		}
+		if (agent == null)
+			return;
+
 		LayoutInflater inflater = this.getLayoutInflater();
 		final short agentId = pc.getAgentId();
 		final View dialogView = inflater.inflate(R.layout.dialog_agent_config,
 				null);
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("ID: " + agentId);
+		builder.setTitle(agent.getName());
 		builder.setView(dialogView)
 				.setPositiveButton(R.string.save,
 						new DialogInterface.OnClickListener() {
@@ -459,19 +490,9 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		return super.onOptionsItemSelected(item);
 	}
 
+	// rozwijanie listy agentów
 	public void toggleTable(View view) {
 		agentsArray.notifyDataSetChanged();
-	}
-
-	public void manageSettings(View view) {
-		short id = (Short) view.getTag();
-		// Log.d("qwe","MANAGESETIING" + id);
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(R.string.choose_agent_action);
-		builder.setItems(R.array.choose_agent_array,
-				new MyDialogOnClickListener(this, id));
-
-		builder.show();
 	}
 
 	public void onDialogConfigButtonClicked(View view) {
@@ -504,6 +525,75 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
+
+	private boolean checkAlert(AgentData agent, int position) {
+		// TODO dołożyć obsługę tego paska o którym mówił
+		SensorsData sensorsData = agent.getData();
+		if (sensorsData.isTempValid()
+				&& sensorsData.getTemp() >= tempAlertLevel) {
+			setAlert(true, position, agent);
+			return true;
+		} else {
+			for (DiskUsageData dud : sensorsData.getDiskUsages()) {
+				double totalSpace = dud.getTotalSpace();
+				double usedSpace = dud.getUsedSpace();
+				if (usedSpace / totalSpace >= HDDAlertLevel) {
+					setAlert(true, position, agent);
+					return true;
+				}
+			}
+		}
+		setAlert(false, position, agent);
+		return false;
+	}
+
+	private void setAlert(boolean isAlerted, int position, AgentData agent) {
+		boolean added = false;
+		// i = 0; textView z napisem "Alerts"
+		for (int i = 1; i < linearLayoutAlertsInternal.getChildCount(); i++) {
+			View view = linearLayoutAlertsInternal.getChildAt(i);
+			if (view.getTag().equals(position)) {
+				if (!isAlerted) {
+					linearLayoutAlertsInternal.removeViewAt(i);
+				}
+				added = true;
+				break;
+			}
+		}
+		if (!added && isAlerted) {
+			LayoutInflater inflater = (LayoutInflater) this
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			TextView alert = (TextView)inflater.inflate(R.layout.alert_text_view, null, true);
+			
+			alert.setTag(position);
+			alert.setClickable(true);
+			alert.setTextColor(Color.RED);
+			alert.setText(agent.getName());
+			
+			linearLayoutAlertsInternal.addView(alert);
+		}
+		// jeżeli laout będzie za wysoki, ustawia 150dp, włącza się wtedy scrolling ^^
+		linearLayoutAlertsBounding.getLayoutParams().height = LayoutParams.WRAP_CONTENT;
+		final float scale = this.getResources().getDisplayMetrics().density;
+		int pixels = (int) (150 * scale + 0.5f);
+		if(linearLayoutAlertsBounding.getHeight() >= pixels ){
+			linearLayoutAlertsBounding.getLayoutParams().height = pixels;
+		}
+	}
+
+	public void findAgentByAlert(final View view) {
+		view.setBackgroundColor(Color.GREEN);
+		Log.d("qwe", "StatsActivity.findAgentByAlert " + view.getTag());
+		int position = (Integer) view.getTag();
+		listView.smoothScrollToPosition(position);
+		view.postDelayed(new Runnable() {	
+			@Override
+			public void run() {
+				view.setBackgroundColor(Color.TRANSPARENT);
+			}
+		}, 200);
+	}
+
 }
 
 /************************/
@@ -547,20 +637,5 @@ class ShortOnFocusChangeListener implements View.OnFocusChangeListener {
 		if (txt.equals("")) {
 			et.setText("0");
 		}
-	}
-}
-
-class MyDialogOnClickListener implements DialogInterface.OnClickListener {
-	private StatsActivity parent;
-	private short id;
-
-	public MyDialogOnClickListener(StatsActivity parent, short id) {
-		this.parent = parent;
-		this.id = id;
-	}
-
-	@Override
-	public void onClick(DialogInterface dialog, int which) {
-		parent.listenerFeedback(which, id);
 	}
 }

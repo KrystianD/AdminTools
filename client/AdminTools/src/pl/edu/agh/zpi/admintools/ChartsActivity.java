@@ -59,7 +59,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	private Button timeStart, timeEnd;
 	// private Button settings;
 	// private Button submit;
-	private TextView information;
+	private Button typeButton;
 	private TextView timeNew, timeOld;
 	private TextView valueMax, valueMin;
 
@@ -89,7 +89,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		timeEnd = (Button) findViewById(R.id.button_date_end);
 		// settings = (Button) findViewById(R.id.button_charts_settings);
 		// submit = (Button) findViewById(R.id.button_submit_charts);
-		information = (TextView) findViewById(R.id.textView_charts_what);
+		typeButton = (Button) findViewById(R.id.button_charts_settings);
 		timeNew = (TextView) findViewById(R.id.textView_charts_time_new);
 		timeOld = (TextView) findViewById(R.id.textView_charts_time_old);
 		valueMax = (TextView) findViewById(R.id.textView_charts_value_max);
@@ -249,21 +249,21 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		String info = "";
 		switch (lastSend.getDataType()) {
 		case PacketStatsRequest.CPU:
-			info += "CPU\n";
+			info += this.getString(R.string.cpu_chart) + "\n";
 			break;
 		case PacketStatsRequest.DISK:
-			info += "DISK\n";
+			info += this.getString(R.string.disk_chart) + "\n";
 			break;
 		case PacketStatsRequest.RAM:
-			info += "RAM\n";
+			info += this.getString(R.string.ram_chart) + "\n";
 			break;
 		case PacketStatsRequest.TEMP:
-			info += "TEMP\n";
+			info += this.getString(R.string.temp_chart) + "\n";
 			break;
 		default:
 			break;
 		}
-		information.setText(info + lastSend.getDiskName());
+		typeButton.setText(info);
 	}
 
 	public void updateDate() {
@@ -420,7 +420,8 @@ class DatePickerFragment extends DialogFragment implements
 	private boolean isStartTime;
 	private PacketStatsRequest packet;
 	private ChartsActivity parent;
-
+	private boolean wasSet;
+	
 	public DatePickerFragment(PacketStatsRequest packet, ChartsActivity parent,
 			boolean isStartTime) {
 		super();
@@ -428,6 +429,7 @@ class DatePickerFragment extends DialogFragment implements
 		this.isStartTime = isStartTime;
 		this.packet = packet;
 		this.parent = parent;
+		this.wasSet = false;
 	}
 
 	@Override
@@ -443,13 +445,16 @@ class DatePickerFragment extends DialogFragment implements
 		int month = c.get(Calendar.MONTH);
 		int day = c.get(Calendar.DAY_OF_MONTH);
 
-		return new DatePickerDialog(getActivity(), this, year, month, day);
+		return new DatePickerDialog(parent, this, year, month, day);
 	}
 
 	@Override
 	public void onDateSet(DatePicker view, int year, int monthOfYear,
 			int dayOfMonth) {
-		Log.d("qwe", "DatePicker.onDateSet()");
+		if(wasSet)
+			return;
+		wasSet = true;
+		Log.d("qwe", "DatePicker.onDateSet()" + view.getId());
 		Calendar currentDate = Calendar.getInstance();
 		currentDate.set(Calendar.HOUR_OF_DAY, 0);
 		currentDate.set(Calendar.MINUTE, 0);
@@ -471,7 +476,7 @@ class DatePickerFragment extends DialogFragment implements
 			if (c.getTimeInMillis() < monthAgo.getTimeInMillis()) {
 				packet.setStartDate((int) (monthAgo.getTimeInMillis() / 1000));
 			} else if ((int) (c.getTimeInMillis() / 1000) >= packet
-					.getStartDate()) {
+					.getEndDate()) {
 				long time = (long) packet.getEndDate();
 				time *= 1000;
 				c.setTimeInMillis(time);
@@ -483,7 +488,7 @@ class DatePickerFragment extends DialogFragment implements
 			if (c.getTimeInMillis() > tomorrow.getTimeInMillis()) {
 				packet.setEndDate((int) (tomorrow.getTimeInMillis() / 1000));
 			} else if ((int) (c.getTimeInMillis() / 1000) <= packet
-					.getEndDate()) {
+					.getStartDate()) {
 				long time = (long) packet.getStartDate();
 				time *= 1000;
 				c.setTimeInMillis(time);

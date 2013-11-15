@@ -90,4 +90,10 @@ public class AgentData implements Serializable{
 			return false;
 		return ((AgentData)o).id == this.id;
 	}
+	
+	public void setAgentData(AgentData agent){
+		this.id = agent.id;
+		this.name = agent.name;
+		this.data = agent.data;
+	}
 }

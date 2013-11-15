@@ -54,10 +54,12 @@
     <string name="submit">Submit</string>
     <string name="na">N/A</string>
     <string name="cpu_chart">CPU</string>
-    <string name="RAM">RAM</string>
-    <string name="TEMP">TEMP</string>
-    <string name="DISK">DISK</string>
+    <string name="ram_chart">RAM</string>
+    <string name="temp_chart">TEMP</string>
+    <string name="disk_chart">DISK</string>
     <string name="refresh">Refresh</string>
     <string name="more">More</string>
+    <string name="charts">Charts</string>
+    <string name="alerts">Alerts</string>
 
 </resources>

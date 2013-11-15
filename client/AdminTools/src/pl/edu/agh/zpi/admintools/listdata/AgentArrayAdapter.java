@@ -31,19 +31,17 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 /**
- *	\class AgentArrayAdapter
- *	\brief Adapter for AgentData arrays for easy agent data visualization.
+ * \class AgentArrayAdapter \brief Adapter for AgentData arrays for easy agent
+ * data visualization.
  */
 public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
-	//! App environment context.
+	// ! App environment context.
 	private final Context context;
-	//! Memory divider (for byte to gigabyte calculations).
-	private final double divider = 1024 * 1024 * 1024; // GB
-	//! Temperature alert threshold.
-	private final double tempAlertLevel = 85;
-	//! HDD usage alert percent threshold.
-	private final double HDDAlertLevel = 0.95;
-
+	// ! Memory divider (for byte to gigabyte calculations).
+	public static final double DIVIDER = 1024 * 1024 * 1024; // GB
+	
+	private ArrayList<Boolean> alertedList = new ArrayList<Boolean>();
+	
 	public AgentArrayAdapter(Context context) {
 		super(context, R.layout.list_agents_stats, new ArrayList<AgentData>());
 		this.context = context;
@@ -83,16 +81,15 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 		LinearLayout agentLayout = (LinearLayout) convertView
 				.findViewById(R.id.linearLayout_list_agent_data);
 
-		addDisksContent(disksTab, diskUsage, agent.getName());
-		addServicesContent(servicesTab, serviceData);
-
 		if (toggleButtonServices.isChecked()) {
 			servicesTab.setVisibility(View.VISIBLE);
+			addServicesContent(servicesTab, serviceData);
 		} else {
 			servicesTab.setVisibility(View.GONE);
 		}
 
 		if (toggleButtonDisks.isChecked()) {
+			addDisksContent(disksTab, diskUsage, agent.getName());
 			disksTab.setVisibility(View.VISIBLE);
 		} else {
 			disksTab.setVisibility(View.GONE);
@@ -104,13 +101,18 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 			agentLayout.setVisibility(View.GONE);
 		}
 
+		if(alertedList.get(position) == true){
+			toggleButtonName.setTextColor(Color.RED);
+		}
+		else{
+			toggleButtonName.setTextColor(Color.BLACK);
+		}
 		toggleButtonName.setText("" + agent.getName());
 		toggleButtonName.setTextOn("" + agent.getName());
 		toggleButtonName.setTextOff("" + agent.getName());
 
 		if (sensors.isTempValid()) {
-			if (sensors.getTemp() > tempAlertLevel) {
-				createAlertNotification();
+			if (sensors.getTemp() > StatsActivity.tempAlertLevel) {
 				temp.setTextColor(Color.RED);
 			} else {
 				temp.setTextColor(Color.BLACK);
@@ -123,8 +125,8 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 
 		cpu.setText(String.format("%.0f%%", sensors.getCpuUsage() * 100));
 
-		double freeRamGB = sensors.getFreeRam() / divider;
-		double totalRamGB = sensors.getTotalRam() / divider;
+		double freeRamGB = sensors.getFreeRam() / DIVIDER;
+		double totalRamGB = sensors.getTotalRam() / DIVIDER;
 		ram.setText(String.format("%.0f%% (%.2fGB/%.2fGB)", freeRamGB
 				/ totalRamGB * 100, freeRamGB, totalRamGB));
 
@@ -138,11 +140,11 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 
 		Button settingsButton = (Button) convertView
 				.findViewById(R.id.button_list_settings);
-		if (settingsButton != null) { // why do I even need that? :(
-										// everything else works!
-			// settingsButton.setId(agent.getId());
-			settingsButton.setTag(agent.getId());
-		}
+		Button chartsButton = (Button) convertView
+				.findViewById(R.id.button_list_charts);
+
+		settingsButton.setTag(agent.getId());
+		chartsButton.setTag(agent.getId());
 
 		if ((position % 2) == 0) {
 			convertView.setBackgroundColor(Color.rgb(200, 200, 200));
@@ -198,8 +200,8 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 		layout.removeAllViews();
 
 		for (DiskUsageData dud : data) {
-			double totalSpaceGB = dud.getTotalSpace() / divider;
-			double usedSpaceGB = dud.getUsedSpace() / divider;
+			double totalSpaceGB = dud.getTotalSpace() / DIVIDER;
+			double usedSpaceGB = dud.getUsedSpace() / DIVIDER;
 
 			name = new TextView(context);
 			// name.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -247,8 +249,7 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 
 			layout.addView(row);
 
-			if (usedSpaceGB / totalSpaceGB > HDDAlertLevel) {
-				createAlertNotification();
+			if (usedSpaceGB / totalSpaceGB > StatsActivity.HDDAlertLevel) {
 				name.setTextColor(Color.RED);
 				usage.setTextColor(Color.RED);
 			} else {
@@ -258,28 +259,41 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 		}
 	}
 
-	private void createAlertNotification() {
-		Intent resultIntent = new Intent(context, StatsActivity.class);
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-		// Adds the back stack
-		stackBuilder.addParentStack(StatsActivity.class);
-		// Adds the Intent to the top of the stack
-		stackBuilder.addNextIntent(resultIntent);
-		// Gets a PendingIntent containing the entire back stack
-		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
-				PendingIntent.FLAG_UPDATE_CURRENT);
-
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(
-				context);
-		builder.setContentIntent(resultPendingIntent)
-				.setContentTitle("Admin Tools")
-				.setContentText("Something is wrong!")
-				.setAutoCancel(true)
-				.setSmallIcon(R.drawable.ic_launcher);
-		Notification noti = builder.build();
-		noti.flags |= Notification.FLAG_AUTO_CANCEL;
-		NotificationManager mNotificationManager = (NotificationManager) context
-				.getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(1, noti);
+	public void set(int position, AgentData agent, boolean isAlerted) {
+		try{
+			alertedList.set(position, isAlerted);
+		}catch(IndexOutOfBoundsException e){
+			alertedList.add(position, isAlerted);
+		}
+		if (this.getCount() <= position) {
+			this.insert(agent, position);
+		} else {
+			this.getItem(position).setAgentData(agent);
+		}
 	}
+
+	// private void createAlertNotification() {
+	// Intent resultIntent = new Intent(context, StatsActivity.class);
+	// TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+	// // Adds the back stack
+	// stackBuilder.addParentStack(StatsActivity.class);
+	// // Adds the Intent to the top of the stack
+	// stackBuilder.addNextIntent(resultIntent);
+	// // Gets a PendingIntent containing the entire back stack
+	// PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
+	// PendingIntent.FLAG_UPDATE_CURRENT);
+	//
+	// NotificationCompat.Builder builder = new NotificationCompat.Builder(
+	// context);
+	// builder.setContentIntent(resultPendingIntent)
+	// .setContentTitle("Admin Tools")
+	// .setContentText("Something is wrong!")
+	// .setAutoCancel(true)
+	// .setSmallIcon(R.drawable.ic_launcher);
+	// Notification noti = builder.build();
+	// noti.flags |= Notification.FLAG_AUTO_CANCEL;
+	// NotificationManager mNotificationManager = (NotificationManager) context
+	// .getSystemService(Context.NOTIFICATION_SERVICE);
+	// mNotificationManager.notify(1, noti);
+	// }
 }

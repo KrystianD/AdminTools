@@ -2,21 +2,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ChartsActivity" >
 
-    <Button
-        android:id="@+id/button_date_end"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/button_date_start"
-        android:layout_alignTop="@+id/textView_date_end"
-        android:onClick="setDate"
-        android:ems="10" />
+    <!--      android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin" -->
 
     <pl.edu.agh.zpi.admintools.listdata.ChartsSurface
         android:id="@+id/surfaceView_charts"
@@ -39,49 +30,12 @@
         android:text="@string/refresh" />
 
     <TextView
-        android:id="@+id/textView_date_end"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView_date_start"
-        android:layout_below="@+id/button_date_start"
-        android:text="@string/date_end" />
-
-    <Button
-        android:id="@+id/button_date_start"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/textView_date_start"
-        android:onClick="setDate"
-        android:ems="10" />
-
-    <TextView
         android:id="@+id/textView_date_start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:text="@string/date_start" />
-
-    <Button
-        android:id="@+id/button_charts_settings"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/button_date_start"
-        android:layout_centerHorizontal="true"
-        android:onClick="setDataType"
-        android:text="@string/settings" />
-
-    <TextView
-        android:id="@+id/textView_charts_what"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/button_charts_settings"
-        android:layout_alignTop="@+id/button_date_end"
-        android:text="@string/na"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
         android:id="@+id/textView_charts_value_max"
@@ -118,5 +72,52 @@
         android:layout_alignParentBottom="true"
         android:text="@string/na"
         android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <Button
+        android:id="@+id/button_date_start"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/textView_date_start"
+        android:ems="10"
+        android:onClick="setDate" />
+
+    <TextView
+        android:id="@+id/textView_date_end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/button_date_start"
+        android:text="@string/date_end" />
+
+    <Button
+        android:id="@+id/button_date_end"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView_date_end"
+        android:layout_toRightOf="@+id/button_date_start"
+        android:ems="10"
+        android:onClick="setDate" />
+
+    <TextView
+        android:id="@+id/textView_charts_settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_date_end"
+        android:layout_toRightOf="@+id/button_date_end"
+        android:text="@string/settings"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <Button
+        android:id="@+id/button_charts_settings"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/button_date_end"
+        android:layout_toRightOf="@+id/button_date_end"
+        android:onClick="setDataType"
+        android:text="@string/settings" />
 
 </RelativeLayout>
