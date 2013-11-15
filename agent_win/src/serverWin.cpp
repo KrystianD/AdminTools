@@ -183,13 +183,15 @@ bool Server::sendHeader (int type) {
 
 bool Server::sendPacket (IPacket& packet) {
 	buffer_t b;
-	packet.toBuffer (b);
+	packet.toBuffer (b); 
+
 	THeader h;
+
 	h.type = packet.getType ();
 	h.size = b.size ();
 	THeader* tHPtr = &h;
-	send (ConnectSocket, reinterpret_cast<char*>(tHPtr), sizeof (h), 0); //uwaga, do ogarniêcia przes³anie struktury uint16 i uint32 (choc wydaje mi siê ze tak jest ok)
-	send (ConnectSocket, &b[0], b.size (), 0);
+	send (ConnectSocket, reinterpret_cast<char*>(tHPtr), sizeof (h), 0); 
+	send (ConnectSocket, &b[0], b.size(), 0);
 	return true;
 }
 

@@ -18,7 +18,7 @@ extern "C" {
        #include "SystemInfo/sigar/sigar_format.h"
 }
 
-void readSensors(TSensorsData& data) {   
+void readSensors(TSensorsData& data, TPacketConfig t) {   
    
     sigar_t *sigar_cpu;
     sigar_cpu_t old;
@@ -38,7 +38,7 @@ void readSensors(TSensorsData& data) {
     avg = perc.combined * 100;
    
     cout << "Cpu Usage: " << avg << std::endl;
-    data.cpuUsage = (float)avg;
+    data.cpuUsage = (float)avg/1000;
     
     sigar_close(sigar_cpu);
     
@@ -51,57 +51,66 @@ void readSensors(TSensorsData& data) {
     
     cout << "Number of cores: " << numCPU << std::endl;
 	
-    // Ca�kowita pami�c RAM
+    // Całkowita pamięc RAM
     
     MEMORYSTATUSEX statex;
 
     statex.dwLength = sizeof (statex); 
 
     GlobalMemoryStatusEx (&statex);
-    cout << "Physical RAM: " << (float)statex.ullTotalPhys/(1024*1024) << " MB" << std::endl;
+    cout << "Physical RAM: " << (float)statex.ullTotalPhys << " B" << std::endl;
      
-    data.totalRam = (uint64_t)statex.ullTotalPhys/(1024*1024);
+    data.totalRam = (uint64_t)statex.ullTotalPhys;
 
-    // Pobranie wolnej pami�ci RAM
+    // Pobranie wolnej pamięci RAM
 
     MEMORYSTATUS m;
    	
     m.dwLength = sizeof(m);
-   	int ret = 0;
+   	uint64_t ret = 0;
    	
     GlobalMemoryStatus(&m);
-   	ret = (int)(m.dwAvailPhys >> 20);
-    cout << "Available physical RAM: " << ret << " MB" << std::endl;
+   	ret = (m.dwAvailPhys);
+    cout << "Available physical RAM: " << ret << " B" << std::endl;
      
-    data.freeRam = ret;    
+	data.freeRam = ret;    
     
     // Pobranie czasu pracy
     
     float minup = (float)GetTickCount() / 1000 / 60 ;
+
+	float secup = (float)GetTickCount() / 1000;
     
     std::cout << "Uptime: " << minup << " minutes." << std::endl;
-    data.uptime = (uint32_t)minup;       
+    data.uptime = (uint32_t)secup;       
 
 	// Current CPU temperature
-	std::cout << "CPU temperature: " << DiagnosticMgr::getCpuTemp() << std::endl;
-	data.temp = (float) DiagnosticMgr::getCpuTemp();
+	std::cout << "CPU temperature: " << DiagnosticMgr::getInstance().getCpuTemp() << std::endl;
+	data.temp = (float) DiagnosticMgr::getInstance().getCpuTemp();
 	data.tempValid = true;
     
-	// Discs usage	
+	// Disks usage	
 	std::vector<FileSystem::Usage*> discsUsage = 
 		DiagnosticMgr::getInstance().getFileSystemInfo() -> dirUsages;
 
 	for(auto it = discsUsage.begin(); it != discsUsage.end(); ++it) {
 		TDiskUsage currentDisc;
 		currentDisc.name = (*it) -> dir;
-		currentDisc.totalSpace = (*it) -> total;
-		currentDisc.usedSpace = (*it) -> used;
+		currentDisc.totalSpace = (*it) -> total*1024;
+		currentDisc.usedSpace = (*it) -> used*1024;
 		data.disksUsage.push_back(currentDisc);
 		
 		std::cout << "\tName: " << currentDisc.name << std::endl;
 		std::cout << "\tTotal: " << currentDisc.totalSpace /(1024 * 1024) << "GB" << std::endl;
 		std::cout << "\tUsed: " << currentDisc.usedSpace /(1024 * 1024) << "GB" << std::endl;
 	}
+
+	// Miejsce na usługi
+	for (vector<TPacketConfig::TService>::iterator it = t.services.begin(); it != t.services.end(); it++) {
+	
+	}
+
+	std::cout << "End of data." << std::endl << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -165,24 +174,24 @@ int main(int argc, char** argv) {
 	while(1)
 	{
 		serv.process();
-		usleep(10000);
+		Sleep(10);
 		TSensorsData d;
 
-		// gather data from senosors and send it to server or save in memory depending on connectino state
 		if (getTicks () - lastSendTime >= serv.getConfig ().interval)
 		{
-			readSensors(d);
-			//Krystian tu używa funkcji która jest w sensors.cpp postaci getSensorsData (d, serv.getConfig ());
-		
+			readSensors(d, serv.getConfig());
+
 			TPacketAgentData agentData;
 			agentData.id = 0;
 			agentData.data = d;
 			agentData.data.timestamp = time (0);
+			agentData.name = "Win";
 
 			if (serv.isValid ())
 			{
 				agentData.oldData = 0;
 				serv.sendPacket (agentData);
+				std::cout << "Packet has been sent!" << std::endl;
 			}
 			else
 			{
@@ -244,6 +253,5 @@ int main(int argc, char** argv) {
 
 	fclose (f);
 
-    //system("pause");
     return 0;
 }
