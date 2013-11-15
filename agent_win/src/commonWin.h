@@ -13,6 +13,9 @@
 #include <string>
 using namespace std;
 
+
+namespace WinAgent
+{
 /**
  *	\fn int recvall (int sockfd, void* data, int size, int timeout)
  *	\brief Receive data from given socket.
@@ -23,5 +26,6 @@ using namespace std;
  *	\return Size of received data.
  */
 int recvallWin (SOCKET sockfd, void* data, int size, int timeout);
+}
 
 #endif

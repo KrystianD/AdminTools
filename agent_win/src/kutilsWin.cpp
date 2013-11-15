@@ -5,6 +5,10 @@
 #include <Windows.h>
 using namespace std;
 
+
+namespace WinAgent
+{
+
 uint32_t getTicks () // na linuksie zwraca z dok³adnoœci¹ do milisekudny (tutaj do sekundy), na ile to jest wa¿ne?
 {
 	time_t sec = time(0);
@@ -47,4 +51,6 @@ void usleep(__int64 usec)
     SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0); 
     WaitForSingleObject(timer, INFINITE); 
     CloseHandle(timer); 
+}
+
 }

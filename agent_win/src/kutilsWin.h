@@ -7,6 +7,9 @@
 
 #include <vector>
 using namespace std;
+
+namespace WinAgent
+{
 /**
  *	\fn vector<string> explode (const string& str, const string& delim)
  *	\brief Split given text by delimiter.
@@ -28,5 +31,7 @@ uint32_t getTicks ();
   *  \param usec microseconds
  */
 void usleep(__int64 usec);
+
+}
 
 #endif

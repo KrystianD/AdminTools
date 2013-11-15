@@ -12,6 +12,11 @@ using namespace std;
 #include "windows.h"
 #include "settingsWin.h"
 
+using namespace WinAgent;
+
+namespace WinAgent
+{
+
 class Server
 {
 public:
@@ -51,4 +56,5 @@ private:
 	void processPacket (THeader& h, buffer_t& buf);
 };
 
+}
 #endif

@@ -5,6 +5,9 @@
 #include "ws2tcpip.h"
 #include "windows.h"
 
+namespace WinAgent
+{
+
 int recvallWin (SOCKET sockfd, void* data, int size, int timeout)
 {
 	//long arg = fcntl (sockfd, F_GETFL, NULL); //znalesc zamiennik dla fcntl dla windowsa
@@ -53,4 +56,6 @@ int recvallWin (SOCKET sockfd, void* data, int size, int timeout)
 
 	//fcntl (sockfd, F_SETFL, arg);
 	return size;
+}
+
 }

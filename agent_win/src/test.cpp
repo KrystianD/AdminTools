@@ -13,6 +13,8 @@
 using SystemInfo::DiagnosticMgr;
 using SystemInfo::FileSystem;
 
+using namespace WinAgent;
+
 extern "C" {
        #include "SystemInfo/sigar/sigar.h"
        #include "SystemInfo/sigar/sigar_format.h"
