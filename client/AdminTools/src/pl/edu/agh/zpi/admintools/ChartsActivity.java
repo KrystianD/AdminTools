@@ -465,7 +465,8 @@ class DatePickerFragment extends DialogFragment implements
 		c.set(Calendar.YEAR, year);
 		c.set(Calendar.MONTH, monthOfYear);
 		c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
+		
+		Log.d("qwe","DatePicker.onDateSet() before" + c);
 		if (isStartTime) {
 			if (c.getTimeInMillis() < monthAgo.getTimeInMillis()) {
 				packet.setStartDate((int) (monthAgo.getTimeInMillis() / 1000));
@@ -491,6 +492,7 @@ class DatePickerFragment extends DialogFragment implements
 			} else
 				packet.setEndDate((int) (c.getTimeInMillis() / 1000));
 		}
+		Log.d("qwe", "DatePicker.onDateSet() after" + c);
 		parent.updateDate();
 	}
 }

@@ -39,13 +39,9 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 	private final Context context;
 	//! Memory divider (for byte to gigabyte calculations).
 	private final double divider = 1024 * 1024 * 1024; // GB
-<<<<<<< HEAD
-	private final double tempAlertLevel = 85;
-=======
 	//! Temperature alert threshold.
-	private final double tempAlertLevel = 65;
+	private final double tempAlertLevel = 85;
 	//! HDD usage alert percent threshold.
->>>>>>> 079f7010a30cf4b534ca5febc24be1a237ffd890
 	private final double HDDAlertLevel = 0.95;
 
 	public AgentArrayAdapter(Context context) {
