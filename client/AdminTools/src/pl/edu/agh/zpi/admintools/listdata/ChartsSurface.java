@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import pl.edu.agh.zpi.admintools.ChartsActivity;
-import pl.edu.agh.zpi.admintools.connection.packets.PacketStatsReply;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketStatsRequest;
 import pl.edu.agh.zpi.admintools.utils.Vector2D;
 import android.content.Context;
@@ -21,7 +20,7 @@ import android.view.SurfaceView;
 public class ChartsSurface extends SurfaceView implements
 		SurfaceHolder.Callback {
 	public static final int ACCURACY = 10;
-	
+
 	ArrayList<Float> values = new ArrayList<Float>();
 	float minVal;
 	float maxVal;
@@ -31,7 +30,7 @@ public class ChartsSurface extends SurfaceView implements
 
 	public ChartsSurface(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		this.context = (ChartsActivity)context;
+		this.context = (ChartsActivity) context;
 		this.holder = getHolder();
 		holder.addCallback(this);
 	}
@@ -56,50 +55,50 @@ public class ChartsSurface extends SurfaceView implements
 		values = data;
 		if (data == null || data.size() < 4)
 			return;
-		switch(type){
+		switch (type) {
 		case PacketStatsRequest.CPU:
 			minVal = 0;
-			maxVal = Collections.max(data)*10+20;
-			context.setAxis((int)minVal, (int)maxVal);
-			for(int i = 0; i < data.size() ; i++ ){
-				data.set(i, data.get(i)*10);
+			maxVal = Collections.max(data) * 10 + 20;
+			context.setAxis((int) minVal, (int) maxVal);
+			for (int i = 0; i < data.size(); i++) {
+				data.set(i, data.get(i) * 10);
 			}
 			break;
 		case PacketStatsRequest.DISK:
 			minVal = 0;
 			maxVal = 100;
-			for(int i = 0; i < data.size() ; i++ ){
-				data.set(i, data.get(i)*100);
+			for (int i = 0; i < data.size(); i++) {
+				data.set(i, data.get(i) * 100);
 			}
-			context.setAxis((int)minVal, (int)maxVal);
+			context.setAxis((int) minVal, (int) maxVal);
 			break;
 		case PacketStatsRequest.RAM:
 			minVal = 0;
 			maxVal = 100;
-			context.setAxis((int)minVal, (int)maxVal);
-			for(int i = 0; i < data.size() ; i++ ){
-				data.set(i, data.get(i)*100);
+			context.setAxis((int) minVal, (int) maxVal);
+			for (int i = 0; i < data.size(); i++) {
+				data.set(i, data.get(i) * 100);
 			}
 			break;
 		case PacketStatsRequest.TEMP:
 			minVal = 0;
 			maxVal = 130;
-			context.setAxis((int)minVal, (int)maxVal);
+			context.setAxis((int) minVal, (int) maxVal);
 			break;
 		default:
 			break;
 		}
 		diff = (short) (maxVal - minVal);
-		
+
 		draw();
 	}
-	
+
 	private Vector2D getPoint(int x, float val, Canvas c) {
 		val = (val - minVal) * c.getHeight() / diff;
 		val = c.getHeight() - val;
 		return new Vector2D(x * ACCURACY, val);
 	}
-	
+
 	private void draw() {
 		Canvas c = null;
 		Paint paint = new Paint();
@@ -111,18 +110,18 @@ public class ChartsSurface extends SurfaceView implements
 
 			if (values == null || values.size() == 0)
 				return;
-			
-			paint.setColor(Color.rgb(100,100,100));
-			
-			for(int i = c.getHeight() ; i > 0 ; i-= (c.getHeight()/maxVal)*10 ){
+
+			paint.setColor(Color.rgb(100, 100, 100));
+
+			for (int i = c.getHeight(); i > 0; i -= (c.getHeight() / maxVal) * 10) {
 				c.drawLine(0, i, c.getWidth(), i, paint);
 			}
-			
+
 			paint.setColor(Color.BLUE);
 			paint.setStyle(Paint.Style.STROKE);
-			paint.setFlags(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
+			paint.setFlags(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
 			paint.setStrokeWidth(2.0f);
-			
+
 			boolean isEmpty = true;
 			Path linePath = new Path();
 			for (int i = 2; i < values.size() - 1; i++) {
@@ -135,7 +134,7 @@ public class ChartsSurface extends SurfaceView implements
 				Vector2D p2 = getPoint(i - 1, values.get(i - 1), c);
 				Vector2D p3 = getPoint(i, values.get(i), c);
 				Vector2D p4 = getPoint(i + 1, values.get(i + 1), c);
-				
+
 				Vector2D P1 = p2;
 				Vector2D P2 = p3;
 				p1.sub(p2);
@@ -157,8 +156,6 @@ public class ChartsSurface extends SurfaceView implements
 					pt.add(Vector2D.mul(T1, H3));
 					pt.add(Vector2D.mul(T2, H4));
 
-			
-					
 					if (isEmpty) {
 						linePath.moveTo(pt.x, pt.y);
 						isEmpty = false;
@@ -168,7 +165,7 @@ public class ChartsSurface extends SurfaceView implements
 			}
 			c.drawPath(linePath, paint);
 		} finally {
-			if(c!=null){
+			if (c != null) {
 				holder.unlockCanvasAndPost(c);
 			}
 			c = null;

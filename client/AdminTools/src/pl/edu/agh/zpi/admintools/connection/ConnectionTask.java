@@ -275,7 +275,7 @@ public class ConnectionTask implements Runnable {
 	}
 
 	private void callback(int type, Serializable data) {
-		Log.d("qwe", "ConnectionTask.callback()");
+		Log.d("qwe", "ConnectionTask.callback()"+ state);
 		if (activityMessenger != null) {
 			Bundle b = new Bundle();
 			Message m = Message.obtain(null, type);
