@@ -14,7 +14,7 @@
 using SystemInfo::DiagnosticMgr;
 using SystemInfo::FileSystem;
 
-//using namespace WinAgent;
+using namespace WinAgent;
 
 extern "C" {
        #include "SystemInfo/sigar/sigar.h"
