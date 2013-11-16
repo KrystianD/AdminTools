@@ -10,14 +10,20 @@
 #include "serverWin.h"
 #include "kutilsWin.h"
 
+
 using SystemInfo::DiagnosticMgr;
 using SystemInfo::FileSystem;
 
-using namespace WinAgent;
+//using namespace WinAgent;
 
 extern "C" {
        #include "SystemInfo/sigar/sigar.h"
        #include "SystemInfo/sigar/sigar_format.h"
+}
+
+static bool portIsOpen(const std::string& address, int port)
+{
+    return false;
 }
 
 void readSensors(TSensorsData& data, TPacketConfig t) {   
@@ -107,9 +113,75 @@ void readSensors(TSensorsData& data, TPacketConfig t) {
 		std::cout << "\tUsed: " << currentDisc.usedSpace /(1024 * 1024) << "GB" << std::endl;
 	}
 
-	// Miejsce na usługi
-	for (vector<TPacketConfig::TService>::iterator it = t.services.begin(); it != t.services.end(); it++) {
-	
+	// Services
+	for (int i = 0; i < t.services.size (); i++) {
+		const TPacketConfig::TService& s = t.services[i];
+
+		std::cout << "Service " << s.name << " is " ;
+		
+		if (s.tcp) {
+		
+			int iResult;
+			WSADATA wsaData;
+			// Initialize Winsock
+			iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+			if (iResult != 0) {
+				printf("WSAStartup failed: %d\n", iResult);
+				return;
+			} else {
+				
+			}
+
+			sockaddr_in servaddr;
+
+			SOCKET fd = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
+			if (fd == INVALID_SOCKET)
+			{
+				perror ("socket");
+				return;
+			}
+
+			memset (&servaddr, 0, sizeof (servaddr));
+			servaddr.sin_family = AF_INET;
+			servaddr.sin_port = htons (0);
+			servaddr.sin_addr.s_addr = INADDR_ANY;
+
+			struct addrinfo hints;
+			struct addrinfo *servinfo;
+
+			memset (&hints, 0, sizeof (hints));
+			hints.ai_family = AF_UNSPEC;
+			hints.ai_socktype = SOCK_STREAM;
+			hints.ai_flags = AI_PASSIVE;
+
+			stringstream port;
+			string portStr;
+			port << s.port;
+			port >> portStr;
+			getaddrinfo ("127.0.0.1", portStr.c_str (), &hints, &servinfo);
+			
+			TService service;
+			service.name = s.name;
+			
+			if (::connect (fd, servinfo->ai_addr, servinfo->ai_addrlen)) {
+				service.available = 0;
+				std::cout << "available." << std::endl;
+			} else {
+				service.available = 1;
+				std::cout << "not available." << std::endl;
+			}
+
+			freeaddrinfo (servinfo);
+
+			data.services.push_back (service);
+			
+			closesocket(fd);
+			fd = INVALID_SOCKET;
+
+		} else {
+		
+			std::cout << "jest udp";
+		}
 	}
 
 	std::cout << "End of data." << std::endl << std::endl;
