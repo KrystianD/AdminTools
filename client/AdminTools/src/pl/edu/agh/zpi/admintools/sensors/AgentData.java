@@ -90,7 +90,13 @@ public class AgentData implements Serializable{
 			return false;
 		return ((AgentData)o).id == this.id;
 	}
-	
+
+	/**
+	 *	\fn public void setAgentData(AgentData agent)
+	 *	\brief Set agent data from other object.
+	 *	\param agent AgentData object.
+	 *	\return None.
+	 */
 	public void setAgentData(AgentData agent){
 		this.id = agent.id;
 		this.name = agent.name;

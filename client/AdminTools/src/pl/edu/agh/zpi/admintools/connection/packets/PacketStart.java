@@ -5,13 +5,24 @@ import java.nio.ByteOrder;
 
 import pl.edu.agh.zpi.admintools.connection.Header;
 
+/**
+ *	\class PacketStart
+ *	\brief Starting packet.
+ */
 public class PacketStart implements IPacket {
 	private final byte type = Header.PACKET_START;
 	private short interval;
-	
+	/**
+	 *	\fn public PacketStart()
+	 *	\brief Default constructor, do nothing.
+	 */
 	public PacketStart() {
 	}
-	
+	/**
+	 *	\fn public PacketStart(short interval)
+	 *	\brief Constructor, set time interval.
+	 *	\param interval Time interval.
+	 */
 	public PacketStart(short interval){
 		this.interval = interval;
 	}
