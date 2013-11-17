@@ -531,7 +531,6 @@ public class StatsActivity extends Activity implements ServiceConnection,
 	}
 
 	private boolean checkAlert(AgentData agent, int position) {
-		// TODO dołożyć obsługę tego paska o którym mówił
 		SensorsData sensorsData = agent.getData();
 		if (sensorsData.isTempValid()
 				&& sensorsData.getTemp() >= tempAlertLevel) {
@@ -553,8 +552,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 	private void setAlert(boolean isAlerted, int position, AgentData agent) {
 		boolean added = false;
-		// i = 0; textView z napisem "Alerts"
-		for (int i = 1; i < linearLayoutAlertsInternal.getChildCount(); i++) {
+		for (int i = 0; i < linearLayoutAlertsInternal.getChildCount(); i++) {
 			View view = linearLayoutAlertsInternal.getChildAt(i);
 			if (view.getTag().equals(position)) {
 				if (!isAlerted) {

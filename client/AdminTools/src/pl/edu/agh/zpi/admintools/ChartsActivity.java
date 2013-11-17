@@ -75,15 +75,15 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_charts);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		
+
 		agent = (AgentData) this.getIntent().getSerializableExtra(AGENT);
 		host = this.getIntent().getStringExtra(AdminTools.HOST);
 		port = this.getIntent().getIntExtra(AdminTools.PORT, 0);
 		key = this.getIntent().getStringExtra(AdminTools.KEY);
 		interval = this.getIntent().getIntExtra(AdminTools.INTERVAL, 1000);
-		
-		getActionBar().setTitle("ChartsActivity\t"+agent.getName());
-		
+
+		getActionBar().setTitle("ChartsActivity\t" + agent.getName());
+
 		surface = (ChartsSurface) findViewById(R.id.surfaceView_charts);
 		timeStart = (Button) findViewById(R.id.button_date_start);
 		timeEnd = (Button) findViewById(R.id.button_date_end);
@@ -113,17 +113,16 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		timeStart.setText(today);
 		timeEnd.setText(tomorrow);
 
-		Log.d("qwe", "charts agent ID "+agent.getId() + "name " + agent.getName());
+		Log.d("qwe",
+				"charts agent ID " + agent.getId() + "name " + agent.getName());
 		statsRequest.setAgentId(agent.getId());
 		statsRequest.setDataType(PacketStatsRequest.TEMP);
 		statsRequest.setDiskName("");
-		statsRequest
-				.setPoints((short) (surface.getWidth() / ChartsSurface.ACCURACY));
 
 		isServiceBinded = bindService(
 				new Intent(this, ConnectionService.class), this,
 				Context.BIND_AUTO_CREATE);
-		
+
 		setResult(RESULT_OK);
 	}
 
@@ -192,10 +191,19 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 
 	public void submit(View view) {
 		Log.d("qwe", "ChartsActivity.submit()");
-		statsRequest
-				.setPoints((short) (surface.getWidth() / ChartsSurface.ACCURACY));
-		lastSend = statsRequest;
-		sendMessageToService(ConnectionService.STATS_REQUEST, statsRequest);
+
+		surface.post(new Runnable() {
+			@Override
+			public void run() {
+				while (surface.getWidth() == 0)
+					;
+				statsRequest.setPoints((short) (surface.getWidth() / ChartsSurface.ACCURACY));
+				lastSend = statsRequest;
+				sendMessageToService(ConnectionService.STATS_REQUEST,
+						statsRequest);
+			}
+		});
+
 	}
 
 	private void sendMessageToService(int type, Object... data) {
@@ -249,16 +257,16 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		String info = "";
 		switch (lastSend.getDataType()) {
 		case PacketStatsRequest.CPU:
-			info += this.getString(R.string.cpu_chart) + "\n";
+			info += this.getString(R.string.cpu_chart);
 			break;
 		case PacketStatsRequest.DISK:
-			info += this.getString(R.string.disk_chart) + "\n";
+			info += this.getString(R.string.disk_chart);
 			break;
 		case PacketStatsRequest.RAM:
-			info += this.getString(R.string.ram_chart) + "\n";
+			info += this.getString(R.string.ram_chart);
 			break;
 		case PacketStatsRequest.TEMP:
-			info += this.getString(R.string.temp_chart) + "\n";
+			info += this.getString(R.string.temp_chart);
 			break;
 		default:
 			break;
@@ -421,7 +429,7 @@ class DatePickerFragment extends DialogFragment implements
 	private PacketStatsRequest packet;
 	private ChartsActivity parent;
 	private boolean wasSet;
-	
+
 	public DatePickerFragment(PacketStatsRequest packet, ChartsActivity parent,
 			boolean isStartTime) {
 		super();
@@ -451,7 +459,7 @@ class DatePickerFragment extends DialogFragment implements
 	@Override
 	public void onDateSet(DatePicker view, int year, int monthOfYear,
 			int dayOfMonth) {
-		if(wasSet)
+		if (wasSet)
 			return;
 		wasSet = true;
 		Log.d("qwe", "DatePicker.onDateSet()" + view.getId());
@@ -470,8 +478,8 @@ class DatePickerFragment extends DialogFragment implements
 		c.set(Calendar.YEAR, year);
 		c.set(Calendar.MONTH, monthOfYear);
 		c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-		
-		Log.d("qwe","DatePicker.onDateSet() before" + c);
+
+		Log.d("qwe", "DatePicker.onDateSet() before" + c);
 		if (isStartTime) {
 			if (c.getTimeInMillis() < monthAgo.getTimeInMillis()) {
 				packet.setStartDate((int) (monthAgo.getTimeInMillis() / 1000));

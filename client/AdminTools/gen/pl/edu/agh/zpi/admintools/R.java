@@ -56,7 +56,7 @@ public final class R {
         public static final int linearLayout_alerts_internal=0x7f090015;
         public static final int linearLayout_dialog_config_services=0x7f090029;
         public static final int linearLayout_list_agent_data=0x7f090038;
-        public static final int listView_agents_data=0x7f090017;
+        public static final int listView_agents_data=0x7f090016;
         public static final int progressBar_connection=0x7f090005;
         public static final int radioGroup_chart_dialog_disk=0x7f09001e;
         public static final int radioGroup_chart_dialog_type=0x7f090019;
@@ -77,7 +77,7 @@ public final class R {
         public static final int tableRow_list_uptime=0x7f090043;
         public static final int textView_IP=0x7f090000;
         public static final int textView_Port=0x7f090003;
-        public static final int textView_alert=0x7f090016;
+        public static final int textView_alert=0x7f090017;
         public static final int textView_charts_settings=0x7f090010;
         public static final int textView_charts_time_new=0x7f090007;
         public static final int textView_charts_time_old=0x7f09000d;

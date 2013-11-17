@@ -118,6 +118,7 @@
         android:layout_alignTop="@+id/button_date_end"
         android:layout_toRightOf="@+id/button_date_end"
         android:onClick="setDataType"
-        android:text="@string/settings" />
+        android:text="@string/settings"
+        android:textAlignment="center" />
 
 </RelativeLayout>
