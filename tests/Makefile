@@ -31,7 +31,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = config_unittest sensors_unittest kutils_unittest common_unittest packets_unittest
+TESTS = config_unittest sensors_unittest kutils_unittest common_unittest packets_unittest functional_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -83,6 +83,9 @@ config_unittest.o : $(TESTS_DIR)/config_unittest.cc \
 config_unittest : config.o config_unittest.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
+server.o : $(USER_DIR)/agent_lin/server.cpp $(USER_DIR)/agent_lin/server.h $(GTEST_HEADERS)
+	$(CXX) -I$(USER_DIR)/common  $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/agent_lin/server.cpp
+
 sensors.o : $(USER_DIR)/agent_lin/sensors.cpp $(USER_DIR)/common/sensors.h $(GTEST_HEADERS)
 	$(CXX) -I$(USER_DIR)/common  $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/agent_lin/sensors.cpp
 
@@ -120,4 +123,11 @@ packets_unittest.o : $(TESTS_DIR)/packets_unittest.cc \
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(USER_DIR)/common -c $(TESTS_DIR)/packets_unittest.cc
 
 packets_unittest : packets_unittest.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+functional_unittest.o : $(TESTS_DIR)/functional_unittest.cc \
+                      $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(USER_DIR)/common -I$(USER_DIR)/agent_lin -c $(TESTS_DIR)/functional_unittest.cc
+
+functional_unittest : server.o kutils.o common.o functional_unittest.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@

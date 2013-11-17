@@ -1,0 +1,10 @@
+killall server
+make
+cd ../server
+rm data.db
+make
+build/server &
+sleep 2
+cd ../tests
+./functional_unittest
+killall server
