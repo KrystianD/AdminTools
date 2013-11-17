@@ -14,7 +14,7 @@
 using SystemInfo::DiagnosticMgr;
 using SystemInfo::FileSystem;
 
-//using namespace WinAgent;
+using namespace WinAgent;
 
 extern "C" {
        #include "SystemInfo/sigar/sigar.h"
@@ -163,11 +163,11 @@ void readSensors(TSensorsData& data, TPacketConfig t) {
 			TService service;
 			service.name = s.name;
 			
-			if (::connect (fd, servinfo->ai_addr, servinfo->ai_addrlen)) {
-				service.available = 0;
+			if (!::connect (fd, servinfo->ai_addr, servinfo->ai_addrlen)) {
+				service.available = 1;
 				std::cout << "available." << std::endl;
 			} else {
-				service.available = 1;
+				service.available = 0;
 				std::cout << "not available." << std::endl;
 			}
 
@@ -180,7 +180,58 @@ void readSensors(TSensorsData& data, TPacketConfig t) {
 
 		} else {
 		
-			std::cout << "jest udp";
+			WSADATA wsaData;
+
+		    int iResult = 0;            
+
+			SOCKET ListenSocket = INVALID_SOCKET;
+			sockaddr_in service;
+
+			TService serviceS;
+			serviceS.name = s.name;
+
+
+			iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+			if (iResult != NO_ERROR) {
+				serviceS.available = 0;
+				std::cout << "not available. ERROR 1" << std::endl;
+				WSACleanup();
+				continue;
+			}
+
+			
+			ListenSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+			if (ListenSocket == INVALID_SOCKET) {
+				serviceS.available = 0;
+				std::cout << "not available. ERROR Socket" << std::endl;
+				WSACleanup();
+				continue;
+			}
+
+			service.sin_family = AF_INET;
+			service.sin_addr.s_addr = inet_addr("127.0.0.1");
+			service.sin_port = htons(s.port);
+			
+			iResult = bind(ListenSocket, (SOCKADDR *) &service, sizeof (service));
+			if (iResult == 0 || iResult == -1) {
+				
+				serviceS.available = 0;
+				std::cout << "not available" << std::endl;
+				if (iResult == -1) {
+					std::cout << "Error" << std::endl;
+				}
+			}
+			else {
+				std::cout << iResult << std::endl;
+				std::cout << "available" << std::endl;
+				serviceS.available = 1;
+			}
+
+			closesocket(ListenSocket);
+			WSACleanup();
+
+			data.services.push_back (serviceS);
+			
 		}
 	}
 
