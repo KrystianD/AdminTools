@@ -31,7 +31,8 @@ public class ConnectionTask implements Runnable {
 	public static final int AGENT_CONFIG = 3;
 	public static final int CONNECTION_ERROR = 4;
 	public static final int STATS_REPLY = 5;
-	
+	public static final int AUTH_FAILED = 6;
+
 	enum State {
 		IDLE, CONNECTING, DISCONNECTING, ACTIVE, STOPPING, STARTING
 	}
@@ -49,7 +50,7 @@ public class ConnectionTask implements Runnable {
 	private int port;
 	private String key;
 	private short interval;
-	
+
 	@Override
 	public void run() {
 		while (!endTask) {
@@ -99,7 +100,7 @@ public class ConnectionTask implements Runnable {
 				Log.e("qwe", "unknown state");
 				break;
 			}
-			if(isConnected){
+			if (isConnected) {
 				sendPing();
 			}
 			try {
@@ -139,11 +140,15 @@ public class ConnectionTask implements Runnable {
 		input = socket.getInputStream();
 		output = socket.getOutputStream();
 
-		processAuthKey();
-
-		callback(CONNECTED, null);
-		
-		state = State.STARTING;
+		if (processAuthKey()) {
+			isConnected = true;
+			state = State.STARTING;
+			callback(CONNECTED, null);
+		} else {
+			isConnected = false;
+			state = State.IDLE;
+			callback(AUTH_FAILED, null);
+		}
 	}
 
 	private void processDisconnecting() throws Exception {
@@ -161,7 +166,7 @@ public class ConnectionTask implements Runnable {
 
 		if (input.available() >= 3) {
 			header = readHeader();
-			Log.d("qwe","ConnectionTask.processActive() " + header.getType());
+			Log.d("qwe", "ConnectionTask.processActive() " + header.getType());
 			switch (header.getType()) {
 			case Header.PACKET_AGENTS_DATA:
 				PacketAgentsData agentsData = new PacketAgentsData();
@@ -180,13 +185,13 @@ public class ConnectionTask implements Runnable {
 				break;
 			case Header.PACKET_CHANGE_REPLY:
 				readPacket(new PacketReply(), header.getSize());
-				//callback(AGENT_CONFIG, pc);
+				// callback(AGENT_CONFIG, pc);
 				break;
 			case Header.PACKET_STATS_REPLY:
-				Log.d("qwe","ConnectionTask.PACKET_STATS_REPLY");
+				Log.d("qwe", "ConnectionTask.PACKET_STATS_REPLY");
 				PacketStatsReply sr = new PacketStatsReply();
 				readPacket(sr, header.getSize());
-				callback(STATS_REPLY,sr);
+				callback(STATS_REPLY, sr);
 				break;
 			default:
 				Log.e("qwe", "unknown header " + header.getType());
@@ -206,13 +211,13 @@ public class ConnectionTask implements Runnable {
 			try {
 				sendHeader(Header.PACKET_PING);
 			} catch (Exception e) {
-				 processNetworkError(e);
+				processNetworkError(e);
 			}
 			lastPing = System.currentTimeMillis();
 		}
 	}
 
-	private void processAuthKey() throws Exception {
+	private boolean processAuthKey() throws Exception {
 		PacketAuthKey authKey = new PacketAuthKey(key.getBytes(), false);
 		sendPacket(authKey);
 		long start = System.currentTimeMillis();
@@ -227,14 +232,13 @@ public class ConnectionTask implements Runnable {
 		input.read(data);
 		Log.d("qwe", "" + header.getType());
 		if (header.getType() == Header.PACKET_REPLY) {
-			isConnected = true;
 			PacketReply r = new PacketReply();
 			r.fromByteArray(data);
-			// Log.d("qwe", "" + r.getValue());
-		} else {
-			isConnected = false;
-			throw new Exception("authKey");
+			if (r.getValue() != PacketReply.NO_AUTH) {
+				return true;
+			}
 		}
+		return false;
 	}
 
 	private Header readHeader() throws Exception {
@@ -245,8 +249,8 @@ public class ConnectionTask implements Runnable {
 
 	private void sendHeader(byte type) throws Exception {
 		Header header = new Header(type, (byte) 0);
-		//Log.d("qwe", "header type " + type);
-		//Log.d("qwe", "output null" + (output == null));
+		// Log.d("qwe", "header type " + type);
+		// Log.d("qwe", "output null" + (output == null));
 		output.write(header.toByteArray());
 		output.flush();
 	}
@@ -275,7 +279,7 @@ public class ConnectionTask implements Runnable {
 	}
 
 	private void callback(int type, Serializable data) {
-		Log.d("qwe", "ConnectionTask.callback()"+ state);
+		Log.d("qwe", "ConnectionTask.callback()" + state);
 		if (activityMessenger != null) {
 			Bundle b = new Bundle();
 			Message m = Message.obtain(null, type);
@@ -297,6 +301,9 @@ public class ConnectionTask implements Runnable {
 			case STATS_REPLY:
 				b.putSerializable(PacketStatsReply.PACKET_STATS_REPLY, data);
 				break;
+			case AUTH_FAILED:
+				// nothing to send
+				break;
 			default:
 				return;
 			}
@@ -311,10 +318,13 @@ public class ConnectionTask implements Runnable {
 		}
 	}
 
-	public synchronized void connect(String host, int port, String key, short interval) {
+	public synchronized void connect(String host, int port, String key,
+			short interval) {
 		Log.d("qwe", "ConnectionTask.connect()" + state);
-		Log.d("qwe", "ConnectionTask.connect() " + host + " " + port + " " + key + " " + interval);
-		if ((!isConnected || this.port != port || this.host != host || !this.key.equals(key) || this.interval != interval)) {
+		Log.d("qwe", "ConnectionTask.connect() " + host + " " + port + " "
+				+ key + " " + interval);
+		if ((!isConnected || this.port != port || this.host != host
+				|| !this.key.equals(key) || this.interval != interval)) {
 			this.host = host;
 			this.port = port;
 			this.key = key;
@@ -337,7 +347,7 @@ public class ConnectionTask implements Runnable {
 			state = State.STOPPING;
 		}
 	}
-	
+
 	public synchronized boolean isConnected() {
 		return isConnected;
 	}
@@ -356,13 +366,13 @@ public class ConnectionTask implements Runnable {
 			Log.e("qwe", "ConnectionTask.enqueueMessage()");
 		}
 	}
-	
-	private void processNetworkError(Exception e){
+
+	private void processNetworkError(Exception e) {
 		e.printStackTrace();
 		state = State.IDLE;
 		host = "";
 		port = 0;
 		isConnected = false;
-		callback(CONNECTION_ERROR,e);
+		callback(CONNECTION_ERROR, e);
 	}
 }

@@ -61,5 +61,6 @@
     <string name="more">More</string>
     <string name="charts">Charts</string>
     <string name="alerts">Alerts</string>
+     <string name="auth_error">Invalid Auth Key!\nSet right key and try again.</string>
 
 </resources>

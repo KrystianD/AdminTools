@@ -44,6 +44,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -214,6 +215,9 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			break;
 		case ConnectionTask.CONNECTION_ERROR:
 			setResult(RESULT_CANCELED);
+			finish();
+		case ConnectionTask.AUTH_FAILED:
+			Toast.makeText(getApplicationContext(), getString(R.string.auth_error), Toast.LENGTH_SHORT).show();
 			finish();
 		default:
 			break;

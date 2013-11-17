@@ -11,6 +11,7 @@ import pl.edu.agh.zpi.admintools.connection.Header;
  * Zwraca 
  */
 public class PacketReply implements IPacket {
+	public static final int NO_AUTH = 0;	
 	private final byte type = Header.PACKET_REPLY;
 	
 	private int value;

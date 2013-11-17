@@ -277,6 +277,9 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 			Exception e = (Exception)msg.getData().get(NETWORK_ERROR);
 			showAlertToast(e.getMessage());
 			break;
+		case ConnectionTask.AUTH_FAILED:
+			showAlertToast(getString(R.string.auth_error));
+			break;
 		default:
 			break;
 		}

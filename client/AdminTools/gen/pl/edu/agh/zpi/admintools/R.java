@@ -134,6 +134,7 @@ public final class R {
         public static final int address_unknown=0x7f06000d;
         public static final int alerts=0x7f06003b;
         public static final int app_name=0x7f060000;
+        public static final int auth_error=0x7f06003c;
         public static final int available=0x7f06001b;
         public static final int cancel=0x7f060002;
         public static final int charts=0x7f06003a;
