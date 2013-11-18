@@ -37,15 +37,24 @@ namespace SystemInfo
 					user = sys = nice = idle = wait =
 						irq = soft_irq = stolen = total = 0;
 				}
-				uint64 user;	//! Time spent outside kernel.
-				uint64 sys;		//! Time spent inside kernel.
-				uint64 nice;	//! Nice time.
-				uint64 idle;	//! Time spent idleing, without jobs.
-				uint64 wait;	//! Time spent waiting for other tasks.
-				uint64 irq;		//!	Time spent on handling hardware irq (interrupt).
-				uint64 soft_irq;	//! Time spent on handling software irq (interrupt).
-				uint64 stolen;	//! Time stolen.
-				uint64 total;	//! Total time spent on every tasks.
+				//! Time spent outside kernel.
+				uint64 user;
+				//! Time spent inside kernel.
+				uint64 sys;
+				//! Nice time.
+				uint64 nice;
+				//! Time spent idleing, without jobs.
+				uint64 idle;
+				//! Time spent waiting for other tasks.
+				uint64 wait;
+				//!	Time spent on handling hardware irq (interrupt).
+				uint64 irq;
+				//! Time spent on handling software irq (interrupt).
+				uint64 soft_irq;
+				//! Time stolen.
+				uint64 stolen;
+				//! Total time spent on every tasks.
+				uint64 total;
 			};
 
 			//! Times combined with all the cores.
@@ -70,13 +79,20 @@ namespace SystemInfo
 					cache_size = 0;
 				}
 
-				std::string vendor;	//! Vendor name.
-				std::string model;	//! Cpu model.
-				uint16 mhz;	//! Clock rate in MHZ.
-				uint64 cache_size;	//! Cache size in bits.
-				uint16 total_sockets;	//! Total number of available sockets.
-				uint16 total_cores;	//! Total number of available cores.
-				uint16 cores_per_socket;	//! Number of cores per available sockets.
+				//! Vendor name.
+				std::string vendor;
+				//! Cpu model.
+				std::string model;
+				//! Clock rate in MHZ.
+				uint16 mhz;
+				//! Cache size in bits.
+				uint64 cache_size;
+				//! Total number of available sockets.
+				uint16 total_sockets;
+				//! Total number of available cores.
+				uint16 total_cores;
+				//! Number of cores per available sockets.
+				uint16 cores_per_socket;
 			};
 			//! Model Details per core.
 			std::vector<Details*> coreDetails;

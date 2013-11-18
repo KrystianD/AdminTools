@@ -21,9 +21,34 @@ namespace SystemInfo
 			 *	\return Cpu::Times data.
 			 */
 			static Cpu::Times* sigarCpuToCpuTimes(sigar_cpu_t* cpuData);
-			static Cpu::Details* sigarCpuInfoToDetails(sigar_cpu_info_t* cpuData);		
-			static Resources* sigarResourcesLimitToResources(sigar_resource_limit_t* resData);			
+			/**
+			 *	\fn static Cpu::Details* sigarCpuInfoToDetails(sigar_cpu_info_t* cpuData)
+			 *	\brief Mapping cpu info data.
+			 *	\param cpuData Sigar Cpu info data.
+			 *	\return Cpu::Details data.
+			 */
+			static Cpu::Details* sigarCpuInfoToDetails(sigar_cpu_info_t* cpuData);
+			/**
+			 *	\fn static Resources* sigarResourcesLimitToResources(sigar_resource_limit_t* resData)
+			 *	\brief Mapping resources limits data.
+			 *	\param resData Sigar resources data.
+			 *	\return Resources data.
+			 */
+			static Resources* sigarResourcesLimitToResources(sigar_resource_limit_t* resData);
+			/**
+			 *	\fn FileSystem::Details* sigarFileSystemToFsDetails(sigar_file_system_t* fsData)
+			 *	\brief Mapping file system data.
+			 *	\param fsData Sigar file system data.
+			 *	\return FileSystem::Details data.
+			 */
 			static FileSystem::Details* sigarFileSystemToFsDetails(sigar_file_system_t* fsData);
-			static FileSystem::Usage* sigarFileSystemUsageToFsUsage(sigar_file_system_usage_t* fsData, std::string dirName);			
+			/**
+			 *	\fn FileSystem::Usage* sigarFileSystemUsageToFsUsage(sigar_file_system_usage_t* fsData, std::string dirName)
+			 *	\brief Mapping file system usage data.
+			 *	\param fsData Sigar file system usage data.
+			 *	\param dirName Directory name.
+			 *	\return FileSystem::Usage data.
+			 */
+			static FileSystem::Usage* sigarFileSystemUsageToFsUsage(sigar_file_system_usage_t* fsData, std::string dirName);
 	};
 }
