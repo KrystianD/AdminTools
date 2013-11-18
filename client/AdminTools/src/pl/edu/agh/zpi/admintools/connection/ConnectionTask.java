@@ -388,8 +388,8 @@ public class ConnectionTask implements Runnable {
 		}
 	}
 	/**
-	 *	\fn public synchronized boolean isConnected()
-	 *	\brief Check if client is connected to any host.
+	 *	\fn public boolean isConnected()
+	 *	\brief Check if client is connected to any host. Synchronized method.
 	 *	\return If connected.
 	 */
 	public synchronized boolean isConnected() {
