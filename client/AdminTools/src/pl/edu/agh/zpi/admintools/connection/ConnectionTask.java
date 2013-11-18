@@ -257,6 +257,8 @@ public class ConnectionTask implements Runnable {
 			if (r.getValue() != PacketReply.NO_AUTH) {
 				return true;
 			}
+		}else{
+			throw new Exception();
 		}
 		return false;
 	}
