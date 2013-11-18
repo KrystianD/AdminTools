@@ -1,10 +1,16 @@
 killall server
-make
+echo "port=5555" > fun_config.cfg
+echo "db=fun_db.db" >> fun_config.cfg
+rm -f fun_db.db
 cd ../server
-rm data.db
 make
-build/server &
-sleep 2
 cd ../tests
+echo -en "#define KEY \"" > key.h
+../server/build/server -c fun_config.cfg -k | tr -d '\r\n' >> key.h
+echo -e "\"" >> key.h
+cat key.h
+make -B functional_unittest || exit
+../server/build/server -c fun_config.cfg &
+sleep 2
 ./functional_unittest
 killall server

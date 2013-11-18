@@ -207,7 +207,7 @@ void Client::processPacket (int size)
 		}
 		else
 		{
-			CLIENT_DEBUG("Invalid key");
+			CLIENT_DEBUG("Invalid key %.*s", 16, p.key);
 			pr.value = 0;
 		}
 		sendPacket (pr);

@@ -75,6 +75,8 @@ public:
 	 */
 	TPacketConfig& getConfig () { return m_config; }
 
+	bool readPacket (int replyType, IPacket& p, int timeout);
+
 private:
 	enum EState { NotConnected, WaitingForConfig, Connected };
 
@@ -92,7 +94,6 @@ private:
 	void connect ();
 
 	bool sendHeader (int type);
-	bool readPacket (int replyType, IPacket& p, int timeout);
 
 	void processPacket (THeader& h, buffer_t& buf);
 };
