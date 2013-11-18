@@ -7,9 +7,6 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 
-namespace WinAgent
-{
-
 Server::Server() {
 	m_state = NotConnected;
 	m_lastConnect = 0;
@@ -28,15 +25,15 @@ void Server::setup (const string& host, int port, const string& key) {
 void Server::process() {
 	if (m_state == NotConnected) 
 	{
-		if (getTicks () - m_lastConnect >= 500)
+		if (GetTickCount () - m_lastConnect >= 500)
 		{
 			connectServer ();
-			m_lastConnect = getTicks ();
+			m_lastConnect = GetTickCount ();
 		}
 	} 
 	else if (m_state == WaitingForConfig) 
 	{
-		if (getTicks () > m_configTime)
+		if (GetTickCount () > m_configTime)
 		{
 			printf ("No config within timeout\r\n");
 			closesocket (ConnectSocket);
@@ -171,7 +168,7 @@ void Server::connectServer() {
 	if (r.value == 1)
 	{
 		m_state = WaitingForConfig;
-		m_configTime = getTicks () + CONFIG_TIMEOUT;
+		m_configTime = GetTickCount () + CONFIG_TIMEOUT;
 	}
 }
 
@@ -244,6 +241,4 @@ void Server::processPacket (THeader& h, buffer_t& buf)
 		printf("Config received\n");
 		break;
 	}
-}
-
 }

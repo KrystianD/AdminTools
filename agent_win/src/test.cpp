@@ -142,6 +142,8 @@ void readSensors(TSensorsData& data, TPacketConfig t) {
 	data.tempValid = true;
     
 	// Disks usage	
+
+	uint32_t s = GetTickCount();
 	std::vector<FileSystem::Usage*> discsUsage = 
 		DiagnosticMgr::getInstance().getFileSystemInfo() -> dirUsages;
 
@@ -156,6 +158,8 @@ void readSensors(TSensorsData& data, TPacketConfig t) {
 		std::cout << "\tTotal: " << currentDisc.totalSpace /(1024 * 1024) << "GB" << std::endl;
 		std::cout << "\tUsed: " << currentDisc.usedSpace /(1024 * 1024) << "GB" << std::endl;
 	}
+
+	printf ("Time to get disks info: %d\r\n", GetTickCount() - s);
 
 	// Services
 	for (int i = 0; i < t.services.size (); i++) {
@@ -333,7 +337,7 @@ int main(int argc, char** argv) {
 		}
 	}
 	cfg.interval = c.getInt ("interval", 2000);
-	uint32_t lastSendTime = getTicks (), lastOldSendTime = getTicks ();
+	uint32_t lastSendTime = GetTickCount (), lastOldSendTime = GetTickCount ();
 	vector<TPacketAgentData> oldSensorsData;
 	
 	FILE *f = fopen ("olddata", "rb");
@@ -363,9 +367,12 @@ int main(int argc, char** argv) {
 		Sleep(10);
 		TSensorsData d;
 
-		if (getTicks () - lastSendTime >= serv.getConfig ().interval)
+		if (GetTickCount () - lastSendTime >= serv.getConfig ().interval)
 		{
+
+			uint32_t s = GetTickCount (); 
 			readSensors(d, serv.getConfig());
+			printf ("Time taken for reading sensors: %d\r\n", GetTickCount () - s);
 
 			TPacketAgentData agentData;
 			agentData.id = 0;
@@ -384,17 +391,17 @@ int main(int argc, char** argv) {
 				oldSensorsData.push_back (agentData);
 				printf ("Packet saved\r\n");
 			}
-			lastSendTime = getTicks ();
+			lastSendTime = GetTickCount ();
 		}
 		// send old sensors data in periods of 10ms
-		if (oldSensorsData.size () > 0 && getTicks () - lastOldSendTime >= 10 && serv.isValid ())
+		if (oldSensorsData.size () > 0 && GetTickCount () - lastOldSendTime >= 10 && serv.isValid ())
 		{
 			TPacketAgentData p = oldSensorsData[0];
 			p.oldData = 1;
 			serv.sendPacket (p);
 			oldSensorsData.erase (oldSensorsData.begin ());
 			printf ("Sent old packet, %d left\n", oldSensorsData.size ());
-			lastOldSendTime = getTicks ();
+			lastOldSendTime = GetTickCount ();
 		}
 
 		// config file update
@@ -418,7 +425,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	std::cout << "Saving data!" << std::endl;
+	std::cout << "Zapisuje dane!" << std::endl;
 
 	// save old data in order to send it to server when connected
 	f = fopen ("olddata", "wb");
