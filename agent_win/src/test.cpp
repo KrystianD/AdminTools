@@ -4,12 +4,59 @@
 #include <iostream>
 #include <time.h>
 
+#include <tchar.h>
+#include <csignal>
+
+
 #include "../../common/configWin.h"
 #include "../../common/configWin.cpp"
 #include "../../common/sensors.h"
 #include "SystemInfo/DiagnosticMgr.h"
 #include "serverWin.h"
 #include "kutilsWin.h"
+
+bool endd = false;
+
+void signal_handler (int signum)
+{
+	endd = true;
+}
+
+
+BOOL WINAPI ConsoleHandler(DWORD CEvent)
+{
+
+	endd = true;
+    char mesg[128];
+
+    switch(CEvent)
+    {
+    case CTRL_C_EVENT:
+        MessageBox(NULL,
+            _T("CTRL+C received!"),_T("CEvent"),MB_OK);
+        break;
+    case CTRL_BREAK_EVENT:
+        MessageBox(NULL,
+            _T("CTRL+BREAK received!"),_T("CEvent"),MB_OK);
+        break;
+    case CTRL_CLOSE_EVENT:
+        MessageBox(NULL,
+            _T("Program being closed!"),_T("CEvent"),MB_OK);
+        break;
+    case CTRL_LOGOFF_EVENT:
+        MessageBox(NULL,
+            _T("User is logging off!"),_T("CEvent"),MB_OK);
+        break;
+    case CTRL_SHUTDOWN_EVENT:
+        MessageBox(NULL,
+            _T("User is logging off!"),_T("CEvent"),MB_OK);
+        break;
+
+    }
+
+	endd = true;
+    return false;
+}
 
 
 using SystemInfo::DiagnosticMgr;
@@ -22,10 +69,6 @@ extern "C" {
        #include "SystemInfo/sigar/sigar_format.h"
 }
 
-static bool portIsOpen(const std::string& address, int port)
-{
-    return false;
-}
 
 void readSensors(TSensorsData& data, TPacketConfig t) {   
    
@@ -250,6 +293,23 @@ int main(int argc, char** argv) {
 		return 1;
     }
 
+	//signal (SIGPIPE, SIG_IGN);
+	signal (SIGINT, signal_handler);
+	signal (SIGTERM, signal_handler);
+	signal(SIGABRT, signal_handler);
+    signal(SIGTERM, signal_handler);
+
+
+	if (SetConsoleCtrlHandler( (PHANDLER_ROUTINE)ConsoleHandler,TRUE)==FALSE)
+    {
+        // unable to install handler... 
+        // display message to the user
+        printf("Unable to install handler!\n");
+        return -1;
+    }
+
+
+
     Server serv;
 	//serv.connectServer();
 	serv.setup (c.getString ("host"), c.getInt ("port"), c.getString ("key"));
@@ -297,7 +357,7 @@ int main(int argc, char** argv) {
 		fclose (f);
 	}
 
-	while(1)
+	while(!endd)
 	{
 		serv.process();
 		Sleep(10);
@@ -357,6 +417,8 @@ int main(int argc, char** argv) {
 			serv.configApplied ();
 		}
 	}
+
+	std::cout << "Zapisuje dane!" << std::endl;
 
 	// save old data in order to send it to server when connected
 	f = fopen ("olddata", "wb");
