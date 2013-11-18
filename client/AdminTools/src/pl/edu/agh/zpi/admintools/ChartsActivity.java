@@ -505,7 +505,7 @@ class DatePickerFragment extends DialogFragment implements
 	 *	\param parent Parent activity.
 	 *	\parma isStartTime Flag if its start time.
 	 */
-	public DatePickerFragment(PacketStatsRequest param packet , ChartsActivity parent,
+	public DatePickerFragment(PacketStatsRequest packet , ChartsActivity parent,
 			boolean isStartTime) {
 		super();
 		Log.d("qwe", "DatePicker()");
