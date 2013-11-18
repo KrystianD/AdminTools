@@ -51,17 +51,17 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 /**
- *	\class StatsActivity
- *	\brief Activity for interacting and handling agents stats data.
+ * \class StatsActivity \brief Activity for interacting and handling agents
+ * stats data.
  */
 public class StatsActivity extends Activity implements ServiceConnection,
 		Handable {
 	private final static int SETTINGS = 0;
 	private final static int CHARTS = 1;
 
-	//! Temperature alert threshold.
+	// ! Temperature alert threshold.
 	public static double tempAlertLevel = 85;
-	//! HDD usage alert percent threshold.
+	// ! HDD usage alert percent threshold.
 	public static double HDDAlertLevel = 0.95;
 
 	private ListView listView;
@@ -87,10 +87,8 @@ public class StatsActivity extends Activity implements ServiceConnection,
 	private LinearLayout linearLayoutAlertsBounding;
 
 	/**
-	 *	\fn public void onCreate(Bundle savedInstanceState)
-	 *	\brief Execute on activity creation.
-	 *	\param savedInstanceState Saved state.
-	 *	\return None.
+	 * \fn public void onCreate(Bundle savedInstanceState) \brief Execute on
+	 * activity creation. \param savedInstanceState Saved state. \return None.
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -135,12 +133,11 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 		setResult(RESULT_OK); // na wstępie zakładamy że jest ok
 	}
+
 	/**
-	 *	\fn public void onServiceConnected(ComponentName name, IBinder service)
-	 *	\brief Execute on service connection.
-	 *	\param name Component name.
-	 *	\param service Msg binder.
-	 *	\return None.
+	 * \fn public void onServiceConnected(ComponentName name, IBinder service)
+	 * \brief Execute on service connection. \param name Component name. \param
+	 * service Msg binder. \return None.
 	 */
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
@@ -149,11 +146,10 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		sendMessageToService(ConnectionService.CONNECT, host, port, key,
 				interval);
 	}
+
 	/**
-	 *	\fn public void onServiceDisconnected(ComponentName name)
-	 *	\brief Execute on service disconnection.
-	 *	\param name Component name.
-	 *	\return None.
+	 * \fn public void onServiceDisconnected(ComponentName name) \brief Execute
+	 * on service disconnection. \param name Component name. \return None.
 	 */
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
@@ -161,10 +157,10 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		serviceMessenger = null;
 		isServiceBinded = false;
 	}
+
 	/**
-	 *	\fn protected void onDestroy()
-	 *	\brief Execute on activity destruction.
-	 *	\return None.
+	 * \fn protected void onDestroy() \brief Execute on activity destruction.
+	 * \return None.
 	 */
 	@Override
 	protected void onDestroy() {
@@ -175,20 +171,20 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		}
 		super.onDestroy();
 	}
+
 	/**
-	 *	\fn protected void onStop()
-	 *	\brief Execute on activity stop.
-	 *	\return None.
+	 * \fn protected void onStop() \brief Execute on activity stop. \return
+	 * None.
 	 */
 	@Override
 	protected void onStop() {
 		sendMessageToService(ConnectionService.STOP);
 		super.onStop();
 	}
+
 	/**
-	 *	\fn protected void onResume()
-	 *	\brief Execute on activity resume.
-	 *	\return None.
+	 * \fn protected void onResume() \brief Execute on activity resume. \return
+	 * None.
 	 */
 	@Override
 	protected void onResume() {
@@ -202,11 +198,10 @@ public class StatsActivity extends Activity implements ServiceConnection,
 				interval);
 		super.onResume();
 	}
+
 	/**
-	 *	\fn public void handleMessage(Message msg)
-	 *	\brief Handle given message.
-	 *	\param msg Message to handle.
-	 *	\return None.
+	 * \fn public void handleMessage(Message msg) \brief Handle given message.
+	 * \param msg Message to handle. \return None.
 	 */
 	@Override
 	public void handleMessage(Message msg) {
@@ -220,12 +215,18 @@ public class StatsActivity extends Activity implements ServiceConnection,
 					.get(PacketAgentsData.PACKET_AGENTS_DATA);
 
 			ArrayList<AgentData> agents = pad.getAgentsList();
-			for (int i = 0; i < agents.size(); i++) {
-				AgentData agent = agents.get(i);
-				boolean isAlerted = checkAlert(agent, i);
-				agentsArray.set(i, agent, isAlerted);
+			if(agents.size() < agentsArray.getCount()){
+				agentsArray.clear();
+				agentsArray.addAll(agents);
 			}
-
+			else{
+				for (int i = 0; i < agents.size(); i++) {
+					AgentData agent = agents.get(i);
+					boolean isAlerted = checkAlert(agent, i);
+					agentsArray.set(i, agent, isAlerted);
+				}
+			}
+			
 			agentsArray.notifyDataSetChanged();
 			break;
 		case ConnectionTask.AGENT_KEY:
@@ -295,11 +296,10 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			}
 		}
 	}
+
 	/**
-	 *	\fn public void manageAgentListButtons(View view)
-	 *	\brief Handle agent list buttons.
-	 *	\param view Agent data view.
-	 *	\return None.
+	 * \fn public void manageAgentListButtons(View view) \brief Handle agent
+	 * list buttons. \param view Agent data view. \return None.
 	 */
 	public void manageAgentListButtons(View view) {
 		short id = (Short) ((Button) view).getTag();
@@ -449,22 +449,21 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			isTcp.setChecked(sc.isTCP());
 		}
 	}
+
 	/**
-	 *	\fn public boolean onCreateOptionsMenu(Menu menu)
-	 *	\brief Execute on creation of options menu.
-	 *	\param menu Menu data.
-	 *	\return true.
+	 * \fn public boolean onCreateOptionsMenu(Menu menu) \brief Execute on
+	 * creation of options menu. \param menu Menu data. \return true.
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.stats, menu);
 		return true;
 	}
+
 	/**
-	 *	\fn public boolean onOptionsItemSelected(MenuItem item)
-	 *	\brief Execute on menu options item selection.
-	 *	\param item Selected menu item.
-	 *	\return If selected.
+	 * \fn public boolean onOptionsItemSelected(MenuItem item) \brief Execute on
+	 * menu options item selection. \param item Selected menu item. \return If
+	 * selected.
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -548,19 +547,17 @@ public class StatsActivity extends Activity implements ServiceConnection,
 	}
 
 	/**
-	 *	\fn public void toggleTable(View view)
-	 *	\brief Toggle agent list data.
-	 *	\param view Current View.
-	 *	\return None.
+	 * \fn public void toggleTable(View view) \brief Toggle agent list data.
+	 * \param view Current View. \return None.
 	 */
 	public void toggleTable(View view) {
 		agentsArray.notifyDataSetChanged();
 	}
+
 	/**
-	 *	\fn public void onDialogConfigButtonClicked(View view)
-	 *	\brief Execute on dialog configuration button was clicked.
-	 *	\param view Current View.
-	 *	\return None.
+	 * \fn public void onDialogConfigButtonClicked(View view) \brief Execute on
+	 * dialog configuration button was clicked. \param view Current View.
+	 * \return None.
 	 */
 	public void onDialogConfigButtonClicked(View view) {
 		LinearLayout parent = (LinearLayout) view.getParent().getParent();
@@ -581,13 +578,12 @@ public class StatsActivity extends Activity implements ServiceConnection,
 				layout.removeViewAt(index - 1);
 		}
 	}
+
 	/**
-	 *	\fn protected void onActivityResult(int requestCode, int resultCode, Intent data)
-	 *	\brief Execute on showing up activity result.
-	 *	\param requestCode Request code.
-	 *	\param resultCode Result code.
-	 *	\param data Result data.
-	 *	\return None.
+	 * \fn protected void onActivityResult(int requestCode, int resultCode,
+	 * Intent data) \brief Execute on showing up activity result. \param
+	 * requestCode Request code. \param resultCode Result code. \param data
+	 * Result data. \return None.
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -635,7 +631,8 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		if (!added && isAlerted) {
 			LayoutInflater inflater = (LayoutInflater) this
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			TextView alert = (TextView)inflater.inflate(R.layout.alert_text_view, null, true);
+			TextView alert = (TextView) inflater.inflate(
+					R.layout.alert_text_view, null, true);
 
 			alert.setTag(position);
 			alert.setClickable(true);
@@ -644,19 +641,19 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 			linearLayoutAlertsInternal.addView(alert);
 		}
-		// jeżeli laout będzie za wysoki, ustawia 150dp, włącza się wtedy scrolling ^^
+		// jeżeli laout będzie za wysoki, ustawia 150dp, włącza się wtedy
+		// scrolling ^^
 		linearLayoutAlertsBounding.getLayoutParams().height = LayoutParams.WRAP_CONTENT;
 		final float scale = this.getResources().getDisplayMetrics().density;
 		int pixels = (int) (150 * scale + 0.5f);
-		if(linearLayoutAlertsBounding.getHeight() >= pixels ){
+		if (linearLayoutAlertsBounding.getHeight() >= pixels) {
 			linearLayoutAlertsBounding.getLayoutParams().height = pixels;
 		}
 	}
+
 	/**
-	 *	\fn public void findAgentByAlert(final View view)
-	 *	\brief Find agent by active alert.
-	 *	\param view Current View.
-	 *	\return None.
+	 * \fn public void findAgentByAlert(final View view) \brief Find agent by
+	 * active alert. \param view Current View. \return None.
 	 */
 	public void findAgentByAlert(final View view) {
 		view.setBackgroundColor(Color.GREEN);
@@ -677,40 +674,33 @@ public class StatsActivity extends Activity implements ServiceConnection,
 /** additional classes **/
 /************************/
 /**
- *	\class ShortTextWatcher
- *	\brief Text watcher for short text.
+ * \class ShortTextWatcher \brief Text watcher for short text.
  */
 class ShortTextWatcher implements TextWatcher {
 	/**
-	 *	\fn public void onTextChanged(CharSequence s, int start, int before, int count)
-	 *	\brief Execute on text change event.
-	 *	\param s New text.
-	 *	\param start Start index.
-	 *	\param before Before index.
-	 *	\param count Count of text.
-	 *	\return None.
+	 * \fn public void onTextChanged(CharSequence s, int start, int before, int
+	 * count) \brief Execute on text change event. \param s New text. \param
+	 * start Start index. \param before Before index. \param count Count of
+	 * text. \return None.
 	 */
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 	}
+
 	/**
-	 *	\fn public void beforeTextChanged(CharSequence s, int start, int count, int after)
-	 *	\brief Execute on just before text change event.
-	 *	\param s New text.
-	 *	\param start Start index.
-	 *	\param count Count of text.
-	 *	\param after After index.
-	 *	\return None.
+	 * \fn public void beforeTextChanged(CharSequence s, int start, int count,
+	 * int after) \brief Execute on just before text change event. \param s New
+	 * text. \param start Start index. \param count Count of text. \param after
+	 * After index. \return None.
 	 */
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
 	}
+
 	/**
-	 *	\fn public void afterTextChanged(Editable s)
-	 *	\brief Execute just after text change event.
-	 *	\param s Editable component.
-	 *	\return None.
+	 * \fn public void afterTextChanged(Editable s) \brief Execute just after
+	 * text change event. \param s Editable component. \return None.
 	 */
 	@Override
 	public void afterTextChanged(Editable s) {
@@ -729,17 +719,16 @@ class ShortTextWatcher implements TextWatcher {
 		}
 	}
 };
+
 /**
- *	\class ShortOnFocusChangeListener
- *	\brief On focus change event listener for short text.
+ * \class ShortOnFocusChangeListener \brief On focus change event listener for
+ * short text.
  */
 class ShortOnFocusChangeListener implements View.OnFocusChangeListener {
 	/**
-	 *	\fn public void onFocusChange(View v, boolean hasFocus)
-	 *	\brief Executed on focus change event.
-	 *	\param v Current View.
-	 *	\param hasFocus Text has focus flag.
-	 *	\return None.
+	 * \fn public void onFocusChange(View v, boolean hasFocus) \brief Executed
+	 * on focus change event. \param v Current View. \param hasFocus Text has
+	 * focus flag. \return None.
 	 */
 	@Override
 	public void onFocusChange(View v, boolean hasFocus) {
