@@ -100,7 +100,7 @@ int main (int argc, char** argv)
 		char key[16];
 		if (DB::generateNewKey (key))
 		{
-			printf ("key=%.*s\n", 16, key);
+			printf ("%.*s\n", 16, key);
 			return 0;
 		}
 	}
