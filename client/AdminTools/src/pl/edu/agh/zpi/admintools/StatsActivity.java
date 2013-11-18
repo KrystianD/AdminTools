@@ -621,11 +621,12 @@ public class StatsActivity extends Activity implements ServiceConnection,
 	private void setAlert(boolean isAlerted, int position, AgentData agent) {
 		boolean added = false;
 		for (int i = 0; i < linearLayoutAlertsInternal.getChildCount(); i++) {
-			View view = linearLayoutAlertsInternal.getChildAt(i);
+			TextView view = (TextView)linearLayoutAlertsInternal.getChildAt(i);
 			if (view.getTag().equals(position)) {
 				if (!isAlerted) {
 					linearLayoutAlertsInternal.removeViewAt(i);
 				}
+				view.setText(agent.getName());
 				added = true;
 				break;
 			}
