@@ -60,6 +60,7 @@ public class ChartsSurface extends SurfaceView implements
 			minVal = 0;
 			maxVal = Collections.max(data) * 10 + 20;
 			context.setAxis((int) minVal, (int) maxVal);
+			
 			for (int i = 0; i < data.size(); i++) {
 				data.set(i, data.get(i) * 10);
 			}
@@ -130,6 +131,7 @@ public class ChartsSurface extends SurfaceView implements
 					isEmpty = true;
 					continue;
 				}
+				
 				Vector2D p1 = getPoint(i - 2, values.get(i - 2), c);
 				Vector2D p2 = getPoint(i - 1, values.get(i - 1), c);
 				Vector2D p3 = getPoint(i, values.get(i), c);
