@@ -255,9 +255,11 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		case ConnectionTask.CONNECTION_ERROR:
 			setResult(RESULT_CANCELED);
 			finish();
+			break;
 		case ConnectionTask.AUTH_FAILED:
 			Toast.makeText(getApplicationContext(), getString(R.string.auth_error), Toast.LENGTH_SHORT).show();
 			finish();
+			break;
 		default:
 			break;
 		}

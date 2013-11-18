@@ -90,7 +90,7 @@ void readSensors(TSensorsData& data, TPacketConfig t) {
     avg = perc.combined * 100;
    
     cout << "Cpu Usage: " << avg << std::endl;
-    data.cpuUsage = (float)avg/1000;
+    data.cpuUsage = (float)avg/100;
     
     sigar_close(sigar_cpu);
     
