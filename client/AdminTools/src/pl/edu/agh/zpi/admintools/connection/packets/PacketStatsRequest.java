@@ -6,23 +6,35 @@ import java.nio.ByteOrder;
 
 import pl.edu.agh.zpi.admintools.connection.Header;
 
+/**
+ *	\class PacketStatsRequest
+ *	\brief Stats request from agent.
+ */
 public class PacketStatsRequest implements IPacket, Serializable {
 	private static final long serialVersionUID = 1L;
 	private final byte type = Header.PACKET_STATS_REQUEST;
+	//! Packet full class type.
 	public static final String PACKET_STATS_REQUEST = "pl.edu.agh.zpi.admintools.connection.packets.PACKET_CONFIG";
-	
+	//! CPU data flag.
 	public static final byte CPU = 0;
+	//! RAM memory data flag.
 	public static final byte RAM = 1;
+	//! TEMPerature data flag.
 	public static final byte TEMP = 2;
+	//! Disc data flag.
 	public static final byte DISK = 3;
-	
+
 	private short agentId;
 	private int startDate;
 	private int endDate;
 	private short points;
 	private byte dataType;
 	private String diskName;
-	
+
+	/**
+	 *	\fn public PacketStatsRequest()
+	 *	\brief Default constructor, do nothing.
+	 */
 	public PacketStatsRequest() {
 	}
 
@@ -44,51 +56,105 @@ public class PacketStatsRequest implements IPacket, Serializable {
 	@Override
 	public void fromByteArray(byte[] array) {
 	}
-	
+	/**
+	 *	\fn public void setAgentId(short agentId)
+	 *	\brief Set agent with stats id.
+	 *	\param agentId Agent id.
+	 *	\return None.
+	 */
 	public void setAgentId(short agentId) {
 		this.agentId = agentId;
 	}
-
+	/**
+	 *	\fn public void setStartDate(int startDate)
+	 *	\brief Set stats start date.
+	 *	\param startDate Stats start date.
+	 *	\return None.
+	 */
 	public void setStartDate(int startDate) {
 		this.startDate = startDate;
 	}
-
+	/**
+	 *	\fn public void setEndDate(int endDate)
+	 *	\brief Set stats end date.
+	 *	\param endDate Stats end date.
+	 *	\return None.
+	 */
 	public void setEndDate(int endDate) {
 		this.endDate = endDate;
 	}
-
+	/**
+	 *	\fn public void setPoints(short points)
+	 *	\brief Set stats points.
+	 *	\param points Stats points.
+	 *	\return None.
+	 */
 	public void setPoints(short points) {
 		this.points = points;
 	}
-
+	/**
+	 *	\fn public void setDataType(byte dataType)
+	 *	\brief Set data type flag.
+	 *	\param dataType Type flag.
+	 *	\return None.
+	 */
 	public void setDataType(byte dataType) {
 		this.dataType = dataType;
 	}
-
+	/**
+	 *	\fn public void setDiskName(String diskName)
+	 *	\brief Set disc name.
+	 *	\param diskName Disc name.
+	 *	\return None.
+	 */
 	public void setDiskName(String diskName) {
 		this.diskName = diskName;
 	}
-
+	/**
+	 *	\fn public short getAgentId()
+	 *	\brief Get agent with stats id.
+	 *	\return Agent id.
+	 */
 	public short getAgentId() {
 		return agentId;
 	}
-
+	/**
+	 *	\fn public int getStartDate()
+	 *	\brief Get stats start date.
+	 *	\return Start date.
+	 */
 	public int getStartDate() {
 		return startDate;
 	}
-
+	/**
+	 *	\fn public int getEndDate()
+	 *	\brief Get stats end date.
+	 *	\return End date.
+	 */
 	public int getEndDate() {
 		return endDate;
 	}
-
+	/**
+	 *	\fn public short getPoints()
+	 *	\brief Get stats points.
+	 *	\return Stats points.
+	 */
 	public short getPoints() {
 		return points;
 	}
-
+	/**
+	 *	\fn public byte getDataType()
+	 *	\brief Get data type flag.
+	 *	\return Type flag.
+	 */
 	public byte getDataType() {
 		return dataType;
 	}
-
+	/**
+	 *	\fn public String getDiskName()
+	 *	\brief Get disc name.
+	 *	\return Disc name.
+	 */
 	public String getDiskName() {
 		return diskName;
 	}

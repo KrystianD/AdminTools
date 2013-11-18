@@ -24,15 +24,30 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+/**
+ *	\class ConnectionTask
+ *	\brief Handle connection events.
+ */
 public class ConnectionTask implements Runnable {
+	//! Connected callback flag.
 	public static final int CONNECTED = 0;
+	//! Agents data callback flag.
 	public static final int AGENTS_DATA = 1;
+	//! Agent authentication key callback flag.
 	public static final int AGENT_KEY = 2;
+	//! Agent configuration callback flag.
 	public static final int AGENT_CONFIG = 3;
+	//! Connection error callback flag.
 	public static final int CONNECTION_ERROR = 4;
+	//! Stats reply callback flag.
 	public static final int STATS_REPLY = 5;
+	//! Authentication failed flag.
 	public static final int AUTH_FAILED = 6;
 
+	/**
+	 *	\enum ConnectionTask.State
+	 *	\brief Represents current state of connection process.
+	 */
 	enum State {
 		IDLE, CONNECTING, DISCONNECTING, ACTIVE, STOPPING, STARTING
 	}
@@ -51,6 +66,11 @@ public class ConnectionTask implements Runnable {
 	private String key;
 	private short interval;
 
+	/**
+	 *	\fn public void run()
+	 *	\brief Start connection task handling routine in different thread.
+	 *	\return None.
+	 */
 	@Override
 	public void run() {
 		while (!endTask) {
@@ -318,6 +338,15 @@ public class ConnectionTask implements Runnable {
 		}
 	}
 
+	/**
+	 *	\fn public synchronized void connect(String host, int port, String key, short interval)
+	 *	\brief Connect to given host using auth key.
+	 *	\param host Host address.
+	 *	\param port Host port.
+	 *	\param key Agent authentication key.
+	 *	\param interval Time interval.
+	 *	\return None.
+	 */
 	public synchronized void connect(String host, int port, String key,
 			short interval) {
 		Log.d("qwe", "ConnectionTask.connect()" + state);
@@ -336,28 +365,51 @@ public class ConnectionTask implements Runnable {
 		}
 	}
 
+	/**
+	 *	\fn public void disconnect()
+	 *	\brief Disconnect from connected host.
+	 *	\return None.
+	 */
 	public void disconnect() {
 		synchronized (state) {
 			state = State.DISCONNECTING;
 		}
 	}
-
+	/**
+	 *	\fn public void stop()
+	 *	\brief Stop connection task handling routine.
+	 *	\return None.
+	 */
 	public void stop() {
 		synchronized (state) {
 			state = State.STOPPING;
 		}
 	}
-
+	/**
+	 *	\fn public synchronized boolean isConnected()
+	 *	\brief Check if client is connected to any host.
+	 *	\return If connected.
+	 */
 	public synchronized boolean isConnected() {
 		return isConnected;
 	}
-
+	/**
+	 *	\fn public void setMessenger(Messenger activityMessenger)
+	 *	\brief Set current activity messenger.
+	 *	\param activityMessenger Messenger to set.
+	 *	\return None.
+	 */
 	public void setMessenger(Messenger activityMessenger) {
 		synchronized (activityMessenger) {
 			this.activityMessenger = activityMessenger;
 		}
 	}
-
+	/**
+	 *	\fn	public void enqueueMessage(IPacket packet)
+	 *	\brief Add packet to queue.
+	 *	\param packet Packet to add.
+	 *	\return None.
+	 */
 	public void enqueueMessage(IPacket packet) {
 		try {
 			packetQueue.add(packet);

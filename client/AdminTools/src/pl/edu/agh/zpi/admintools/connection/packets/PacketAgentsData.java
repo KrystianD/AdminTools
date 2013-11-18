@@ -8,25 +8,41 @@ import java.util.ArrayList;
 import pl.edu.agh.zpi.admintools.connection.Header;
 import pl.edu.agh.zpi.admintools.sensors.AgentData;
 
-public class PacketAgentsData implements IPacket, Serializable {	
+/**
+ *	\class PacketAgentsData
+ *	\brief Combined agents data.
+ */
+public class PacketAgentsData implements IPacket, Serializable {
 	private static final long serialVersionUID = 1L;
+	//! Packet full class type.
 	public static final String PACKET_AGENTS_DATA = "pl.edu.agh.zpi.admintools.connection.packets.PACKET_AGENTS_DATA";
 	private static final byte type = Header.PACKET_AGENTS_DATA;
-	
+
 	private ArrayList<AgentData> list = new ArrayList<AgentData>();
-	
+	/**
+	 *	\fn public PacketAgentsData()
+	 *	\brief Default constructor, do nothing.
+	 */
 	public PacketAgentsData() {
 		// TODO Auto-generated constructor stub
 	}
-
+	/**
+	 *	\fn public AgentData[] getAgentsArray()
+	 *	\brief Get all agents data as array.
+	 *	\return Array of agents data.
+	 */
 	public AgentData[] getAgentsArray(){
 		return (AgentData[])list.toArray();
 	}
-	
+	/**
+	 *	\fn public ArrayList<AgentData> getAgentsList()
+	 *	\brief Get all agents data as array list.
+	 *	\return Array list of agents data.
+	 */
 	public ArrayList<AgentData> getAgentsList(){
 		return list;
 	}
-	
+
 	@Override
 	public byte[] toByteArray() {
 		// TODO Auto-generated method stub
@@ -53,6 +69,11 @@ public class PacketAgentsData implements IPacket, Serializable {
 		return type;
 	}
 
+	/**
+	 *	\fn public String toString()
+	 *	\brief Human readable string representation of packet.
+	 *	\return Packet as string.
+	 */
 	@Override
 	public String toString() {
 		return "PacketAgentsData [list=" + list + "]";

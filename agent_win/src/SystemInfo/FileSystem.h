@@ -35,15 +35,23 @@ namespace SystemInfo
 					dir = dev = type = sys_type = options = fsType = "";
 					flags = 0;
 				}
-				std::string dir;	//! Directory name
-				std::string dev;	//! Device name
-				std::string type;	//! Device type
-				std::string sys_type;	//! Device system type
-				std::string options;	//! Additional options
-				std::string fsType;		//! File system type
-				uint32 flags;	//! Additional flags
+				//! Directory name
+				std::string dir;
+				//! Device name
+				std::string dev;
+				//! Device type
+				std::string type;
+				//! Device system type
+				std::string sys_type;
+				//! Additional options
+				std::string options;
+				//! File system type
+				std::string fsType;
+				//! Additional flags
+				uint32 flags;
 			};
-			std::vector<Details*> dirDetails;	//! List of details per directory
+			//! List of details per directory
+			std::vector<Details*> dirDetails;
 
 			/**
 			 *	\struct Usage
@@ -63,29 +71,48 @@ namespace SystemInfo
 						disc_read_bytes = disc_rtime = disc_wtime =
 						disc_qtime = disc_time = disc_snaptime = 0;
 				}
-				std::string dir;	//! Directory/disc name for usage informations
+				//! Directory/disc name for usage informations
+				std::string dir;
+				//! Percent use of directory/disc
+				double percent_use;
+				//! Total memory assigned to disc
+				uint64 total;
+				//!	Free memory on disc
+				uint64 free;
+				//! Memory used on disc
+				uint64 used;
+				//! Memory available on disc
+				uint64 avail;
+				//! Memory used by files.
+				uint64 files;
+				//! Memory not used by files.
+				uint64 free_files;
 
-				double percent_use;	//! Percent use of directory/disc
-				uint64 total;	//! Total memory assigned to disc
-				uint64 free;	//!	Free memory on disc
-				uint64 used;	//! Memory used on disc
-				uint64 avail;	//! Memory available on disc
-				uint64 files;	//!
-				uint64 free_files;	//!
-
-				uint64 disc_reads;	//!
-				uint64 disc_writes;	//!
-				uint64 disc_write_bytes;	//!
+				//! Number of disc reads operation.
+				uint64 disc_reads;
+				//! Number of disc writes operation.
+				uint64 disc_writes;
+				//! Number of bytes writed.
+				uint64 disc_write_bytes;
+				//! Number of bytes readed.
 				uint64 disc_read_bytes;
+				//! Time spent on read.
 				uint64 disc_rtime;
+				//! Time spent on write.
 				uint64 disc_wtime;
+				//! Time spent in queue.
 				uint64 disc_qtime;
+				//! Total time.
 				uint64 disc_time;
+				//! Snap time.
 				uint64 disc_snaptime;
+				//! Disc service time.
 				double disc_service_time;
+				//! Number of disc queues.
 				double disc_queue;
 			};
-			std::vector<Usage*> dirUsages;	//! List with usage information for every disc
+			//! List with usage information for every disc
+			std::vector<Usage*> dirUsages;
 
 			/**
 			 * 	\fn getFullFsTypeName(sigar_file_system_type_e type)

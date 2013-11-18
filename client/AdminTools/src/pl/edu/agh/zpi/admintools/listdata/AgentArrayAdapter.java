@@ -31,22 +31,33 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 /**
- * \class AgentArrayAdapter \brief Adapter for AgentData arrays for easy agent
- * data visualization.
+ * \class AgentArrayAdapter
+ * \brief Adapter for AgentData arrays for easy agent data visualization.
  */
 public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
-	// ! App environment context.
 	private final Context context;
-	// ! Memory divider (for byte to gigabyte calculations).
+	//! Memory divider (for byte to gigabyte calculations).
 	public static final double DIVIDER = 1024 * 1024 * 1024; // GB
-	
+
 	private ArrayList<Boolean> alertedList = new ArrayList<Boolean>();
-	
+
+	/**
+	 *	\fn public AgentArrayAdapter(Context context)
+	 *	\brief Constructor, set global context.
+	 *	\param context Context with env global informations.
+	 */
 	public AgentArrayAdapter(Context context) {
 		super(context, R.layout.list_agents_stats, new ArrayList<AgentData>());
 		this.context = context;
 	}
-
+	/**
+	 *	\fn public View getView(int position, View convertView, ViewGroup parent)
+	 *	\brief Get View created over current agent data.
+	 *	\param position Agent data index.
+	 *	\param convertView Source view.
+	 *	\param parent Parental group. Unused.
+	 *	\return Instance of filled with agent data View.
+	 */
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null) {
@@ -259,6 +270,14 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 		}
 	}
 
+	/**
+	 *	\fn public void set(int position, AgentData agent, boolean isAlerted)
+	 *	\brief Set new agent data.
+	 *	\param position Agent data index.
+	 *	\param agent Agent data.
+	 *	\param isAlerted Flag with alert information.
+	 *	\return None.
+	 */
 	public void set(int position, AgentData agent, boolean isAlerted) {
 		try{
 			alertedList.set(position, isAlerted);

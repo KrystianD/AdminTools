@@ -2,9 +2,7 @@
 
 #include "Types.h"
 #include "Cpu.h"
-#include "Memory.h"
 #include "Resources.h"
-#include "Processes.h"
 #include "FileSystem.h"
 
 namespace SystemInfo
@@ -23,16 +21,34 @@ namespace SystemInfo
 			 *	\return Cpu::Times data.
 			 */
 			static Cpu::Times* sigarCpuToCpuTimes(sigar_cpu_t* cpuData);
+			/**
+			 *	\fn static Cpu::Details* sigarCpuInfoToDetails(sigar_cpu_info_t* cpuData)
+			 *	\brief Mapping cpu info data.
+			 *	\param cpuData Sigar Cpu info data.
+			 *	\return Cpu::Details data.
+			 */
 			static Cpu::Details* sigarCpuInfoToDetails(sigar_cpu_info_t* cpuData);
-			static Memory* sigarMemAndSwapToMemory(sigar_mem_t* memData, sigar_swap_t* swapData);
+			/**
+			 *	\fn static Resources* sigarResourcesLimitToResources(sigar_resource_limit_t* resData)
+			 *	\brief Mapping resources limits data.
+			 *	\param resData Sigar resources data.
+			 *	\return Resources data.
+			 */
 			static Resources* sigarResourcesLimitToResources(sigar_resource_limit_t* resData);
-			static Processes::Stats* sigarProcStatToProcessesStats(sigar_proc_stat_t* procData);
+			/**
+			 *	\fn FileSystem::Details* sigarFileSystemToFsDetails(sigar_file_system_t* fsData)
+			 *	\brief Mapping file system data.
+			 *	\param fsData Sigar file system data.
+			 *	\return FileSystem::Details data.
+			 */
 			static FileSystem::Details* sigarFileSystemToFsDetails(sigar_file_system_t* fsData);
+			/**
+			 *	\fn FileSystem::Usage* sigarFileSystemUsageToFsUsage(sigar_file_system_usage_t* fsData, std::string dirName)
+			 *	\brief Mapping file system usage data.
+			 *	\param fsData Sigar file system usage data.
+			 *	\param dirName Directory name.
+			 *	\return FileSystem::Usage data.
+			 */
 			static FileSystem::Usage* sigarFileSystemUsageToFsUsage(sigar_file_system_usage_t* fsData, std::string dirName);
-
-			static void fillProcessDetailsWithSigarProcState(Processes::Details* details, sigar_proc_state_t* state);
-			static void fillProcessDetailsWithSigarProcCpu(Processes::Details* details, sigar_proc_cpu_t* cpu);
-			static void fillProcessDetailsWithSigarProcTime(Processes::Details* details, sigar_proc_time_t* time);
-			static void fillProcessDetailsWithSigarProcMemory(Processes::Details* details, sigar_proc_mem_t* mem);
 	};
 }
