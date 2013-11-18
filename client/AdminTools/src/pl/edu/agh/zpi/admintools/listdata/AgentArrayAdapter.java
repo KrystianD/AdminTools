@@ -35,9 +35,8 @@ import android.widget.ToggleButton;
  * \brief Adapter for AgentData arrays for easy agent data visualization.
  */
 public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
-	// ! App environment context.
 	private final Context context;
-	// ! Memory divider (for byte to gigabyte calculations).
+	//! Memory divider (for byte to gigabyte calculations).
 	public static final double DIVIDER = 1024 * 1024 * 1024; // GB
 
 	private ArrayList<Boolean> alertedList = new ArrayList<Boolean>();
@@ -275,7 +274,7 @@ public class AgentArrayAdapter extends ArrayAdapter<AgentData> {
 	 *	\fn public void set(int position, AgentData agent, boolean isAlerted)
 	 *	\brief Set new agent data.
 	 *	\param position Agent data index.
-	 *	\parma agent Agent data.
+	 *	\param agent Agent data.
 	 *	\param isAlerted Flag with alert information.
 	 *	\return None.
 	 */

@@ -406,7 +406,7 @@ public class ConnectionTask implements Runnable {
 	}
 	/**
 	 *	\fn	public void enqueueMessage(IPacket packet)
-	 *	\brife Add packet to queue.
+	 *	\brief Add packet to queue.
 	 *	\param packet Packet to add.
 	 *	\return None.
 	 */

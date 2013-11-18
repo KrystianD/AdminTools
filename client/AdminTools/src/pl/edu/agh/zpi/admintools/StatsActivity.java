@@ -50,14 +50,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+/**
+ *	\class StatsActivity
+ *	\brief Activity for interacting and handling agents stats data.
+ */
 public class StatsActivity extends Activity implements ServiceConnection,
 		Handable {
 	private final static int SETTINGS = 0;
 	private final static int CHARTS = 1;
 
-	// ! Temperature alert threshold.
+	//! Temperature alert threshold.
 	public static double tempAlertLevel = 85;
-	// ! HDD usage alert percent threshold.
+	//! HDD usage alert percent threshold.
 	public static double HDDAlertLevel = 0.95;
 
 	private ListView listView;
@@ -82,6 +86,12 @@ public class StatsActivity extends Activity implements ServiceConnection,
 	private LinearLayout linearLayoutAlertsInternal;
 	private LinearLayout linearLayoutAlertsBounding;
 
+	/**
+	 *	\fn public void onCreate(Bundle savedInstanceState)
+	 *	\brief Execute on activity creation.
+	 *	\param savedInstanceState Saved state.
+	 *	\return None.
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -110,7 +120,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 		linearLayoutAlertsInternal = (LinearLayout) findViewById(R.id.linearLayout_alerts_internal);
 		linearLayoutAlertsBounding = (LinearLayout) findViewById(R.id.linearLayout_alerts);
-		
+
 		agentsArray = new AgentArrayAdapter(this);
 		// longClickListener = new LongClickItemListener(this);
 
@@ -125,7 +135,13 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 		setResult(RESULT_OK); // na wstępie zakładamy że jest ok
 	}
-
+	/**
+	 *	\fn public void onServiceConnected(ComponentName name, IBinder service)
+	 *	\brief Execute on service connection.
+	 *	\param name Component name.
+	 *	\param service Msg binder.
+	 *	\return None.
+	 */
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
 		serviceMessenger = new Messenger(service);
@@ -133,14 +149,23 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		sendMessageToService(ConnectionService.CONNECT, host, port, key,
 				interval);
 	}
-
+	/**
+	 *	\fn public void onServiceDisconnected(ComponentName name)
+	 *	\brief Execute on service disconnection.
+	 *	\param name Component name.
+	 *	\return None.
+	 */
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
 		Log.d("qwe", "StatsActivity.onServiceDisconnected()");
 		serviceMessenger = null;
 		isServiceBinded = false;
 	}
-
+	/**
+	 *	\fn protected void onDestroy()
+	 *	\brief Execute on activity destruction.
+	 *	\return None.
+	 */
 	@Override
 	protected void onDestroy() {
 		if (isServiceBinded) {
@@ -150,13 +175,21 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		}
 		super.onDestroy();
 	}
-
+	/**
+	 *	\fn protected void onStop()
+	 *	\brief Execute on activity stop.
+	 *	\return None.
+	 */
 	@Override
 	protected void onStop() {
 		sendMessageToService(ConnectionService.STOP);
 		super.onStop();
 	}
-
+	/**
+	 *	\fn protected void onResume()
+	 *	\brief Execute on activity resume.
+	 *	\return None.
+	 */
 	@Override
 	protected void onResume() {
 		Log.d("qwe", "StatsActivity.onResume()" + serviceMessenger);
@@ -169,7 +202,12 @@ public class StatsActivity extends Activity implements ServiceConnection,
 				interval);
 		super.onResume();
 	}
-
+	/**
+	 *	\fn public void handleMessage(Message msg)
+	 *	\brief Handle given message.
+	 *	\param msg Message to handle.
+	 *	\return None.
+	 */
 	@Override
 	public void handleMessage(Message msg) {
 		Log.d("qwe", "StatsActivity handleMessage " + msg.what);
@@ -257,7 +295,12 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			}
 		}
 	}
-
+	/**
+	 *	\fn public void manageAgentListButtons(View view)
+	 *	\brief Handle agent list buttons.
+	 *	\param view Agent data view.
+	 *	\return None.
+	 */
 	public void manageAgentListButtons(View view) {
 		short id = (Short) ((Button) view).getTag();
 		if (view.getId() == R.id.button_list_settings) {
@@ -406,13 +449,23 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			isTcp.setChecked(sc.isTCP());
 		}
 	}
-
+	/**
+	 *	\fn public boolean onCreateOptionsMenu(Menu menu)
+	 *	\brief Execute on creation of options menu.
+	 *	\param menu Menu data.
+	 *	\return true.
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.stats, menu);
 		return true;
 	}
-
+	/**
+	 *	\fn public boolean onOptionsItemSelected(MenuItem item)
+	 *	\brief Execute on menu options item selection.
+	 *	\param item Selected menu item.
+	 *	\return If selected.
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -494,11 +547,21 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		return super.onOptionsItemSelected(item);
 	}
 
-	// rozwijanie listy agentów
+	/**
+	 *	\fn public void toggleTable(View view)
+	 *	\brief Toggle agent list data.
+	 *	\param view Current View.
+	 *	\return None.
+	 */
 	public void toggleTable(View view) {
 		agentsArray.notifyDataSetChanged();
 	}
-
+	/**
+	 *	\fn public void onDialogConfigButtonClicked(View view)
+	 *	\brief Execute on dialog configuration button was clicked.
+	 *	\param view Current View.
+	 *	\return None.
+	 */
 	public void onDialogConfigButtonClicked(View view) {
 		LinearLayout parent = (LinearLayout) view.getParent().getParent();
 		LinearLayout layout = (LinearLayout) parent.getChildAt(9); // magic
@@ -518,7 +581,14 @@ public class StatsActivity extends Activity implements ServiceConnection,
 				layout.removeViewAt(index - 1);
 		}
 	}
-
+	/**
+	 *	\fn protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	 *	\brief Execute on showing up activity result.
+	 *	\param requestCode Request code.
+	 *	\param resultCode Result code.
+	 *	\param data Result data.
+	 *	\return None.
+	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == AdminTools.CHARTS_ACTIVITY_CODE) {
@@ -566,12 +636,12 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			LayoutInflater inflater = (LayoutInflater) this
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			TextView alert = (TextView)inflater.inflate(R.layout.alert_text_view, null, true);
-			
+
 			alert.setTag(position);
 			alert.setClickable(true);
 			alert.setTextColor(Color.RED);
 			alert.setText(agent.getName());
-			
+
 			linearLayoutAlertsInternal.addView(alert);
 		}
 		// jeżeli laout będzie za wysoki, ustawia 150dp, włącza się wtedy scrolling ^^
@@ -582,13 +652,18 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			linearLayoutAlertsBounding.getLayoutParams().height = pixels;
 		}
 	}
-
+	/**
+	 *	\fn public void findAgentByAlert(final View view)
+	 *	\brief Find agent by active alert.
+	 *	\param view Current View.
+	 *	\return None.
+	 */
 	public void findAgentByAlert(final View view) {
 		view.setBackgroundColor(Color.GREEN);
 		Log.d("qwe", "StatsActivity.findAgentByAlert " + view.getTag());
 		int position = (Integer) view.getTag();
 		listView.smoothScrollToPosition(position);
-		view.postDelayed(new Runnable() {	
+		view.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				view.setBackgroundColor(Color.TRANSPARENT);
@@ -601,17 +676,42 @@ public class StatsActivity extends Activity implements ServiceConnection,
 /************************/
 /** additional classes **/
 /************************/
-
+/**
+ *	\class ShortTextWatcher
+ *	\brief Text watcher for short text.
+ */
 class ShortTextWatcher implements TextWatcher {
+	/**
+	 *	\fn public void onTextChanged(CharSequence s, int start, int before, int count)
+	 *	\brief Execute on text change event.
+	 *	\param s New text.
+	 *	\param start Start index.
+	 *	\param before Before index.
+	 *	\param count Count of text.
+	 *	\return None.
+	 */
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 	}
-
+	/**
+	 *	\fn public void beforeTextChanged(CharSequence s, int start, int count, int after)
+	 *	\brief Execute on just before text change event.
+	 *	\param s New text.
+	 *	\param start Start index.
+	 *	\param count Count of text.
+	 *	\param after After index.
+	 *	\return None.
+	 */
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
 	}
-
+	/**
+	 *	\fn public void afterTextChanged(Editable s)
+	 *	\brief Execute just after text change event.
+	 *	\param s Editable component.
+	 *	\return None.
+	 */
 	@Override
 	public void afterTextChanged(Editable s) {
 		String str = s.toString();
@@ -629,9 +729,18 @@ class ShortTextWatcher implements TextWatcher {
 		}
 	}
 };
-
+/**
+ *	\class ShortOnFocusChangeListener
+ *	\brief On focus change event listener for short text.
+ */
 class ShortOnFocusChangeListener implements View.OnFocusChangeListener {
-
+	/**
+	 *	\fn public void onFocusChange(View v, boolean hasFocus)
+	 *	\brief Executed on focus change event.
+	 *	\param v Current View.
+	 *	\param hasFocus Text has focus flag.
+	 *	\return None.
+	 */
 	@Override
 	public void onFocusChange(View v, boolean hasFocus) {
 		EditText et = (EditText) v;
