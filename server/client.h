@@ -31,7 +31,7 @@ public:
 	/**
 	 *	\fn Client (int fd, const string& ip, int port)
 	 *	\brief Constructor, initialize data with incoming connection returns.
-	 *	\param id Socket descriptor.
+	 *	\param fd Socket descriptor.
 	 *	\param ip Client ip address.
 	 *	\param port Client port.
 	 */
@@ -51,7 +51,7 @@ public:
 	void process ();
 	/**
 	 *	\fn void fetchConfig ()
-	 *	\biref Fetch client-agent current configuration.
+	 *	\brief Fetch client-agent current configuration.
 	 *	\return None.
 	 */
 	void fetchConfig ();
