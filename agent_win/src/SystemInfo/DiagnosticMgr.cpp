@@ -25,25 +25,6 @@ DiagnosticMgr::~DiagnosticMgr()
 	sigar_close(sigarCore);
 }
 
-Memory* DiagnosticMgr::getMemoryInfo()
-{
-	if(!initialized) {
-		std::cout << "Couldn't acquire memory info" << std::endl;
-		return NULL;
-	}
-	sigar_mem_t* memData = new sigar_mem_t();
-	if(sigar_mem_get(sigarCore, memData)) {
-		std::cout << "SIGAR couldn't acquire memory info" << std::endl;
-		return NULL;
-	}
-	sigar_swap_t* swapData = new sigar_swap_t();
-	if(sigar_swap_get(sigarCore, swapData)) {
-		std::cout << "SIGAR couldn't acquire swap info" << std::endl;
-		return NULL;
-	}
-	return InfoMapper::sigarMemAndSwapToMemory(memData, swapData);
-}
-
 Resources* DiagnosticMgr::getResourcesInfo()
 {
 	if(!initialized) {
@@ -92,74 +73,6 @@ Cpu* DiagnosticMgr::getCpuInfo()
 		result -> coreDetails.push_back(
 			InfoMapper::sigarCpuInfoToDetails(&(coreDetails -> data[j])));
 	}
-	return result;
-}
-
-Processes* DiagnosticMgr::getProcessesInfo()
-{
-	if(!initialized) {
-		std::cout << "Couldn't acquire processes info" << std::endl;
-		return NULL;
-	}
-
-	sigar_proc_stat_t* procStats = new sigar_proc_stat_t();
-	if(sigar_proc_stat_get(sigarCore, procStats)) {
-		std::cout << "SIGAR couldn't acquire processes stats" << std::endl;
-		return NULL;
-	}
-	Processes* result = new Processes();
-	result -> stats = InfoMapper::sigarProcStatToProcessesStats(procStats);
-
-	sigar_proc_list_t* procList = new sigar_proc_list_t();
-	if(sigar_proc_list_get(sigarCore, procList)) {
-		std::cout << "SIGAR couldn't acquire processes list" << std::endl;
-		return result;
-	}
-	for(uint16 i = 0; i < procList -> number; ++i) {
-		uint64 pid = procList -> data[i];
-		result -> pids.push_back(pid);
-		result -> details.push_back(getProcessDetails(pid));
-	}
-
-	return result;
-}
-
-Processes::Details* DiagnosticMgr::getProcessDetails( uint64 pid )
-{
-	Processes::Details* result = new Processes::Details();
-	result -> pid = pid;
-
-	sigar_proc_state_t* procState = new sigar_proc_state_t();
-	if(sigar_proc_state_get(sigarCore, pid, procState)) {
-		std::cout << "SIGAR couldn't acquire process state for pid: "
-			<< pid << std::endl;
-		return result;
-	}
-	InfoMapper::fillProcessDetailsWithSigarProcState(result, procState);
-
-	sigar_proc_cpu_t* procCpu = new sigar_proc_cpu_t();
-	if(sigar_proc_cpu_get(sigarCore, pid, procCpu)) {
-		std::cout << "SIGAR couldn't acquire process cpu for pid: "
-			<< pid << std::endl;
-		return result;
-	}
-	InfoMapper::fillProcessDetailsWithSigarProcCpu(result, procCpu);
-
-	sigar_proc_time_t* procTime = new sigar_proc_time_t();
-	if(sigar_proc_time_get(sigarCore, pid, procTime)) {
-		std::cout << "SIGAR couldn't acquire process time for pid: "
-			<< pid << std::endl;
-		return result;
-	}
-	InfoMapper::fillProcessDetailsWithSigarProcTime(result, procTime);
-
-	sigar_proc_mem_t* procMem = new sigar_proc_mem_t();
-	if(sigar_proc_mem_get(sigarCore, pid, procMem)) {
-		std::cout << "SIGAR couldn't acquire process memory for pid: "
-			<< pid << std::endl;
-		return result;
-	}
-	InfoMapper::fillProcessDetailsWithSigarProcMemory(result, procMem);
 	return result;
 }
 

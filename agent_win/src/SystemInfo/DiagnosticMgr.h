@@ -1,10 +1,8 @@
 #pragma once
 
 #include "Types.h"
-#include "Memory.h"
 #include "Resources.h"
 #include "Cpu.h"
-#include "Processes.h"
 #include "FileSystem.h"
 
 /**
@@ -21,12 +19,7 @@ namespace SystemInfo
 	 */
 	class DiagnosticMgr
 	{
-		public:
-			/**
-			 *	\brief Get informations about memory (RAM/Swap).
-			 *	\return Memory informations.
-			 */
-			Memory* getMemoryInfo();
+		public:			
 			/**
 			 *	\brief Get informations about resources used and its limits.
 			 *	\return Resources informations.
@@ -36,12 +29,7 @@ namespace SystemInfo
 			 *	\brief Get informations about CPUs/Cores.
 			 *	\return Cpu and cores informations.
 			 */
-			Cpu* getCpuInfo();
-			/**
-			 * 	\brief Get informations about processes currently running on system.
-			 *	\return Processes informations.
-			 */
-			Processes* getProcessesInfo();
+			Cpu* getCpuInfo();			
 			/**
 			 *	\brief Get informations about file system (HDD, virtual, external drives).
 			 *	\return FileSystem informations.
@@ -65,9 +53,7 @@ namespace SystemInfo
 			DiagnosticMgr();
 			DiagnosticMgr(const DiagnosticMgr&) {}
 			DiagnosticMgr& operator=(const DiagnosticMgr&) {}
-			~DiagnosticMgr();
-
-			Processes::Details* getProcessDetails(uint64 pid);
+			~DiagnosticMgr();			
 
 			sigar_t* sigarCore;
 			bool initialized;
