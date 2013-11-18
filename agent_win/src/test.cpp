@@ -418,7 +418,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	std::cout << "Zapisuje dane!" << std::endl;
+	std::cout << "Saving data!" << std::endl;
 
 	// save old data in order to send it to server when connected
 	f = fopen ("olddata", "wb");
