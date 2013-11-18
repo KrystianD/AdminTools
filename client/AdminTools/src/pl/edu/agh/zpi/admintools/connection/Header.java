@@ -48,7 +48,7 @@ public class Header {
 
 	/**
 	 *	\fn public Header()
-	 *	\brife Default constructor, do nothing.
+	 *	\brief Default constructor, do nothing.
 	 */
 	public Header() {
 	}

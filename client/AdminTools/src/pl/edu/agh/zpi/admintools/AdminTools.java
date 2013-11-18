@@ -113,7 +113,7 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 				Context.BIND_AUTO_CREATE);
 	}
 	/**
-	 *	\fn public void onConnect(View view) throws InterruptedException
+	 *	\fn public void onConnect(View view)
 	 *	\brief Execute on establish connection.
 	 *	\param view Current View.
 	 *	\return None.
