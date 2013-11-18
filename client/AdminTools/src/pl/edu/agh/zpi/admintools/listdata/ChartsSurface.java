@@ -17,8 +17,13 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+/**
+ *	\class ChartsSurface
+ *	\brief Surface for displaying charts data.
+ */
 public class ChartsSurface extends SurfaceView implements
 		SurfaceHolder.Callback {
+	//! Charts data accuracy.
 	public static final int ACCURACY = 10;
 
 	ArrayList<Float> values = new ArrayList<Float>();
@@ -28,28 +33,58 @@ public class ChartsSurface extends SurfaceView implements
 	ChartsActivity context;
 	SurfaceHolder holder;
 
+	/**
+	 *	\fn public ChartsSurface(Context context, AttributeSet attrs)
+	 *	\brief Constructor, set global context and set of attribute.
+	 *	\param context Context with env global informations.
+	 *	\param attrs A collection of attributes (AttributeSet).
+	 */
 	public ChartsSurface(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		this.context = (ChartsActivity) context;
 		this.holder = getHolder();
 		holder.addCallback(this);
 	}
-
+	/**
+	 *	\fn public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+	 *	\brief Execute on surface changed event.
+	 *	\param holder Surface holder class.
+	 *	\param format Surface format.
+	 *	\param width Surface width.
+	 *	\param height Surface height.
+	 *	\return None.
+	 */
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
 		draw();
 	}
-
+	/**
+	 *	\fn public void surfaceCreated(SurfaceHolder holder)
+	 *	\brief Execute on surface creation.
+	 *	\param holder Surface holder class.
+	 *	\return None.
+	 */
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		draw();
 	}
-
+	/**
+	 *	\fn public void surfaceDestroyed(SurfaceHolder holder)
+	 *	\brief Execute on surface destruction.
+	 *	\param holder Surface holder class.
+	 *	\return None.
+	 */
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 	}
-
+	/**
+	 *	\fn public void setData(ArrayList<Float> data, int type)
+	 *	\brief Set new data tu surface and display it on charts.
+	 *	\param data List with series of data.
+	 *	\param type Stats type flag.
+	 *	\return None.
+	 */
 	public void setData(ArrayList<Float> data, int type) {
 		Log.d("qwe", "ChartsSurface.setData()");
 		values = data;
