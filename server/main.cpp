@@ -140,6 +140,8 @@ int main (int argc, char** argv)
 
 	fprintf (stderr, "ok\r\n");
 
+	uint32_t lastCleanup = getTicks ();
+
 	for (;;)
 	{
 		timeval tv;
@@ -218,6 +220,13 @@ int main (int argc, char** argv)
 				clients.erase (clients.begin () + i);
 				fprintf (stderr, "Client deleted\r\n");
 			}
+		}
+
+		if (getTicks () - lastCleanup > 60 * 60 * 1000)
+		{
+			DB::cleanup ();
+			lastCleanup = getTicks ();
+			fprintf (stderr, "DB cleanup\r\n");
 		}
 	}
 

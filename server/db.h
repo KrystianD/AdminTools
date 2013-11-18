@@ -183,6 +183,12 @@ public:
 	 */
 	static bool getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<TSensorsRecord>& records);
 
+	/**
+	 *	\fn static bool cleanup ()
+	 *	\brief Remove old records from database.
+	 */
+	static bool cleanup ();
+
 private:
 	/**
 	 *	\fn static bool execute (const string& query)

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <cmath>
 
+#include <errno.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -110,17 +111,28 @@ void Client::process ()
 	{
 		int len = dataToSend.size ();
 
-		int sent = send (fd, &dataToSend[0], len, 0);
+		CLIENT_DEBUG ("[SEND] Sending %d bytes", len);
+		int sent = send (fd, &dataToSend[0], len, MSG_DONTWAIT);
 		if (sent <= 0)
 		{
-			CLIENT_DEBUG("connection error, disconnecting");
-			toDelete = true;
-			close (fd);
-			return;
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+			{
+				printf ("asd\n");
+			}
+			else
+			{
+				CLIENT_DEBUG("connection error, disconnecting");
+				toDelete = true;
+				close (fd);
+				return;
+			}
 		}
 
-		dataToSend.erase (dataToSend.begin (), dataToSend.begin () + sent);
-		CLIENT_DEBUG ("[SEND] %d bytes sent, %d bytes left", sent, dataToSend.size ());
+		if (sent > 0)
+		{
+			dataToSend.erase (dataToSend.begin (), dataToSend.begin () + sent);
+			CLIENT_DEBUG ("[SEND] %d bytes sent, %d bytes left", sent, dataToSend.size ());
+		}
 	}
 
 	if (state == WAITING_FOR_PACKET && getTicks () - packetStartTime >= SERVER_PACKET_TIMEOUT)

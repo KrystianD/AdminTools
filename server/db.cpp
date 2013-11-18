@@ -273,6 +273,10 @@ bool DB::getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<T
 		return false;
 	}
 }
+bool DB::cleanup ()
+{
+	execute ("DELETE FROM records WHERE date<strftime('%s','now')-60*60*24*30");
+}
 
 bool DB::execute (const string& query)
 {

@@ -1,10 +1,11 @@
-#define _WIN32_WINNT  0x0501
+﻿#define _WIN32_WINNT  0x0501
 
 #include <vector>
 #include <iostream>
 #include <time.h>
 
-#include "../../common/config.h"
+#include "../../common/configWin.h"
+#include "../../common/configWin.cpp"
 #include "../../common/sensors.h"
 #include "SystemInfo/DiagnosticMgr.h"
 #include "serverWin.h"
