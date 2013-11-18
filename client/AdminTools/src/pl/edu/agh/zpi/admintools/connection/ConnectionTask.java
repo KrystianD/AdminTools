@@ -45,7 +45,7 @@ public class ConnectionTask implements Runnable {
 	public static final int AUTH_FAILED = 6;
 
 	/**
-	 *	\enum ConnectionTask.State
+	 *	\enum State
 	 *	\brief Represents current state of connection process.
 	 */
 	enum State {

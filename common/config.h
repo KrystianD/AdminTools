@@ -74,7 +74,7 @@ public:
 	 *	\fn void setInt (const string& key, int val)
 	 *	\brief Insert int value and assign it with given key.
 	 *	\param key Key connected with inserted value.
-	 *	\param value Inserted value.
+	 *	\param val Inserted value.
 	 *	\return None.
 	 */
 	void setInt (const string& key, int val);

@@ -44,8 +44,13 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+/**
+ *	\class ChartsActivity
+ *	\brief Activity for interacting and handling charts visualization.
+ */
 public class ChartsActivity extends Activity implements ServiceConnection,
 		Handable {
+	//! Agent item full key.
 	public static final String AGENT = "pl.edu.agh.zpi.admintools.ChartsActivity.AGENT";
 
 	private boolean isServiceBinded;
@@ -71,6 +76,12 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	private Messenger activityMessenger = new Messenger(new IncomingHandler(
 			this));
 
+	/**
+	 *	\fn protected void onCreate(Bundle savedInstanceState)
+	 *	\brief Execute on activity creation.
+	 *	\param savedInstanceState Bundle with object saved state.
+	 *	\return None.
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -126,7 +137,11 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 
 		setResult(RESULT_OK);
 	}
-
+	/**
+	 *	\fn protected void onDestroy()
+	 *	\brief Execute on activity destruction.
+	 *	\return None.
+	 */
 	@Override
 	protected void onDestroy() {
 		if (isServiceBinded) {
@@ -136,12 +151,20 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		}
 		super.onDestroy();
 	}
-
+	/**
+	 *	\fn protected void onStop()
+	 *	\brief Execute on activity stop event.
+	 *	\return None.
+	 */
 	@Override
 	protected void onStop() {
 		super.onStop();
 	}
-
+	/**
+	 *	\fn protected void onResume()
+	 *	\brief Execute on activity reasume event.
+	 *	\return None.
+	 */
 	@Override
 	protected void onResume() {
 		Log.d("qwe", "ChartsActivity.onResume()" + serviceMessenger);
@@ -154,7 +177,12 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		sendMessageToService(ConnectionService.STOP);
 		super.onResume();
 	}
-
+	/**
+	 *	\fn public void handleMessage(Message msg)
+	 *	\brief Handle incoming Message.
+	 *	\param msg Incoming Message.
+	 *	\return None.
+	 */
 	@Override
 	public void handleMessage(Message msg) {
 		Log.d("qwe", "ChartsActivity.handleMessage() " + msg.what);
@@ -172,7 +200,13 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 			break;
 		}
 	}
-
+	/**
+	 *	\fn public void onServiceConnected(ComponentName name, IBinder service)
+	 *	\brief Execute on service connection establish event.
+	 *	\param name Component name.
+	 *	\param service Service binder.
+	 *	\return None.
+	 */
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
 		serviceMessenger = new Messenger(service);
@@ -182,14 +216,24 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		sendMessageToService(ConnectionService.STOP);
 		submit(null);
 	}
-
+	/**
+	 *	\fn public void onServiceDisconnected(ComponentName name)
+	 *	\brief Execute on service disconnected event.
+	 *	\param name Component name.
+	 *	\return None.
+	 */
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
 		Log.d("qwe", "ChartsActivity.onServiceDisconnected()");
 		serviceMessenger = null;
 		isServiceBinded = false;
 	}
-
+	/**
+	 *	\fn public void submit(View view)
+	 *	\brief Submit given view. Do something.
+	 *	\param view Submitted view.
+	 *	\return None.
+	 */
 	public void submit(View view) {
 		Log.d("qwe", "ChartsActivity.submit()");
 
@@ -234,7 +278,13 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 			}
 		}
 	}
-
+	/**
+	 *	\fn public void setAxis(int minVal, int maxVal)
+	 *	\brief Set charts axis.
+	 *	\param minVal Minimal axis value.
+	 *	\param maxVal Maximum axis value.
+	 *	\return None.
+	 */
 	public void setAxis(int minVal, int maxVal) {
 		Log.d("qwe", "ChartsActivity.setAxis()");
 		String start = "", end = "";
@@ -274,7 +324,11 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		}
 		typeButton.setText(info);
 	}
-
+	/**
+	 *	\fn public void updateDate()
+	 *	\brief Update charts date.
+	 *	\return None.
+	 */
 	public void updateDate() {
 		Log.d("qwe", "ChartsActivity.updateDate()");
 		String start = "", end = "";
@@ -294,7 +348,12 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 
 		submit(null);
 	}
-
+	/**
+	 *	\fn public void setDate(View view)
+	 *	\brief Set charts date.
+	 *	\param view Current View.
+	 *	\return None.
+	 */
 	public void setDate(View view) {
 		Log.d("qwe", "ChartsActivity.setDate()");
 		DialogFragment dateFragment = null;
@@ -305,7 +364,12 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		}
 		dateFragment.show(getFragmentManager(), "datePicker");
 	}
-
+	/**
+	 *	\fn public void setDataType(View view)
+	 *	\brief Set charts data type.
+	 *	\param view Current View.
+	 *	\return None.
+	 */
 	public void setDataType(View view) {
 		Log.d("qwe", "ChartsActivity.setDataType()");
 		final LayoutInflater inflater = this.getLayoutInflater();
@@ -407,7 +471,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	 * @Override public boolean onCreateOptionsMenu(Menu menu) { // Inflate the
 	 * menu; this adds items to the action bar if it is present.
 	 * getMenuInflater().inflate(R.menu.charts, menu); return true; }
-	 * 
+	 *
 	 * @Override public boolean onOptionsItemSelected(MenuItem item) { switch
 	 * (item.getItemId()) { case android.R.id.home: // This ID represents the
 	 * Home or Up button. In the case of this // activity, the Up button is
@@ -423,7 +487,10 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 /****************************************/
 /*************** KLASY POMOCNICZE *******/
 /****************************************/
-
+/**
+ *	\class DatePickerFragment
+ *	\brief Date picker dialog.
+ */
 class DatePickerFragment extends DialogFragment implements
 		DatePickerDialog.OnDateSetListener {
 	private boolean isStartTime;
@@ -431,7 +498,14 @@ class DatePickerFragment extends DialogFragment implements
 	private ChartsActivity parent;
 	private boolean wasSet;
 
-	public DatePickerFragment(PacketStatsRequest packet, ChartsActivity parent,
+	/**
+	 *	\fn public DatePickerFragment(PacketStatsRequest packet, ChartsActivity parent, boolean isStartTime)
+	 *	\brief Constructor, set components data.
+	 *	\param packet Packet stats request.
+	 *	\param parent Parent activity.
+	 *	\parma isStartTime Flag if its start time.
+	 */
+	public DatePickerFragment(PacketStatsRequest param packet , ChartsActivity parent,
 			boolean isStartTime) {
 		super();
 		Log.d("qwe", "DatePicker()");
@@ -440,7 +514,12 @@ class DatePickerFragment extends DialogFragment implements
 		this.parent = parent;
 		this.wasSet = false;
 	}
-
+	/**
+	 *	\fn public Dialog onCreateDialog(Bundle savedInstanceState)
+	 *	\brief Execute on creation of dialog.
+	 *	\param savedInstanceState Bundle with object saved state.
+	 *	\return Created dialog.
+	 */
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		Log.d("qwe", "DatePicker.onCreateDialog()");
@@ -456,7 +535,15 @@ class DatePickerFragment extends DialogFragment implements
 
 		return new DatePickerDialog(parent, this, year, month, day);
 	}
-
+	/**
+	 *	\fn public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth)
+	 *	\brief Execute on date set event.
+	 *	\param view Date picker instance.
+	 *	\param year Selected year.
+	 *	\param monthOfYear Selected month of year.
+	 *	\param dayOfMonth Selected day of month.
+	 *	\return None.
+	 */
 	@Override
 	public void onDateSet(DatePicker view, int year, int monthOfYear,
 			int dayOfMonth) {

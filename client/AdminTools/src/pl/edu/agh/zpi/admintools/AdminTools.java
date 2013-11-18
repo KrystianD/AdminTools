@@ -43,20 +43,31 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+/**
+ *	\class AdminTools
+ *	\brief Main client activity, manage whole application.
+ */
 public class AdminTools extends Activity implements ServiceConnection, Handable {
+	//! Host field key.
 	public static final String HOST = "pl.edu.agh.zpi.admintools.host";
+	//! Port field key.
 	public static final String PORT = "pl.edu.agh.zpi.admintools.port";
+	//! Authentication key field key.
 	public static final String KEY = "pl.edu.agh.zpi.admintools.key";
+	//! Time interval field key.
 	public static final String INTERVAL = "pl.edu.agh.zpi.admintools.interval";
+	//! Connection preferences name field key.
 	public static final String CONN_PREFS_NAME = "connection_prefs_file";
+	//! Network error field key.
 	public static final String NETWORK_ERROR = "pl.edu.agh.zpi.admintools.network_error";
 
-	
+	//! Starting stats activity code.
 	public static final int STATS_ACTIVITY_CODE = 1;
+	//! Starting charts activity code.
 	public static final int CHARTS_ACTIVITY_CODE = 2;
 
 	private SharedPreferences connectionSettings;
-	
+
 	private EditText editTextHost;
 	private EditText editTextPort;
 	private Button buttonConnect;
@@ -70,16 +81,22 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 
 	private String key;
 	private int interval;
-	
+
+	/**
+	 *	\fn protected void onCreate(Bundle savedInstanceState)
+	 *	\brief Execute on activity creation.
+	 *	\param savedInstanceState Bundle with object saved state.
+	 *	\return None.
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_admin_tools);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		
+
 		connectionSettings = getSharedPreferences(
 					CONN_PREFS_NAME, MODE_MULTI_PROCESS);
-		
+
 		editTextHost = (EditText) findViewById(R.id.editText_IP);
 		editTextPort = (EditText) findViewById(R.id.editText_Port);
 		buttonConnect = (Button) findViewById(R.id.button_connect);
@@ -90,12 +107,17 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 
 		key = connectionSettings.getString(KEY, "");
 		interval = connectionSettings.getInt(INTERVAL, 1000);
-		
+
 		isServiceBinded = bindService(
 				new Intent(this, ConnectionService.class), this,
 				Context.BIND_AUTO_CREATE);
 	}
-
+	/**
+	 *	\fn public void onConnect(View view) throws InterruptedException
+	 *	\brief Execute on establish connection.
+	 *	\param view Current View.
+	 *	\return None.
+	 */
 	public void onConnect(View view) throws InterruptedException {
 		setConnectionUI(true);
 
@@ -214,7 +236,13 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 		editor.putString(PORT, editTextPort.getText().toString());
 		editor.commit();
 	}
-
+	/**
+	 *	\fn public void onServiceConnected(ComponentName name, IBinder service)
+	 *	\brief Execute on service connection establish event.
+	 *	\param name Component name.
+	 *	\param service Service binder.
+	 *	\return None.
+	 */
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
 		serviceMessenger = new Messenger(service);
@@ -226,14 +254,23 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 			e.printStackTrace();
 		}
 	}
-
+	/**
+	 *	\fn public void onServiceDisconnected(ComponentName name)
+	 *	\brief Execute on service disconnected event.
+	 *	\param name Component name.
+	 *	\return None.
+	 */
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
 		Log.d("qwe", "AdminTools.onServiceDisconnected()");
 		serviceMessenger = null;
 		isServiceBinded = false;
 	}
-
+	/**
+	 *	\fn protected void onDestroy()
+	 *	\brief Execute on activity destruction.
+	 *	\return None.
+	 */
 	@Override
 	protected void onDestroy() {
 		Log.d("qwe", "AdminTools.onDestroy()" + isServiceBinded);
@@ -244,7 +281,11 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 		}
 		super.onDestroy();
 	}
-
+	/**
+	 *	\fn protected void onResume()
+	 *	\brief Execute on activity reasume event.
+	 *	\return None.
+	 */
 	@Override
 	protected void onResume() {
 		if (serviceMessenger != null) {
@@ -258,7 +299,12 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 		}
 		super.onResume();
 	}
-
+	/**
+	 *	\fn public void handleMessage(Message msg)
+	 *	\brief Handle incoming Message.
+	 *	\param msg Incoming Message.
+	 *	\return None.
+	 */
 	@Override
 	public void handleMessage(Message msg) {
 		Log.d("qwe", "AdminTools handleMessage");
@@ -269,7 +315,7 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 					Integer.parseInt(editTextPort.getText().toString()));
 			intent.putExtra(HOST, editTextHost.getText().toString());
 			intent.putExtra(KEY, key);
-			
+
 			startActivityForResult(intent, STATS_ACTIVITY_CODE);
 			setConnectionUI(false);
 			break;
@@ -284,7 +330,14 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 			break;
 		}
 	}
-
+	/**
+	 *	\fn protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	 *	\brief Execute on activity result request.
+	 *	\param requestCode Request code.
+	 *	\param resultCode Result code.
+	 *	\param data Intent data.
+	 *	\return None.
+	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == STATS_ACTIVITY_CODE) {
@@ -296,13 +349,23 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-
+	/**
+	 *	\fn public boolean onCreateOptionsMenu(Menu menu)
+	 *	\brief Execute on creation of options menu.
+	 *	\param menu Menu data.
+	 *	\return true.
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.admin_tools, menu);
 		return true;
 	}
-
+	/**
+	 *	\fn public boolean onOptionsItemSelected(MenuItem item)
+	 *	\brief Execute on menu options item selection.
+	 *	\param item Selected menu item.
+	 *	\return If selected.
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -354,15 +417,27 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 /************************/
 /** additional classes **/
 /************************/
-
+/**
+ *	\class KeyTextWatcher
+ *	\brief Text watcher for key text.
+ */
 class KeyTextWatcher implements TextWatcher {
 	private Button positive;
-
+	/**
+	 *	\fn public KeyTextWatcher(Button positive)
+	 *	\brief Constructor, sets positive Button.
+	 *	\param positive Button to set.
+	 */
 	public KeyTextWatcher(Button positive) {
 		super();
 		this.positive = positive;
 	}
-
+	/**
+	 *	\fn public void afterTextChanged(Editable s)
+	 *	\brief Execute just after text change event.
+	 *	\param s Editable component.
+	 *	\return None.
+	 */
 	@Override
 	public void afterTextChanged(Editable s) {
 		if (s.toString().length() != 16) {
@@ -372,12 +447,28 @@ class KeyTextWatcher implements TextWatcher {
 			positive.setEnabled(true);
 		}
 	}
-
+	/**
+	 *	\fn public void beforeTextChanged(CharSequence s, int start, int count, int after)
+	 *	\brief Execute on just before text change event. Do nothing.
+	 *	\param s New text.
+	 *	\param start Start index.
+	 *	\param count Count of text.
+	 *	\param after After index.
+	 *	\return None.
+	 */
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
 	}
-
+	/**
+	 *	\fn public void onTextChanged(CharSequence s, int start, int before, int count)
+	 *	\brief Execute on text change event. Do nothing.
+	 *	\param s New text.
+	 *	\param start Start index.
+	 *	\param before Before index.
+	 *	\param count Count of text.
+	 *	\return None.
+	 */
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 	}
