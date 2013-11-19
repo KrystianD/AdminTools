@@ -241,7 +241,7 @@ bool DB::getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<T
 	sqlite3_bind_int (stm, 2, startDate);
 	sqlite3_bind_int (stm, 3, endDate);
 
-	fprintf (stderr, "ag: %d s: %d e: %d\n", agentId, startDate, endDate);
+	uint32_t s = getTicks ();
 	res = sqlite3_step (stm);
 	while (res == SQLITE_ROW)
 	{
@@ -270,7 +270,8 @@ bool DB::getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<T
 		records.push_back (r);
 		res = sqlite3_step (stm);
 	}
-	fprintf (stderr, "%d\n", records.size ());
+	uint32_t e = getTicks ();
+	fprintf (stderr, "pts: %d time: %d\n", records.size (), e - s);
 	if (res == SQLITE_DONE)
 	{
 		sqlite3_finalize (stm);

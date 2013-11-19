@@ -393,6 +393,9 @@ bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 	uint32_t start = req.startDate;
 	uint32_t end = req.endDate;
 
+	fprintf (stderr, "ag: %d s: %d e: %d\n", req.agentId, req.startDate, req.endDate);
+	fprintf (stderr, "req pt: %d\n", req.points);
+
 	vector<TSensorsRecord> rec;
 	if (!DB::getRecords (req.agentId, start, end - 1, rec))
 	{

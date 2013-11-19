@@ -85,7 +85,10 @@ public:
 		return true;
 	}
 
-	// reset internal pointer
+	/**
+	 *	\fn	void rewind ()
+	 *	\brief Reset internal pointer
+	 */
 	void rewind ()
 	{
 		m_pos = 0;
