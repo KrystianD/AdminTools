@@ -121,6 +121,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
+		Log.d("qwe", "startDate " + c);
 		statsRequest.setStartDate((int) (c.getTime().getTime() / 1000));
 		Log.d("qwe", "" + (int) (c.getTime().getTime() / 1000));
 		today += c.get(Calendar.DAY_OF_MONTH) + "-";
@@ -144,7 +145,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		isServiceBinded = bindService(
 				new Intent(this, ConnectionService.class), this,
 				Context.BIND_AUTO_CREATE);
-
+		
 		setResult(RESULT_OK);
 	}
 	/**
@@ -568,10 +569,11 @@ class DatePickerFragment extends DialogFragment implements
 		if (wasSet)
 			return;
 		wasSet = true;
-		Log.d("qwe", "DatePicker.onDateSet()" + view.getId());
 		Calendar currentDate = Calendar.getInstance();
 		currentDate.set(Calendar.HOUR_OF_DAY, 0);
 		currentDate.set(Calendar.MINUTE, 0);
+		currentDate.set(Calendar.SECOND, 0);
+		currentDate.set(Calendar.MILLISECOND, 0);
 		Calendar tomorrow = Calendar.getInstance();
 		tomorrow.setTimeInMillis(currentDate.getTimeInMillis());
 		tomorrow.add(Calendar.DAY_OF_MONTH, 1);
@@ -580,10 +582,13 @@ class DatePickerFragment extends DialogFragment implements
 		monthAgo.add(Calendar.MONTH, -1);
 
 		final Calendar c = Calendar.getInstance();
-		c.setTimeInMillis(0l);
 		c.set(Calendar.YEAR, year);
 		c.set(Calendar.MONTH, monthOfYear);
 		c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
 
 		Log.d("qwe", "DatePicker.onDateSet() before" + c);
 		if (isStartTime) {
