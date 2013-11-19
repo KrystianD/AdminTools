@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <fstream>
 #include "../common/config.h"
+#include "../common/config.h"
 #include "gtest/gtest.h"
 
 TEST(ConfigTest, TestHasKey) {
@@ -60,6 +61,29 @@ TEST(ConfigTest, TestGettingUndeclaredInt) {
 	ASSERT_NE(cfg.getInt("port_undeclared", 0), 1234);
 }
 
+std::string replaceAll (const string& str, const string& what, const string& replacement)
+{
+	string newStr = "";
+	size_t idx = 0;
+	size_t pos;
+	while (idx < str.size ())
+	{
+		pos = str.find (what, idx);
+		if (pos == string::npos)
+		{
+			newStr += str.substr (idx);
+			break;
+		}
+		else
+		{
+			newStr += str.substr (idx, pos - idx) + replacement;
+			idx = pos + what.size ();
+		}
+	}
+	return newStr;
+}
+
+
 TEST(ConfigTest, TestSaveToFile) {
 	// clean file contents
 	std::ofstream ofs;
@@ -84,5 +108,5 @@ TEST(ConfigTest, TestSaveToFile) {
 	bufferPatternFile << patternFile.rdbuf();
 	
 	// compare two files, they should be equal
-	ASSERT_EQ(bufferPatternFile.str().compare(bufferNewFile.str()), 0);
+	ASSERT_EQ(replaceAll(bufferPatternFile.str(),"\r","").compare(replaceAll(bufferNewFile.str(),"\r","")), 0);
 }
