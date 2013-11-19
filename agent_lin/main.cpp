@@ -48,7 +48,9 @@ int main (int argc, char** argv)
 
 	signal (SIGPIPE, SIG_IGN);
 	signal (SIGINT, signal_handler);
-	// signal (SIGINT, signal_handler);
+	signal (SIGHUP, signal_handler);
+	signal (SIGQUIT, signal_handler);
+	signal (SIGTERM, signal_handler);
 
 	// load config file
 	Config c;
@@ -112,7 +114,7 @@ int main (int argc, char** argv)
 
 		TSensorsData d;
 
-		// gather data from senosors and send it to server or save in memory depending on connectino state
+		// gather data from senosors and send it to server or save in memory depending on connection state
 		if (getTicks () - lastSendTime >= serv.getConfig ().interval)
 		{
 			getSensorsData (d, serv.getConfig ());

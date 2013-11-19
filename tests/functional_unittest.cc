@@ -282,7 +282,7 @@ TEST(FunctionalTest, TestSendPacketAgentData) {
 	TPacketAgentData packetAgentData;
 
 	packetAgentData.id = 100;
-	packetAgentData.oldData = 200;
+	packetAgentData.oldData = 0;
 	packetAgentData.name = "test";
 	packetAgentData.data.timestamp = 302192301;
 	packetAgentData.data.temp = 10.9;

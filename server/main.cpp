@@ -23,6 +23,13 @@ using namespace std;
 
 vector<Client> clients;
 
+bool end = false;
+
+void signal_handler (int signum)
+{
+	end = true;
+}
+
 int main (int argc, char** argv)
 {
 	srand (time (0));
@@ -106,6 +113,10 @@ int main (int argc, char** argv)
 	}
 
 	signal (SIGPIPE, SIG_IGN);
+	signal (SIGINT, signal_handler);
+	signal (SIGHUP, signal_handler);
+	signal (SIGQUIT, signal_handler);
+	signal (SIGTERM, signal_handler);
 
 	sockaddr_in myaddr;
 
@@ -142,7 +153,7 @@ int main (int argc, char** argv)
 
 	uint32_t lastCleanup = getTicks ();
 
-	for (;;)
+	while (!end)
 	{
 		timeval tv;
 		fd_set fds;
@@ -164,8 +175,11 @@ int main (int argc, char** argv)
 		int res = select (maxfd + 1, &fds, 0, 0, &tv);
 		if (res == -1)
 		{
-			perror ("select");
-			return 1;
+			if (errno != EINTR)
+			{
+				perror ("select");
+				return 1;
+			}
 		}
 		else
 		{
@@ -229,6 +243,14 @@ int main (int argc, char** argv)
 			fprintf (stderr, "DB cleanup\r\n");
 		}
 	}
+	fprintf (stderr, "Disconnect clients\r\n");
+	for (int i = clients.size () - 1; i >= 0; i--)
+	{
+		close (clients[i].fd);
+		fprintf (stderr, "Client deleted\r\n");
+	}
+	DB::close ();
+	fprintf (stderr, "Database closed\r\n");
 
 	return 0;
 }

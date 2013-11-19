@@ -189,6 +189,12 @@ public:
 	 */
 	static bool cleanup ();
 
+	/**
+	 *	\fn static void close ()
+	 *	\brief Close database
+	 */
+	static void close ();
+
 private:
 	/**
 	 *	\fn static bool execute (const string& query)

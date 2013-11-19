@@ -31,6 +31,8 @@ string ftm (uint32_t tm, uint32_t base)
 Client::Client (int fd, const string& ip, int port)
 	: fd (fd), ip (ip), port (port)
 {
+	dbAgent.id = -1;
+
 	CLIENT_DEBUG("New client fd: %d addr: %s:%d", fd, ip.c_str (), port);
 
 	state = WAITING_FOR_HEADER;
@@ -98,12 +100,6 @@ void Client::readData ()
 		bufferPointer -= dataToReceive;
 		dataToReceive = newDataLen;
 	}
-
-	// printf ("rd: %d\r\n", rd);
-	// for (int i=0;i<rd;i++)
-	// {
-		// putchar (buffer[i]);
-	// }
 }
 void Client::process ()
 {
@@ -117,7 +113,7 @@ void Client::process ()
 		{
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 			{
-				printf ("asd\n");
+				fprintf (stderr, "skip\n");
 			}
 			else
 			{
@@ -162,7 +158,7 @@ void Client::process ()
 
 	if (oldData.size () > 0 && getTicks () - oldDataUpdateTime >= 2000)
 	{
-		CLIENT_DEBUG("Inserting %d of old data", oldData.size ());
+		CLIENT_DEBUG("Inserting %d records of old data", oldData.size ());
 		DB::insertRecords (dbAgent, oldData);
 		CLIENT_DEBUG("Done.");
 		oldData.clear ();
@@ -398,11 +394,19 @@ bool Client::generateAndSendStats (const TPacketStatsRequest& req)
 
 	vector<TSensorsRecord> rec;
 	if (!DB::getRecords (req.agentId, start, end - 1, rec))
+	{
+		r.points.clear ();
+		sendPacket (r);
 		return false;
+	}
 
 	int pointsCount = req.points;
 	if (pointsCount == 0)
+	{
+		r.points.clear ();
+		sendPacket (r);
 		return false;
+	}
 	vector<int16_t> points;
 
 	uint32_t cur = start;

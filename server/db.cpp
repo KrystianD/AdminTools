@@ -262,6 +262,7 @@ bool DB::getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<T
 		records.push_back (r);
 		res = sqlite3_step (stm);
 	}
+	fprintf (stderr, "%d\n", records.size ());
 	if (res == SQLITE_DONE)
 	{
 		sqlite3_finalize (stm);
@@ -276,6 +277,10 @@ bool DB::getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<T
 bool DB::cleanup ()
 {
 	execute ("DELETE FROM records WHERE date<strftime('%s','now')-60*60*24*30");
+}
+void DB::close ()
+{
+	sqlite3_close (db);
 }
 
 bool DB::execute (const string& query)
