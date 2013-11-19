@@ -18,7 +18,7 @@ void signal_handler (int signum)
 
 int main (int argc, char** argv)
 {
-	const char *configPath = "config.cfg";
+	const char *configPath = "/etc/config_agent.cfg";
 	int cc;
 	opterr = 0;
 	while ((cc = getopt (argc, argv, "c:")) != -1)
