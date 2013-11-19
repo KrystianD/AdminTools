@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "server.h"
 #include "key.h"
+#include "packets.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,7 +70,7 @@ TEST(FunctionalTest, TestVALIDKEY) {
 	m_fd = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (m_fd == -1)
 	{
-		perror ("socket");
+		FAIL();
 		return;
 	}
 
@@ -110,12 +111,11 @@ TEST(FunctionalTest, TestVALIDKEY) {
 	if (::connect (m_fd, servinfo->ai_addr, servinfo->ai_addrlen))
 	{
 		close (m_fd);
-		perror ("connect ");
+		FAIL();
 		return;
 	}
 
 	TPacketAuth p;
-	strncpy (p.key, "xxxxxxxxxxxxxxxxxx", 16);
 	strncpy (p.key, KEY, 16);
 	p.sendConfig = 0;
 
@@ -125,11 +125,10 @@ TEST(FunctionalTest, TestVALIDKEY) {
 
 	if (!readPacket (PACKET_REPLY, r, 1000))
 	{
-		printf ("unable to read reply packet\r\n");
+		FAIL();
 	}
 	else
 	{
-		printf ("ok  reply:%d!!\n",r.value);
 		ASSERT_EQ(r.value,1);
 	}
 
@@ -144,7 +143,7 @@ TEST(FunctionalTest, TestWRONGKEY) {
 	m_fd = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (m_fd == -1)
 	{
-		perror ("socket");
+		FAIL();
 		return;
 	}
 
@@ -185,7 +184,7 @@ TEST(FunctionalTest, TestWRONGKEY) {
 	if (::connect (m_fd, servinfo->ai_addr, servinfo->ai_addrlen))
 	{
 		close (m_fd);
-		perror ("connect ");
+		FAIL();
 		return;
 	}
 
@@ -199,13 +198,128 @@ TEST(FunctionalTest, TestWRONGKEY) {
 
 	if (!readPacket (PACKET_REPLY, r, 1000))
 	{
-		printf ("unable to read reply packet\r\n");
+		FAIL();	
 	}
 	else
 	{
-		printf ("ok  reply:%d!!\n",r.value);
 		ASSERT_EQ(r.value,0);
 	}
 
 	close (m_fd);
 }
+
+TEST(FunctionalTest, TestSendPacketAgentData) {
+
+
+	sockaddr_in servaddr;
+
+	m_fd = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (m_fd == -1)
+	{
+		FAIL();
+		return;
+	}
+
+	int yes = 1;
+	setsockopt (m_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof (int));
+
+	memset (&servaddr, 0, sizeof (servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_port = htons (1234);
+	servaddr.sin_addr.s_addr = INADDR_ANY;
+
+	int status;
+	struct addrinfo hints;
+	struct addrinfo *servinfo;
+
+	memset (&hints, 0, sizeof (hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+
+	stringstream port;
+	string portStr;
+	port << m_port;
+	port >> portStr;
+	if (status = getaddrinfo (m_host.c_str (), portStr.c_str (), &hints, &servinfo))
+	{
+		close (m_fd);
+		fprintf (stderr, "getaddrinfo: %s\n", gai_strerror (status));
+		return;
+	}
+
+	char str[100];
+	inet_ntop (servinfo->ai_family, &((sockaddr_in*)servinfo->ai_addr)->sin_addr, str, 100);
+	printf ("%s\r\n", str);
+
+	freeaddrinfo (servinfo);
+
+	if (::connect (m_fd, servinfo->ai_addr, servinfo->ai_addrlen))
+	{
+		close (m_fd);
+		FAIL();
+		return;
+	}
+
+	TPacketAuth packetAuth;
+	
+	strncpy (packetAuth.key, KEY, 16);
+	packetAuth.sendConfig = 0;
+
+	sendPacket (packetAuth);
+
+	TPacketReply r;
+
+	if (!readPacket (PACKET_REPLY, r, 1000))
+	{
+		FAIL();
+	}
+	else
+	{
+		ASSERT_EQ(r.value,1);
+	}
+
+	TPacketAgentData packetAgentData;
+
+	packetAgentData.id = 100;
+	packetAgentData.oldData = 200;
+	packetAgentData.name = "test";
+	packetAgentData.data.timestamp = 302192301;
+	packetAgentData.data.temp = 10.9;
+	packetAgentData.data.tempValid = true;
+	packetAgentData.data.cpuUsage = 80.9;
+	packetAgentData.data.totalRam = 102932100;
+	packetAgentData.data.freeRam = 102932100;
+	packetAgentData.data.uptime = 1000;
+
+	TDiskUsage diskUsage;
+	diskUsage.name = "dysk";
+	diskUsage.totalSpace = 3029301;
+	diskUsage.usedSpace = 30219;
+
+	packetAgentData.data.disksUsage.push_back(diskUsage);
+
+	TService service;
+	service.name = "ssh";
+	service.available = true;
+
+	packetAgentData.data.services.push_back(service);
+
+	sendPacket (packetAgentData);
+
+	TPacketStart packetStart;
+	packetStart.interval = 2000;
+
+	sendPacket(packetStart);
+
+	TPacketAgentsData agentsData;
+
+	sleep(3);
+
+	if (!readPacket (PACKET_AGENTSDATA, agentsData, 1000))
+	{
+		FAIL();
+	}
+}
+
+
