@@ -1,0 +1,25 @@
+var class_system_info_1_1_resources =
+[
+    [ "Resources", "class_system_info_1_1_resources.html#ae58474de6d2839452d86e6fc74d585f5", null ],
+    [ "displayCombinedInfo", "class_system_info_1_1_resources.html#a6d61a43218a91dcf2a7f013e90a43f93", null ],
+    [ "coreCurrent", "class_system_info_1_1_resources.html#aedb76a2760c06f2fc7abe5f98aa2791c", null ],
+    [ "coreMax", "class_system_info_1_1_resources.html#a5bd71cbc4eb6299ba8e0c927e94a83be", null ],
+    [ "cpuCurrent", "class_system_info_1_1_resources.html#af934932cbc453ed42d0c0b2cfe6fd8fd", null ],
+    [ "cpuMax", "class_system_info_1_1_resources.html#a2c0cbaab99a12314838b1d151043a49a", null ],
+    [ "dataCurrent", "class_system_info_1_1_resources.html#a506a195c936b037310ba6e8615d43468", null ],
+    [ "dataMax", "class_system_info_1_1_resources.html#a3bb81da44eba02b99edb9a1feb84e024", null ],
+    [ "fileSizeCurrent", "class_system_info_1_1_resources.html#aa63e28c6a3769e18228d270b38e6397d", null ],
+    [ "fileSizeMax", "class_system_info_1_1_resources.html#aa0f07e73de8fa42f22963a9356d72ce5", null ],
+    [ "memoryCurrent", "class_system_info_1_1_resources.html#a32978159c0893e90401ee22b25d47ef6", null ],
+    [ "memoryMax", "class_system_info_1_1_resources.html#a033e56ff0e09457eb20c715e3f578240", null ],
+    [ "openFilesCurrent", "class_system_info_1_1_resources.html#a4594f89a789735c3509546fc0e9ebd73", null ],
+    [ "openFilesMax", "class_system_info_1_1_resources.html#ac6132770b57cbbe81111a88a4c001a19", null ],
+    [ "pipeSizeCurrent", "class_system_info_1_1_resources.html#a21a921337a7bd75bbcfbb6174d98ace6", null ],
+    [ "pipeSizeMax", "class_system_info_1_1_resources.html#a75af692003a279b551d058f9c678236e", null ],
+    [ "processesCurrent", "class_system_info_1_1_resources.html#a28f623f4c4e8c15c4ee86341c96b3b8c", null ],
+    [ "processesMax", "class_system_info_1_1_resources.html#ace99428498b28a8ad306466021732ab9", null ],
+    [ "stackCurrent", "class_system_info_1_1_resources.html#aba609ca043cf0658b6fe1220ba0657fc", null ],
+    [ "stackMax", "class_system_info_1_1_resources.html#a3d9569b3cca9ab3c61e53ad66f17f27a", null ],
+    [ "virtualMemoryCurrent", "class_system_info_1_1_resources.html#ab0ee368fb7c32dee144e15bfa0484b83", null ],
+    [ "virtualMemoryMax", "class_system_info_1_1_resources.html#a084c6ae6d533a01a7ccc6a0435b3579f", null ]
+];

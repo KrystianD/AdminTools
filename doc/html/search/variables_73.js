@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['send_5fconfig',['SEND_CONFIG',['../classpl_1_1edu_1_1agh_1_1zpi_1_1admintools_1_1_connection_service.html#af861a5a921c456dd9b9639f273a5aa27',1,'pl::edu::agh::zpi::admintools::ConnectionService']]],
+  ['sendconfig',['sendConfig',['../class_t_packet_auth.html#a1d7c0dc6b136b1346f365cbf72e4a439',1,'TPacketAuth']]],
+  ['services',['services',['../class_t_packet_config.html#aaf14dd3a954888f479a98d072d575492',1,'TPacketConfig::services()'],['../class_t_sensors_data.html#a3d1190e8d798f1bb4035bb56288f5b4c',1,'TSensorsData::services()'],['../class_t_d_b_agent.html#a8c6f7e3ec9f1d812187da0c9f233f72c',1,'TDBAgent::services()']]],
+  ['set_5finterval',['SET_INTERVAL',['../classpl_1_1edu_1_1agh_1_1zpi_1_1admintools_1_1_connection_service.html#af3ddef238c134172b29c3685077ddf71',1,'pl::edu::agh::zpi::admintools::ConnectionService']]],
+  ['settingschanged',['settingsChanged',['../class_client.html#a7d366ef167e1efae8d93881d48533789',1,'Client']]],
+  ['size',['size',['../struct_t_header.html#a242f52d532c77cf9b06c997881238233',1,'THeader']]],
+  ['soft_5firq',['soft_irq',['../struct_system_info_1_1_cpu_1_1_times.html#ae7cb0ed558c2d90a0953c722f8ad4b99',1,'SystemInfo::Cpu::Times']]],
+  ['stackcurrent',['stackCurrent',['../class_system_info_1_1_resources.html#aba609ca043cf0658b6fe1220ba0657fc',1,'SystemInfo::Resources']]],
+  ['stackmax',['stackMax',['../class_system_info_1_1_resources.html#a3d9569b3cca9ab3c61e53ad66f17f27a',1,'SystemInfo::Resources']]],
+  ['startdate',['startDate',['../class_t_packet_stats_request.html#a9f97f75b7fba7a8c447189aa37ccbe70',1,'TPacketStatsRequest']]],
+  ['stats_5factivity_5fcode',['STATS_ACTIVITY_CODE',['../classpl_1_1edu_1_1agh_1_1zpi_1_1admintools_1_1_admin_tools.html#a08b0a493bb8ce93f8ef3fa999d1e5331',1,'pl::edu::agh::zpi::admintools::AdminTools']]],
+  ['stats_5freply',['STATS_REPLY',['../classpl_1_1edu_1_1agh_1_1zpi_1_1admintools_1_1connection_1_1_connection_task.html#a9a92fb87722c79cd33e35aafbc212b5c',1,'pl::edu::agh::zpi::admintools::connection::ConnectionTask']]],
+  ['stats_5frequest',['STATS_REQUEST',['../classpl_1_1edu_1_1agh_1_1zpi_1_1admintools_1_1_connection_service.html#a8b31658f332494941e87abba19a53aa5',1,'pl::edu::agh::zpi::admintools::ConnectionService']]],
+  ['stolen',['stolen',['../struct_system_info_1_1_cpu_1_1_times.html#ae79035d5cf58f576d0b9ea96d4eba262',1,'SystemInfo::Cpu::Times']]],
+  ['stop',['STOP',['../classpl_1_1edu_1_1agh_1_1zpi_1_1admintools_1_1_connection_service.html#a1832189ea1b9d92e7792a156951c5649',1,'pl::edu::agh::zpi::admintools::ConnectionService']]],
+  ['sys',['sys',['../struct_system_info_1_1_cpu_1_1_times.html#a921b4c733fbc3c1f8d8ce1efdfe3224d',1,'SystemInfo::Cpu::Times']]],
+  ['sys_5ftype',['sys_type',['../struct_system_info_1_1_file_system_1_1_details.html#a84b602cfe33ac1eb0c21da252bbc45f5',1,'SystemInfo::FileSystem::Details']]]
+];
