@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <fstream>
 #include "../common/config.h"
-#include "../common/config.h"
 #include "gtest/gtest.h"
 
 TEST(ConfigTest, TestHasKey) {
