@@ -221,3 +221,9 @@ pip-log.txt
 .mr.developer.cfg
 
 tests/fun_db.db
+
+tests/fun_config.cfg
+
+tests/gtest_main.a
+
+tests/key.h

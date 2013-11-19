@@ -318,6 +318,8 @@ TEST(FunctionalTest, TestSendPacketAgentData) {
 
 	if (!readPacket (PACKET_AGENTSDATA, agentsData, 1000))
 	{
+		FAIL();
+	} else {
 		ASSERT_EQ(agentsData.agents.size(), 1);
 		ASSERT_EQ(agentsData.agents[0].id, 100);
 		ASSERT_EQ(agentsData.agents[0].name, "test");
@@ -335,7 +337,6 @@ TEST(FunctionalTest, TestSendPacketAgentData) {
 		ASSERT_EQ(agentsData.agents[0].data.services.size(), 1);
 		ASSERT_EQ(agentsData.agents[0].data.services[0].name, "ssh");
 		ASSERT_EQ(agentsData.agents[0].data.services[0].available, true);
-		FAIL();
 	}
 }
 
