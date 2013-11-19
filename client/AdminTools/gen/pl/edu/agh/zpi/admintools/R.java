@@ -138,6 +138,7 @@ public final class R {
         public static final int available=0x7f06001b;
         public static final int cancel=0x7f060002;
         public static final int charts=0x7f06003a;
+        public static final int charts_size_zero=0x7f06003d;
         public static final int choose_agent_action=0x7f06001d;
         public static final int choose_agent_action_charts=0x7f06001f;
         public static final int choose_agent_action_settings=0x7f06001e;

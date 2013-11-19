@@ -42,6 +42,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 /**
@@ -194,7 +195,14 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		case ConnectionTask.STATS_REPLY:
 			PacketStatsReply psr = (PacketStatsReply) msg.getData().get(
 					PacketStatsReply.PACKET_STATS_REPLY);
-			surface.setData(psr.getPoints(), statsRequest.getDataType());
+			ArrayList<Float> points = psr.getPoints();
+			if(points.size() == 0){
+				Toast.makeText(getApplicationContext(), getString(R.string.charts_size_zero), Toast.LENGTH_SHORT).show();
+			}
+			else{
+				surface.setData(points, statsRequest.getDataType());
+			}
+			break;
 		default:
 			// sendMessageToService(ConnectionService.STOP);
 			break;
@@ -346,6 +354,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		start += c.get(Calendar.YEAR);
 		timeStart.setText(start);
 
+		
 		submit(null);
 	}
 	/**

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">AdminTools</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -60,6 +61,7 @@
     <string name="more">More</string>
     <string name="charts">Charts</string>
     <string name="alerts">Alerts</string>
-     <string name="auth_error">Invalid Auth Key!\nSet right key and try again.</string>
+    <string name="auth_error">Invalid Auth Key!\nSet right key and try again.</string>
+    <string name="charts_size_zero">Error while fetching stats.</string>
 
 </resources>

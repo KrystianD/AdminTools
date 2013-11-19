@@ -1,7 +1,6 @@
 package pl.edu.agh.zpi.admintools;
 
 import java.util.ArrayList;
-import java.util.zip.Inflater;
 
 import pl.edu.agh.zpi.admintools.connection.ConnectionTask;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketAgentsData;
@@ -56,8 +55,6 @@ import android.widget.ToggleButton;
  */
 public class StatsActivity extends Activity implements ServiceConnection,
 		Handable {
-	private final static int SETTINGS = 0;
-	private final static int CHARTS = 1;
 
 	// ! Temperature alert threshold.
 	public static double tempAlertLevel = 85;
@@ -215,18 +212,17 @@ public class StatsActivity extends Activity implements ServiceConnection,
 					.get(PacketAgentsData.PACKET_AGENTS_DATA);
 
 			ArrayList<AgentData> agents = pad.getAgentsList();
-			if(agents.size() < agentsArray.getCount()){
+			if (agents.size() < agentsArray.getCount()) {
 				agentsArray.clear();
 				agentsArray.addAll(agents);
-			}
-			else{
+			} else {
 				for (int i = 0; i < agents.size(); i++) {
 					AgentData agent = agents.get(i);
 					boolean isAlerted = checkAlert(agent, i);
 					agentsArray.set(i, agent, isAlerted);
 				}
 			}
-			
+
 			agentsArray.notifyDataSetChanged();
 			break;
 		case ConnectionTask.AGENT_KEY:
@@ -257,7 +253,8 @@ public class StatsActivity extends Activity implements ServiceConnection,
 			finish();
 			break;
 		case ConnectionTask.AUTH_FAILED:
-			Toast.makeText(getApplicationContext(), getString(R.string.auth_error), Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(),
+					getString(R.string.auth_error), Toast.LENGTH_SHORT).show();
 			finish();
 			break;
 		default:
@@ -621,7 +618,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 	private void setAlert(boolean isAlerted, int position, AgentData agent) {
 		boolean added = false;
 		for (int i = 0; i < linearLayoutAlertsInternal.getChildCount(); i++) {
-			TextView view = (TextView)linearLayoutAlertsInternal.getChildAt(i);
+			TextView view = (TextView) linearLayoutAlertsInternal.getChildAt(i);
 			if (view.getTag().equals(position)) {
 				if (!isAlerted) {
 					linearLayoutAlertsInternal.removeViewAt(i);
