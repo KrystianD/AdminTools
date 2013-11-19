@@ -149,7 +149,8 @@ public class ChartsSurface extends SurfaceView implements
 
 			paint.setColor(Color.rgb(100, 100, 100));
 
-			for (int i = c.getHeight(); i > 0; i -= (c.getHeight() / maxVal) * 10) {
+			for ( float i = c.getHeight(); i > 0; i -= ((float)c.getHeight() / maxVal) * 10) {
+				Log.d("qwe", i + "   " + c.getHeight());
 				c.drawLine(0, i, c.getWidth(), i, paint);
 			}
 
@@ -192,7 +193,7 @@ public class ChartsSurface extends SurfaceView implements
 					pt.add(Vector2D.mul(P2, H2));
 					pt.add(Vector2D.mul(T1, H3));
 					pt.add(Vector2D.mul(T2, H4));
-
+					
 					if (isEmpty) {
 						linePath.moveTo(pt.x, pt.y);
 						isEmpty = false;
