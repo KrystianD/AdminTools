@@ -150,7 +150,6 @@ public class ChartsSurface extends SurfaceView implements
 			paint.setColor(Color.rgb(100, 100, 100));
 
 			for ( float i = c.getHeight(); i > 0; i -= ((float)c.getHeight() / maxVal) * 10) {
-				Log.d("qwe", i + "   " + c.getHeight());
 				c.drawLine(0, i, c.getWidth(), i, paint);
 			}
 
