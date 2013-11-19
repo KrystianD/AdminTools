@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
@@ -70,6 +71,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 	private Messenger activityMessenger = new Messenger(new IncomingHandler(
 			this));
 
+	private SharedPreferences connectionSettings;
 	/**
 	 *	\fn protected void onCreate(Bundle savedInstanceState)
 	 *	\brief Execute on activity creation.
@@ -83,11 +85,23 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		agent = (AgentData) this.getIntent().getSerializableExtra(AGENT);
-		host = this.getIntent().getStringExtra(AdminTools.HOST);
-		port = this.getIntent().getIntExtra(AdminTools.PORT, 0);
-		key = this.getIntent().getStringExtra(AdminTools.KEY);
-		interval = this.getIntent().getIntExtra(AdminTools.INTERVAL, 1000);
+//		host = this.getIntent().getStringExtra(AdminTools.HOST);
+//		port = this.getIntent().getIntExtra(AdminTools.PORT, 0);
+//		key = this.getIntent().getStringExtra(AdminTools.KEY);
+//		interval = this.getIntent().getIntExtra(AdminTools.INTERVAL, 1000);
 
+		connectionSettings = getSharedPreferences(AdminTools.CONN_PREFS_NAME,
+				MODE_MULTI_PROCESS);
+
+		Log.d("qwe", "StatsActivity.onCreate()");
+
+		host = connectionSettings.getString(AdminTools.HOST, "");
+		port = Integer.parseInt(connectionSettings.getString(AdminTools.PORT,
+				""));
+		key = connectionSettings.getString(AdminTools.KEY, "");
+		interval = connectionSettings.getInt(AdminTools.INTERVAL, 0);
+		
+		
 		getActionBar().setTitle("ChartsActivity\t" + agent.getName());
 
 		surface = (ChartsSurface) findViewById(R.id.surfaceView_charts);
