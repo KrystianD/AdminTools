@@ -180,18 +180,21 @@ public:
 	 *	\param[in] startDate Interval start time.
 	 *	\param[in] endDate Interval end time.
 	 *	\param[out] records Filtered sensors datas.
+	 *	\return If succeeded.
 	 */
 	static bool getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<TSensorsRecord>& records);
 
 	/**
-	 *	\fn static bool cleanup ()
+	 *	\fn static bool cleanup()
 	 *	\brief Remove old records from database.
+	 *	\return If succeeded.
 	 */
 	static bool cleanup ();
 
 	/**
-	 *	\fn static void close ()
-	 *	\brief Close database
+	 *	\fn static void close()
+	 *	\brief Close database.
+	 *	\return None.
 	 */
 	static void close ();
 
