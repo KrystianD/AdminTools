@@ -50,15 +50,15 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 /**
- * \class StatsActivity \brief Activity for interacting and handling agents
- * stats data.
+ * \class StatsActivity
+ * \brief Activity for interacting and handling agents stats data.
  */
 public class StatsActivity extends Activity implements ServiceConnection,
 		Handable {
 
-	// ! Temperature alert threshold.
+	//! Temperature alert threshold.
 	public static double tempAlertLevel = 85;
-	// ! HDD usage alert percent threshold.
+	//! HDD usage alert percent threshold.
 	public static double HDDAlertLevel = 0.95;
 
 	private ListView listView;
@@ -674,7 +674,8 @@ public class StatsActivity extends Activity implements ServiceConnection,
 /** additional classes **/
 /************************/
 /**
- * \class ShortTextWatcher \brief Text watcher for short text.
+ * \class ShortTextWatcher
+ * \brief Text watcher for short text.
  */
 class ShortTextWatcher implements TextWatcher {
 	/**
@@ -721,8 +722,8 @@ class ShortTextWatcher implements TextWatcher {
 };
 
 /**
- * \class ShortOnFocusChangeListener \brief On focus change event listener for
- * short text.
+ * \class ShortOnFocusChangeListener
+ * \brief On focus change event listener for short text.
  */
 class ShortOnFocusChangeListener implements View.OnFocusChangeListener {
 	/**
