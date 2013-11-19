@@ -3,14 +3,10 @@ package pl.edu.agh.zpi.admintools;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.GregorianCalendar;
 
 import pl.edu.agh.zpi.admintools.connection.ConnectionTask;
-import pl.edu.agh.zpi.admintools.connection.packets.PacketConfig;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketStatsReply;
 import pl.edu.agh.zpi.admintools.connection.packets.PacketStatsRequest;
-import pl.edu.agh.zpi.admintools.connection.packets.ServiceConfig;
 import pl.edu.agh.zpi.admintools.listdata.ChartsSurface;
 import pl.edu.agh.zpi.admintools.sensors.AgentData;
 import pl.edu.agh.zpi.admintools.sensors.DiskUsageData;
@@ -37,13 +33,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 /**
  *	\class ChartsActivity

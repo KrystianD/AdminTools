@@ -93,11 +93,11 @@ public class ChartsSurface extends SurfaceView implements
 		switch (type) {
 		case PacketStatsRequest.CPU:
 			minVal = 0;
-			maxVal = Collections.max(data) * 10 + 20;
+			maxVal = (float)Math.ceil(Collections.max(data)) * 100 + 30;
 			context.setAxis((int) minVal, (int) maxVal);
 			
 			for (int i = 0; i < data.size(); i++) {
-				data.set(i, data.get(i) * 10);
+				data.set(i, data.get(i) * 100);
 			}
 			break;
 		case PacketStatsRequest.DISK:

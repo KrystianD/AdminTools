@@ -45,6 +45,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/button_date_end"
+        android:minEms="2"
+        android:gravity="right"
         android:text="@string/na"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
@@ -63,6 +65,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/textView_charts_time_new"
         android:layout_alignLeft="@+id/textView_charts_value_max"
+        android:minEms="2"
+        android:gravity="right"
         android:text="@string/na"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
