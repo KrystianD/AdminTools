@@ -1,3 +1,7 @@
+/**
+ *	\namespace pl.edu.agh.zpi.admintools.utils
+ *	\brief Utilities module.
+ */
 package pl.edu.agh.zpi.admintools.utils;
 
 import android.graphics.PointF;

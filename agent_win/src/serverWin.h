@@ -14,6 +14,10 @@ using namespace std;
 
 using namespace WinAgent;
 
+/**
+ *	\namespace WinAgent
+ *	\brief Windows agent module.
+ */
 namespace WinAgent
 {
 /**

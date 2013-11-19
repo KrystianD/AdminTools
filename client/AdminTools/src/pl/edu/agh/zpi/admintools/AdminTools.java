@@ -2,7 +2,10 @@
 TODO obsługa headerTimeout - teraz zawiesza się przy próbie zalogowania
 
  **/
-
+/**
+ *	\namespace pl.edu.agh.zpi.admintools
+ *	\brief Admin tool module for android.
+ */
 package pl.edu.agh.zpi.admintools;
 
 import java.net.InetAddress;

@@ -1,3 +1,7 @@
+/**
+ *	\namespace pl.edu.agh.zpi.admintools.listdata
+ *	\brief Data adapters and handlers.
+ */
 package pl.edu.agh.zpi.admintools.listdata;
 
 import java.util.ArrayList;

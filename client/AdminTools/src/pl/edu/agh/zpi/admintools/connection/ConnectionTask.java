@@ -1,3 +1,7 @@
+/**
+ *	\namespace pl.edu.agh.zpi.admintools.connection
+ *	\brief Connection and packets module.
+ */
 package pl.edu.agh.zpi.admintools.connection;
 
 import java.io.InputStream;

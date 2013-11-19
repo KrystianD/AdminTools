@@ -1,3 +1,7 @@
+/**
+ *	\namespace pl.edu.agh.zpi.admintools.connection.packets
+ *	\brief Packets submodule.
+ */
 package pl.edu.agh.zpi.admintools.connection.packets;
 
 /**

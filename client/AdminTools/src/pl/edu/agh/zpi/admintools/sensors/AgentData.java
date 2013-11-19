@@ -1,3 +1,7 @@
+/**
+ *	\namespace pl.edu.agh.zpi.admintools.sensors
+ *	\brief Sensors data transfer objects (DTOs).
+ */
 package pl.edu.agh.zpi.admintools.sensors;
 
 import java.io.Serializable;

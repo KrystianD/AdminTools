@@ -17,7 +17,7 @@ using namespace std;
 namespace WinAgent
 {
 /**
- *	\fn int recvall (int sockfd, void* data, int size, int timeout)
+ *	\fn int recvallWin (SOCKET sockfd, void* data, int size, int timeout)
  *	\brief Receive data from given socket.
  *	\param sockfd Socket descriptor.
  *	\param data Pointer to received data.
