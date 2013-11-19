@@ -318,6 +318,23 @@ TEST(FunctionalTest, TestSendPacketAgentData) {
 
 	if (!readPacket (PACKET_AGENTSDATA, agentsData, 1000))
 	{
+		ASSERT_EQ(agentsData.agents.size(), 1);
+		ASSERT_EQ(agentsData.agents[0].id, 100);
+		ASSERT_EQ(agentsData.agents[0].name, "test");
+		ASSERT_EQ(agentsData.agents[0].data.timestamp, 302192301);
+		ASSERT_EQ(agentsData.agents[0].data.temp, 10.9);
+		ASSERT_EQ(agentsData.agents[0].data.tempValid, true);
+		ASSERT_EQ(agentsData.agents[0].data.cpuUsage, 80.9);
+		ASSERT_EQ(agentsData.agents[0].data.totalRam, 102932100);
+		ASSERT_EQ(agentsData.agents[0].data.freeRam, 102932100);
+		ASSERT_EQ(agentsData.agents[0].data.uptime, 1000);
+		ASSERT_EQ(agentsData.agents[0].data.disksUsage.size(), 1);
+		ASSERT_EQ(agentsData.agents[0].data.disksUsage[0].name, "dysk");
+		ASSERT_EQ(agentsData.agents[0].data.disksUsage[0].totalSpace, 3029301);
+		ASSERT_EQ(agentsData.agents[0].data.disksUsage[0].usedSpace, 30219);
+		ASSERT_EQ(agentsData.agents[0].data.services.size(), 1);
+		ASSERT_EQ(agentsData.agents[0].data.services[0].name, "ssh");
+		ASSERT_EQ(agentsData.agents[0].data.services[0].available, true);
 		FAIL();
 	}
 }
