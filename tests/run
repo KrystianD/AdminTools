@@ -1,4 +1,5 @@
 make
+chmod 000 assets/inaccesible_file
 ./config_unittest
 ./sensors_unittest
 ./kutils_unittest
