@@ -1,8 +1,8 @@
-Package: server
+Package: agent_lin
 Version: 1.0-1
 Section: base
 Priority: optional
 Architecture: all
 Depends: 
 Maintainer: Krystian Dużyński
-Description: ZPI project server
+Description: ZPI project agent
