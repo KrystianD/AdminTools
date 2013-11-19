@@ -53,6 +53,11 @@ bool DB::createTables ()
 
 	if (!execute (str))
 		return false;
+	
+	str = "CREATE UNIQUE INDEX records_date_idx ON records(agentId,date);";
+
+	if (!execute (str))
+		return false;
 
 	return true;
 }
@@ -226,7 +231,10 @@ bool DB::insertRecords (int agentId, const vector<TSensorsData>& data)
 }
 bool DB::getRecords (int agentId, uint32_t startDate, uint32_t endDate, vector<TSensorsRecord>& records)
 {
-	string query = "SELECT id,date,temp,cpu,ram,diskUsages FROM records WHERE agentId=? AND date>=? AND date<=? ORDER BY date";
+	string query = 
+		"SELECT id,date,temp,cpu,ram,diskUsages "
+		"FROM records INDEXED BY records_date_idx "
+		"WHERE agentId=? AND date>=? AND date<=? ORDER BY date";
 	sqlite3_stmt *stm;
 	int res = sqlite3_prepare_v2 (db, query.c_str (), query.size (), &stm, 0);
 	sqlite3_bind_int (stm, 1, agentId);

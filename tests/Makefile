@@ -27,7 +27,7 @@ TESTS_DIR = .
 CPPFLAGS += -isystem $(GTEST_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread
+CXXFLAGS += -g -Wall -Wno-unused-parameter -Wno-unused-variable -Wextra -pthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -129,5 +129,5 @@ functional_unittest.o : $(TESTS_DIR)/functional_unittest.cc \
                       $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(USER_DIR)/common -I$(USER_DIR)/agent_lin -c $(TESTS_DIR)/functional_unittest.cc
 
-functional_unittest : server.o kutils.o common.o functional_unittest.o gtest_main.a
+functional_unittest : kutils.o common.o functional_unittest.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@

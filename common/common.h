@@ -49,6 +49,50 @@ public:
 		}
 		return true;
 	}
+
+	/**
+	 *	\fn	template<typename T> bool fetch (T& val)
+	 *	\brief Fetch parametrized data from buffer last position.
+	 *	\param[out] val Fetched value.
+	 *	\return If succeeded.
+	 */
+	template<typename T>
+	bool fetch (T& val)
+	{
+		if (m_pos + sizeof (T) > size ())
+			return false;
+		memcpy (&val, data () + m_pos, sizeof (T));
+		m_pos += sizeof (T);
+		return true;
+	}
+	/**
+	 *	\fn	bool fetch (string& val)
+	 *	\brief Fetch string from buffer last position.
+	 *	\param[out] val Fetched string.
+	 *	\return If succeeded.
+	 */
+	bool fetch (string& val)
+	{
+		uint16_t len;
+		fetch (len);
+		val = "";
+		while (len--)
+		{
+			char c;
+			fetch (c);
+			val += c;
+		}
+		return true;
+	}
+
+	// reset internal pointer
+	void rewind ()
+	{
+		m_pos = 0;
+	}
+
+private:
+	int m_pos;
 };
 
 /**

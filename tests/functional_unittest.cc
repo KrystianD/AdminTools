@@ -28,6 +28,7 @@ bool sendPacket (IPacket& packet)
 	h.size = b.size ();
 	send (m_fd, &h, sizeof (h), 0);
 	send (m_fd, &b[0], b.size (), 0);
+	return true;
 }
 bool readPacket (int replyType, IPacket& p, int timeout)
 {
@@ -95,7 +96,7 @@ TEST(FunctionalTest, TestVALIDKEY) {
 	string portStr;
 	port << m_port;
 	port >> portStr;
-	if (status = getaddrinfo (m_host.c_str (), portStr.c_str (), &hints, &servinfo))
+	if ((status = getaddrinfo (m_host.c_str (), portStr.c_str (), &hints, &servinfo)))
 	{
 		close (m_fd);
 		fprintf (stderr, "getaddrinfo: %s\n", gai_strerror (status));
@@ -168,7 +169,7 @@ TEST(FunctionalTest, TestWRONGKEY) {
 	string portStr;
 	port << m_port;
 	port >> portStr;
-	if (status = getaddrinfo (m_host.c_str (), portStr.c_str (), &hints, &servinfo))
+	if ((status = getaddrinfo (m_host.c_str (), portStr.c_str (), &hints, &servinfo)))
 	{
 		close (m_fd);
 		fprintf (stderr, "getaddrinfo: %s\n", gai_strerror (status));
@@ -241,7 +242,7 @@ TEST(FunctionalTest, TestSendPacketAgentData) {
 	string portStr;
 	port << m_port;
 	port >> portStr;
-	if (status = getaddrinfo (m_host.c_str (), portStr.c_str (), &hints, &servinfo))
+	if ((status = getaddrinfo (m_host.c_str (), portStr.c_str (), &hints, &servinfo)))
 	{
 		close (m_fd);
 		fprintf (stderr, "getaddrinfo: %s\n", gai_strerror (status));
@@ -281,9 +282,9 @@ TEST(FunctionalTest, TestSendPacketAgentData) {
 
 	TPacketAgentData packetAgentData;
 
-	packetAgentData.id = 100;
+	packetAgentData.id = 999; // NOT IMPORTANT server fills
 	packetAgentData.oldData = 0;
-	packetAgentData.name = "test";
+	packetAgentData.name = "test"; // NOT IMPORTANT server fills
 	packetAgentData.data.timestamp = 302192301;
 	packetAgentData.data.temp = 10.9;
 	packetAgentData.data.tempValid = true;
@@ -319,14 +320,16 @@ TEST(FunctionalTest, TestSendPacketAgentData) {
 	if (!readPacket (PACKET_AGENTSDATA, agentsData, 1000))
 	{
 		FAIL();
-	} else {
+	}
+	else
+	{
 		ASSERT_EQ(agentsData.agents.size(), 1);
-		ASSERT_EQ(agentsData.agents[0].id, 100);
-		ASSERT_EQ(agentsData.agents[0].name, "test");
+		ASSERT_EQ(agentsData.agents[0].id, 1);
+		ASSERT_EQ(agentsData.agents[0].name, "127.0.0.1");
 		ASSERT_EQ(agentsData.agents[0].data.timestamp, 302192301);
-		ASSERT_EQ(agentsData.agents[0].data.temp, 10.9);
+		ASSERT_EQ(agentsData.agents[0].data.temp, 10.9f);
 		ASSERT_EQ(agentsData.agents[0].data.tempValid, true);
-		ASSERT_EQ(agentsData.agents[0].data.cpuUsage, 80.9);
+		ASSERT_EQ(agentsData.agents[0].data.cpuUsage, 80.9f);
 		ASSERT_EQ(agentsData.agents[0].data.totalRam, 102932100);
 		ASSERT_EQ(agentsData.agents[0].data.freeRam, 102932100);
 		ASSERT_EQ(agentsData.agents[0].data.uptime, 1000);

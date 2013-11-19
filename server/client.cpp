@@ -185,6 +185,7 @@ void Client::processPacket (int size)
 	
 	buffer_t buf;
 	buf.insert (buf.begin (), (char*)buffer, (char*)buffer + size);
+	buf.rewind ();
 
 	switch (h.type)
 	{

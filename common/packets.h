@@ -247,12 +247,10 @@ public:
 	virtual bool fromBuffer (buffer_t& buf)
 	{
 		m_pos = 0;
-		if (!fetch (buf, id)) return false;
-		if (!fetch (buf, oldData)) return false;
-		if (!fetch (buf, name)) return false;
-		buffer_t tmp;
-		tmp.insert (tmp.begin (), buf.begin () + m_pos, buf.end ());
-		data.fromBuffer (tmp);
+		if (!buf.fetch (id)) return false;
+		if (!buf.fetch (oldData)) return false;
+		if (!buf.fetch (name)) return false;
+		data.fromBuffer (buf);
 		return true;
 	}
 };
@@ -298,6 +296,14 @@ public:
 	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
+		uint16_t len;
+		if (!buf.fetch (len)) return false;
+		for (int i = 0; i < len; i++)
+		{
+			TPacketAgentData d;
+			if (!d.fromBuffer (buf)) return false;
+			agents.push_back (d);
+		}
 		return true;
 	}
 };

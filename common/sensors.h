@@ -152,34 +152,33 @@ public:
 	 */
 	virtual bool fromBuffer (buffer_t& buf)
 	{
-		m_pos = 0;
-		if (!fetch (buf, timestamp)) return false;
-		if (!fetch (buf, temp)) return false;
-		if (!fetch (buf, tempValid)) return false;
-		if (!fetch (buf, cpuUsage)) return false;
-		if (!fetch (buf, totalRam)) return false;
-		if (!fetch (buf, freeRam)) return false;
-		if (!fetch (buf, uptime)) return false;
+		if (!buf.fetch (timestamp)) return false;
+		if (!buf.fetch (temp)) return false;
+		if (!buf.fetch (tempValid)) return false;
+		if (!buf.fetch (cpuUsage)) return false;
+		if (!buf.fetch (totalRam)) return false;
+		if (!buf.fetch (freeRam)) return false;
+		if (!buf.fetch (uptime)) return false;
 
 		uint16_t len;
-		if (!fetch (buf, len)) return false;
+		if (!buf.fetch (len)) return false;
 		disksUsage.clear ();
 		while (len--)
 		{
 			TDiskUsage d;
-			if (!fetch (buf, d.name)) return false;
-			if (!fetch (buf, d.totalSpace)) return false;
-			if (!fetch (buf, d.usedSpace)) return false;
+			if (!buf.fetch (d.name)) return false;
+			if (!buf.fetch (d.totalSpace)) return false;
+			if (!buf.fetch (d.usedSpace)) return false;
 			disksUsage.push_back (d);
 		}
 
-		if (!fetch (buf, len)) return false;
+		if (!buf.fetch (len)) return false;
 		services.clear ();
 		while (len--)
 		{
 			TService s;
-			if (!fetch (buf, s.name)) return false;
-			if (!fetch (buf, s.available)) return false;
+			if (!buf.fetch (s.name)) return false;
+			if (!buf.fetch (s.available)) return false;
 			services.push_back (s);
 		}
 		return true;
