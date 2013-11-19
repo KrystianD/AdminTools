@@ -34,7 +34,7 @@ int main (int argc, char** argv)
 {
 	srand (time (0));
 
-	const char *configPath = "config.cfg";
+	const char *configPath = "/etc/config.cfg";
 	bool generateKey = false;
 	int c;
 	opterr = 0;

@@ -1,8 +1,8 @@
 Package: server
-Version: 1.1-1
+Version: 1.0-1
 Section: base
 Priority: optional
 Architecture: all
 Depends: 
-Maintainer: Chr. Clemens Lee <clemens@kclee.de>
-Description: Linux system information
+Maintainer: Krystian Dużyński
+Description: ZPI project server
