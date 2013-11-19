@@ -7,6 +7,7 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 namespace WinAgent
+{
 
 Server::Server() {
 	m_state = NotConnected;
@@ -242,4 +243,5 @@ void Server::processPacket (THeader& h, buffer_t& buf)
 		printf("Config received\n");
 		break;
 	}
+}
 }
