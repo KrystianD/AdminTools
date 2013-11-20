@@ -385,7 +385,11 @@ public class ConnectionTask implements Runnable {
 			this.host = host;
 			this.port = port;
 			this.key = key;
-			this.interval = interval;
+			if(interval < 2000){
+				this.interval = 2000;
+			}else{
+				this.interval = interval;
+			}
 			state = State.CONNECTING;
 		} else {
 			state = State.STARTING;
