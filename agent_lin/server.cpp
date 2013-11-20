@@ -161,7 +161,12 @@ void Server::connect ()
 	p.sendConfig = 1;
 	strncpy (p.key, m_key.c_str (), 16);
 
-	sendPacket (p);
+	if (!sendPacket (p))
+	{
+		close (m_fd);
+		printf ("unable to send auth packet\r\n");
+		return;
+	}
 
 	TPacketReply r;
 	if (!readPacket (PACKET_REPLY, r, 1000))
@@ -185,7 +190,13 @@ bool Server::sendHeader (int type)
 	THeader h;
 	h.type = type;
 	h.size = 0;
-	send (m_fd, &h, sizeof (h), 0);
+	if (send (m_fd, &h, sizeof (h), 0) <= 0)
+	{
+		close (m_fd);
+		m_state = NotConnected;
+		return false;
+	}
+	return true;
 }
 bool Server::sendPacket (IPacket& packet)
 {
@@ -194,8 +205,19 @@ bool Server::sendPacket (IPacket& packet)
 	THeader h;
 	h.type = packet.getType ();
 	h.size = b.size ();
-	send (m_fd, &h, sizeof (h), 0);
-	send (m_fd, &b[0], b.size (), 0);
+	if (send (m_fd, &h, sizeof (h), 0) <= 0)
+	{
+		close (m_fd);
+		m_state = NotConnected;
+		return false;
+	}
+	if (send (m_fd, &b[0], b.size (), 0) <= 0)
+	{
+		close (m_fd);
+		m_state = NotConnected;
+		return false;
+	}
+	return true;
 }
 bool Server::readPacket (int replyType, IPacket& p, int timeout)
 {

@@ -271,5 +271,7 @@ int main (int argc, char** argv)
 	DB::close ();
 	fprintf (stderr, "Database closed\r\n");
 
+	close (serverFd);
+
 	return 0;
 }

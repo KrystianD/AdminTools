@@ -106,6 +106,7 @@ int main (int argc, char** argv)
 		fclose (f);
 	}
 
+	int i = 0;
 	while (!end)
 	{
 		serv.process ();
@@ -127,7 +128,10 @@ int main (int argc, char** argv)
 			if (serv.isValid ())
 			{
 				agentData.oldData = 0;
-				serv.sendPacket (agentData);
+				if (serv.sendPacket (agentData))
+					printf ("Packet sent (%d)\r\n", i++);
+				else
+					printf ("Unable to send packet\r\n");
 			}
 			else
 			{
