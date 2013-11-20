@@ -14,7 +14,7 @@ IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
 (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
 HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 /**
  *	\namespace pl.edu.agh.zpi.admintools.connection
  *	\brief Connection and packets module.
@@ -46,28 +46,26 @@ import android.os.RemoteException;
 import android.util.Log;
 
 /**
- *	\class ConnectionTask
- *	\brief Handle connection events.
+ * \class ConnectionTask \brief Handle connection events.
  */
 public class ConnectionTask implements Runnable {
-	//! Connected callback flag.
+	// ! Connected callback flag.
 	public static final int CONNECTED = 0;
-	//! Agents data callback flag.
+	// ! Agents data callback flag.
 	public static final int AGENTS_DATA = 1;
-	//! Agent authentication key callback flag.
+	// ! Agent authentication key callback flag.
 	public static final int AGENT_KEY = 2;
-	//! Agent configuration callback flag.
+	// ! Agent configuration callback flag.
 	public static final int AGENT_CONFIG = 3;
-	//! Connection error callback flag.
+	// ! Connection error callback flag.
 	public static final int CONNECTION_ERROR = 4;
-	//! Stats reply callback flag.
+	// ! Stats reply callback flag.
 	public static final int STATS_REPLY = 5;
-	//! Authentication failed flag.
+	// ! Authentication failed flag.
 	public static final int AUTH_FAILED = 6;
 
 	/**
-	 *	\enum State
-	 *	\brief Represents current state of connection process.
+	 * \enum State \brief Represents current state of connection process.
 	 */
 	enum State {
 		IDLE, CONNECTING, DISCONNECTING, ACTIVE, STOPPING, STARTING
@@ -82,15 +80,15 @@ public class ConnectionTask implements Runnable {
 	private ConcurrentLinkedQueue<IPacket> packetQueue = new ConcurrentLinkedQueue<IPacket>();
 	private State state = State.IDLE;
 	private boolean isConnected = false;
+	private boolean isStopped = true;
 	private String host;
 	private int port;
 	private String key;
 	private short interval;
 
 	/**
-	 *	\fn public void run()
-	 *	\brief Start connection task handling routine in different thread.
-	 *	\return None.
+	 * \fn public void run() \brief Start connection task handling routine in
+	 * different thread. \return None.
 	 */
 	@Override
 	public void run() {
@@ -163,11 +161,13 @@ public class ConnectionTask implements Runnable {
 
 	private void processStopping() throws Exception {
 		sendHeader(Header.PACKET_STOP);
+		isStopped = true;
 		state = State.ACTIVE;
 	}
 
 	private void processStarting() throws Exception {
 		sendPacket(new PacketStart((short) interval));
+		isStopped = false;
 		state = State.ACTIVE;
 	}
 
@@ -205,6 +205,15 @@ public class ConnectionTask implements Runnable {
 		IPacket packet = null;
 		Header header;
 
+		long start = System.currentTimeMillis();
+		while (input.available() < 3 && !isStopped) {
+			if (System.currentTimeMillis() - start > (interval * 2 + 1000)) {
+				throw new Exception("headerTimeout "
+						+ (System.currentTimeMillis() - start));
+			}
+			Thread.sleep(10);
+		}
+
 		if (input.available() >= 3) {
 			header = readHeader();
 			Log.d("qwe", "ConnectionTask.processActive() " + header.getType());
@@ -238,7 +247,6 @@ public class ConnectionTask implements Runnable {
 				Log.e("qwe", "unknown header " + header.getType());
 				readPacket(null, header.getSize());
 			}
-
 		}
 		packet = packetQueue.poll();
 		if (packet != null) {
@@ -278,7 +286,7 @@ public class ConnectionTask implements Runnable {
 			if (r.getValue() != PacketReply.NO_AUTH) {
 				return true;
 			}
-		}else{
+		} else {
 			throw new Exception();
 		}
 		return false;
@@ -362,13 +370,10 @@ public class ConnectionTask implements Runnable {
 	}
 
 	/**
-	 *	\fn public synchronized void connect(String host, int port, String key, short interval)
-	 *	\brief Connect to given host using auth key.
-	 *	\param host Host address.
-	 *	\param port Host port.
-	 *	\param key Agent authentication key.
-	 *	\param interval Time interval.
-	 *	\return None.
+	 * \fn public synchronized void connect(String host, int port, String key,
+	 * short interval) \brief Connect to given host using auth key. \param host
+	 * Host address. \param port Host port. \param key Agent authentication key.
+	 * \param interval Time interval. \return None.
 	 */
 	public synchronized void connect(String host, int port, String key,
 			short interval) {
@@ -389,49 +394,47 @@ public class ConnectionTask implements Runnable {
 	}
 
 	/**
-	 *	\fn public void disconnect()
-	 *	\brief Disconnect from connected host.
-	 *	\return None.
+	 * \fn public void disconnect() \brief Disconnect from connected host.
+	 * \return None.
 	 */
 	public void disconnect() {
 		synchronized (state) {
 			state = State.DISCONNECTING;
 		}
 	}
+
 	/**
-	 *	\fn public void stop()
-	 *	\brief Stop connection task handling routine.
-	 *	\return None.
+	 * \fn public void stop() \brief Stop connection task handling routine.
+	 * \return None.
 	 */
 	public void stop() {
 		synchronized (state) {
 			state = State.STOPPING;
 		}
 	}
+
 	/**
-	 *	\fn public boolean isConnected()
-	 *	\brief Check if client is connected to any host. Synchronized method.
-	 *	\return If connected.
+	 * \fn public boolean isConnected() \brief Check if client is connected to
+	 * any host. Synchronized method. \return If connected.
 	 */
 	public synchronized boolean isConnected() {
 		return isConnected;
 	}
+
 	/**
-	 *	\fn public void setMessenger(Messenger activityMessenger)
-	 *	\brief Set current activity messenger.
-	 *	\param activityMessenger Messenger to set.
-	 *	\return None.
+	 * \fn public void setMessenger(Messenger activityMessenger) \brief Set
+	 * current activity messenger. \param activityMessenger Messenger to set.
+	 * \return None.
 	 */
 	public void setMessenger(Messenger activityMessenger) {
 		synchronized (activityMessenger) {
 			this.activityMessenger = activityMessenger;
 		}
 	}
+
 	/**
-	 *	\fn	public void enqueueMessage(IPacket packet)
-	 *	\brief Add packet to queue.
-	 *	\param packet Packet to add.
-	 *	\return None.
+	 * \fn public void enqueueMessage(IPacket packet) \brief Add packet to
+	 * queue. \param packet Packet to add. \return None.
 	 */
 	public void enqueueMessage(IPacket packet) {
 		try {
