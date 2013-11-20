@@ -146,9 +146,11 @@ int main (int argc, char** argv)
 		{
 			TPacketAgentData p = oldSensorsData[0];
 			p.oldData = 1;
-			serv.sendPacket (p);
-			oldSensorsData.erase (oldSensorsData.begin ());
-			printf ("Sent old packet, %u left\n", oldSensorsData.size ());
+			if (serv.sendPacket (p))
+			{
+				oldSensorsData.erase (oldSensorsData.begin ());
+				printf ("Sent old packet, %u left\n", oldSensorsData.size ());
+			}
 			lastOldSendTime = getTicks ();
 		}
 
