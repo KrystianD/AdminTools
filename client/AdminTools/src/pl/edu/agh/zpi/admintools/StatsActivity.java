@@ -725,10 +725,10 @@ class IntervalTextWatcher implements TextWatcher {
 	@Override
 	public void afterTextChanged(Editable s) {
 		String str = s.toString();
-		if (!str.matches("^[0-9]+$") && !str.equals("")) {
+		/*if (!str.matches("^[0-9]+$")) {
 			s.delete(s.length() - 1, s.length() - 1);
 			str = s.toString();
-		}
+		}*/
 		try {
 		 	int interval =  Integer.parseInt(str);
 		 	if (interval < 2000){
@@ -780,10 +780,10 @@ class ShortTextWatcher implements TextWatcher {
 	@Override
 	public void afterTextChanged(Editable s) {
 		String str = s.toString();
-		if (!str.matches("^[0-9]+$") && !str.equals("")) {
+		/*if (!str.matches("^[0-9]+$")) {
 			s.delete(s.length() - 1, s.length() - 1);
 			str = s.toString();
-		}
+		}*/
 		try {
 			Short.parseShort(str);
 		} catch (Exception e) {

@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="@string/interval"
-            android:inputType="numberDecimal" />
+            android:inputType="number" />
 
         <TextView
             android:id="@+id/textView_dialog_config_temperature_divider"
