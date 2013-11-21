@@ -116,7 +116,7 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		port = Integer.parseInt(connectionSettings.getString(AdminTools.PORT,
 				""));
 		key = connectionSettings.getString(AdminTools.KEY, "");
-		interval = connectionSettings.getInt(AdminTools.INTERVAL, 0);
+		interval = connectionSettings.getInt(AdminTools.INTERVAL, 2000);
 		
 		
 		getActionBar().setTitle("ChartsActivity\t" + agent.getName());
