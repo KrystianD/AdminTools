@@ -17,6 +17,7 @@ void assignData (TPacketAgentData& packet)
 		{
 			agentsData[i].time = time (0);
 			agentsData[i].packet = packet;
+			sort (agentsData.begin (), agentsData.end (), cmp);
 			return;
 		}
 	}

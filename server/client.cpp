@@ -37,7 +37,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 #include "settings.h"
 #include "db.h"
 
-#define CLIENT_DEBUG(x,...) printf ("[Client #%d id: %2d] " x "\r\n", fd, dbAgent.id, ##__VA_ARGS__)
+#define CLIENT_DEBUG(x,...) printf ("[Client %2d# (%-10s:%2d)] " x "\r\n", fd, dbAgent.name.c_str (), dbAgent.id, ##__VA_ARGS__)
 
 string ftm (uint32_t tm, uint32_t base)
 {

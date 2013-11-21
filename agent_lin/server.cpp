@@ -79,7 +79,7 @@ void Server::process ()
 			{
 				THeader h;
 				int rd = recvall (m_fd, &h, sizeof (h), 1000);
-				if (rd == 0)
+				if (rd <= 0)
 				{
 					close (m_fd);
 					m_state = NotConnected;
@@ -91,7 +91,7 @@ void Server::process ()
 					buffer_t buf;
 					buf.resize (h.size);
 					rd = recvall (m_fd, &buf[0], h.size, 1000);
-					if (rd == 0)
+					if (rd <= 0)
 					{
 						close (m_fd);
 						m_state = NotConnected;

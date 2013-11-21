@@ -251,7 +251,7 @@ int main (int argc, char** argv)
 			{
 				close (clients[i].fd);
 				clients.erase (clients.begin () + i);
-				fprintf (stderr, "Client deleted\r\n");
+				fprintf (stderr, "Client deleted (%d#)\r\n", clients[i].fd);
 			}
 		}
 
