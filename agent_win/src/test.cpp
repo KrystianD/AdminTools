@@ -1,21 +1,3 @@
-﻿/*
-Copyright (c) 2013, AGH University of Science and Technology
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
 #define _WIN32_WINNT  0x0501
 
 #include <vector>
@@ -186,24 +168,13 @@ void readSensors(TSensorsData& data, TPacketConfig t) {
 		std::cout << "Service " << s.name << " is " ;
 		
 		if (s.tcp) {
-		
-			int iResult;
-			WSADATA wsaData;
-			// Initialize Winsock
-			iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
-			if (iResult != 0) {
-				printf("WSAStartup failed: %d\n", iResult);
-				return;
-			} else {
-				
-			}
 
 			sockaddr_in servaddr;
 
 			SOCKET fd = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
 			if (fd == INVALID_SOCKET)
 			{
-				perror ("socket");
+				perror ("Error with socket occured.");
 				return;
 			}
 
@@ -245,8 +216,6 @@ void readSensors(TSensorsData& data, TPacketConfig t) {
 			fd = INVALID_SOCKET;
 
 		} else {
-		
-			WSADATA wsaData;
 
 		    int iResult = 0;            
 
@@ -256,21 +225,12 @@ void readSensors(TSensorsData& data, TPacketConfig t) {
 			TService serviceS;
 			serviceS.name = s.name;
 
-
-			iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-			if (iResult != NO_ERROR) {
-				serviceS.available = 0;
-				std::cout << "not available. ERROR 1" << std::endl;
-				WSACleanup();
-				continue;
-			}
-
 			
 			ListenSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 			if (ListenSocket == INVALID_SOCKET) {
 				serviceS.available = 0;
 				std::cout << "not available. ERROR Socket" << std::endl;
-				WSACleanup();
+				
 				continue;
 			}
 
@@ -279,12 +239,11 @@ void readSensors(TSensorsData& data, TPacketConfig t) {
 			service.sin_port = htons(s.port);
 			
 			iResult = bind(ListenSocket, (SOCKADDR *) &service, sizeof (service));
-			if (iResult == 0 || iResult == -1) {
-				
+			if (iResult == 0 || iResult == -1) {	
 				serviceS.available = 0;
 				std::cout << "not available" << std::endl;
 				if (iResult == -1) {
-					std::cout << "Error" << std::endl;
+					std::cout << "Error - bind." << std::endl;
 				}
 			}
 			else {
@@ -294,10 +253,8 @@ void readSensors(TSensorsData& data, TPacketConfig t) {
 			}
 
 			closesocket(ListenSocket);
-			WSACleanup();
 
-			data.services.push_back (serviceS);
-			
+			data.services.push_back (serviceS);		
 		}
 	}
 
@@ -311,7 +268,7 @@ int main(int argc, char** argv) {
 	Config c;	
     
 	if (! c.fromFile (configPath)) {
-        std::cout << "Plik uszkodzony lub nie istnieje!" << std::endl; 
+        std::cout << "File is deprecated or does not exist!" << std::endl; 
 		return 1;
     }
 
@@ -322,13 +279,21 @@ int main(int argc, char** argv) {
     signal(SIGTERM, signal_handler);
 
 
-	if (SetConsoleCtrlHandler( (PHANDLER_ROUTINE)ConsoleHandler,TRUE)==FALSE)
-    {
-        // unable to install handler... 
-        // display message to the user
+	if (SetConsoleCtrlHandler( (PHANDLER_ROUTINE)ConsoleHandler,TRUE)==FALSE) {
         printf("Unable to install handler!\n");
         return -1;
     }
+
+
+	WSADATA wsaData;
+
+	int iResult = 0;  
+	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (iResult != NO_ERROR) {
+		std::cout << "Wsa startup error." << std::endl;
+		WSACleanup();
+		return -1;
+	}
 
 
 
@@ -379,8 +344,7 @@ int main(int argc, char** argv) {
 		fclose (f);
 	}
 
-	while(!endd)
-	{
+	while(!endd) {
 		serv.process();
 		Sleep(10);
 		TSensorsData d;
@@ -464,7 +428,8 @@ int main(int argc, char** argv) {
 	}
 	printf ("Data saved\n");
 
+	WSACleanup();
+	
 	fclose (f);
-
     return 0;
 }
