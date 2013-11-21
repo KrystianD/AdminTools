@@ -142,12 +142,12 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 		statsRequest.setStartDate((int) (c.getTime().getTime() / 1000));
 		Log.d("qwe", "" + (int) (c.getTime().getTime() / 1000));
 		today += c.get(Calendar.DAY_OF_MONTH) + "-";
-		today += c.get(Calendar.MONTH) + "-";
+		today += (c.get(Calendar.MONTH)+1) + "-";
 		today += c.get(Calendar.YEAR);
 		c.add(Calendar.DAY_OF_YEAR, 1);
 		statsRequest.setEndDate((int) (c.getTime().getTime() / 1000));
 		tomorrow += c.get(Calendar.DAY_OF_MONTH) + "-";
-		tomorrow += c.get(Calendar.MONTH) + "-";
+		tomorrow += (c.get(Calendar.MONTH)+1) + "-";
 		tomorrow += c.get(Calendar.YEAR);
 
 		timeStart.setText(today);
@@ -327,13 +327,13 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 
 		c.setTimeInMillis((long) lastSend.getEndDate() * 1000);
 		end += c.get(Calendar.DAY_OF_MONTH) + "-";
-		end += c.get(Calendar.MONTH) + "-";
+		end += (c.get(Calendar.MONTH)+1) + "-";
 		end += c.get(Calendar.YEAR);
 		timeNew.setText(end);
 
 		c.setTimeInMillis((long) lastSend.getStartDate() * 1000);
 		start += c.get(Calendar.DAY_OF_MONTH) + "-";
-		start += c.get(Calendar.MONTH) + "-";
+		start += (c.get(Calendar.MONTH)+1) + "-";
 		start += c.get(Calendar.YEAR);
 		timeOld.setText(start);
 
@@ -371,13 +371,13 @@ public class ChartsActivity extends Activity implements ServiceConnection,
 
 		c.setTimeInMillis((long) statsRequest.getEndDate() * 1000);
 		end += c.get(Calendar.DAY_OF_MONTH) + "-";
-		end += c.get(Calendar.MONTH) + "-";
+		end += (c.get(Calendar.MONTH)+1) + "-";
 		end += c.get(Calendar.YEAR);
 		timeEnd.setText(end);
 
 		c.setTimeInMillis((long) statsRequest.getStartDate() * 1000);
 		start += c.get(Calendar.DAY_OF_MONTH) + "-";
-		start += c.get(Calendar.MONTH) + "-";
+		start += (c.get(Calendar.MONTH)+1) + "-";
 		start += c.get(Calendar.YEAR);
 		timeStart.setText(start);
 
