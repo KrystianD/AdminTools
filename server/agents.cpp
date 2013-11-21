@@ -17,7 +17,7 @@ bool cmp (const TAgentData& a1, const TAgentData& a2)
 			o2 = i;
 	}
 
-	if (o1 == -1 && o2 == -1)
+	if (o1 == o2)
 		return a1.packet.name < a2.packet.name;
 	else if (o1 != -1 && o2 == -1)
 		return true;
