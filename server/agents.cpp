@@ -6,7 +6,25 @@ vector<TAgentData> agentsData;
 
 bool cmp (const TAgentData& a1, const TAgentData& a2)
 {
-	return a1.packet.name < a2.packet.name;
+	const char* orders[] = { "KD" };
+
+	int o1 = -1, o2 = -1;
+	for (int i = 0; i < sizeof (orders) / sizeof (orders[0]); i++)
+	{
+		if (a1.packet.name.substr (0, strlen (orders[i])) == string (orders[i]))
+			o1 = i;
+		if (a2.packet.name.substr (0, strlen (orders[i])) == string (orders[i]))
+			o2 = i;
+	}
+
+	if (o1 == -1 && o2 == -1)
+		return a1.packet.name < a2.packet.name;
+	else if (o1 != -1 && o2 == -1)
+		return true;
+	else if (o1 == -1 && o2 != -1)
+		return false;
+	else
+		return o1 < o2;
 }
 
 void assignData (TPacketAgentData& packet)
