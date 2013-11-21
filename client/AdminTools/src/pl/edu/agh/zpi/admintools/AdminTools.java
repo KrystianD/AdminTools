@@ -122,7 +122,7 @@ public class AdminTools extends Activity implements ServiceConnection, Handable 
 		editTextPort.setText(connectionSettings.getString(PORT, ""));
 
 		key = connectionSettings.getString(KEY, "");
-		interval = connectionSettings.getInt(INTERVAL, 1000);
+		interval = connectionSettings.getInt(INTERVAL, 2000);
 
 		isServiceBinded = bindService(
 				new Intent(this, ConnectionService.class), this,

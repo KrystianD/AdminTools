@@ -124,7 +124,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		port = Integer.parseInt(connectionSettings.getString(AdminTools.PORT,
 				""));
 		key = connectionSettings.getString(AdminTools.KEY, "");
-		interval = connectionSettings.getInt(AdminTools.INTERVAL, 0);
+		interval = connectionSettings.getInt(AdminTools.INTERVAL, 2000);
 
 		TextView tv = (TextView) findViewById(R.id.textView_server_name);
 		String serverName = host + ":" + port;
@@ -520,8 +520,9 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 			EditText editText = (EditText) dialogView
 					.findViewById(R.id.editText_dialog_refresh_interval);
+			editText.addTextChangedListener(new IntervalTextWatcher());
 			editText.setText(""
-					+ connectionSettings.getInt(AdminTools.INTERVAL, 1000));
+					+ connectionSettings.getInt(AdminTools.INTERVAL, 2000));
 
 			break;
 		case R.id.action_generate_agent_key:
@@ -690,6 +691,62 @@ public class StatsActivity extends Activity implements ServiceConnection,
 /************************/
 /** additional classes **/
 /************************/
+
+/**
+ * \class IntervalTextWatcher
+ * \brief Text watcher for interval validation.
+ */
+class IntervalTextWatcher implements TextWatcher {
+	/**
+	 * \fn public void onTextChanged(CharSequence s, int start, int before, int
+	 * count) \brief Execute on text change event. \param s New text. \param
+	 * start Start index. \param before Before index. \param count Count of
+	 * text. \return None.
+	 */
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+	}
+
+	/**
+	 * \fn public void beforeTextChanged(CharSequence s, int start, int count,
+	 * int after) \brief Execute on just before text change event. \param s New
+	 * text. \param start Start index. \param count Count of text. \param after
+	 * After index. \return None.
+	 */
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
+	}
+
+	/**
+	 * \fn public void afterTextChanged(Editable s) \brief Execute just after
+	 * text change event. \param s Editable component. \return None.
+	 */
+	@Override
+	public void afterTextChanged(Editable s) {
+		String str = s.toString();
+		/*if (!str.matches("^[0-9]+$")) {
+			s.delete(s.length() - 1, s.length() - 1);
+			str = s.toString();
+		}*/
+		try {
+		 	int interval =  Integer.parseInt(str);
+		 	if (interval < 2000){
+		 		s.clear();
+		 		s.append("2000");
+		 	}else if(interval > 60000){
+		 		s.clear();
+		 		s.append("60000");
+		 	}
+		} catch (Exception e) {
+			s.clear();
+			if (!str.equals("")) {
+				s.append("2000");
+			}
+		}
+	}
+};
+
 /**
  * \class ShortTextWatcher
  * \brief Text watcher for short text.
@@ -723,10 +780,10 @@ class ShortTextWatcher implements TextWatcher {
 	@Override
 	public void afterTextChanged(Editable s) {
 		String str = s.toString();
-		if (!str.matches("^[0-9]+") && !str.equals("")) {
+		/*if (!str.matches("^[0-9]+$")) {
 			s.delete(s.length() - 1, s.length() - 1);
 			str = s.toString();
-		}
+		}*/
 		try {
 			Short.parseShort(str);
 		} catch (Exception e) {
