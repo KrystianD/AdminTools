@@ -7,7 +7,7 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 namespace WinAgent;
-d
+
 Server::Server() {
 	m_state = NotConnected;
 	m_lastConnect = 0;
