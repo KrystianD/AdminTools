@@ -14,7 +14,7 @@ IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
 (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
 HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 package pl.edu.agh.zpi.admintools;
 
 import java.util.ArrayList;
@@ -67,15 +67,15 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 /**
- * \class StatsActivity
- * \brief Activity for interacting and handling agents stats data.
+ * \class StatsActivity \brief Activity for interacting and handling agents
+ * stats data.
  */
 public class StatsActivity extends Activity implements ServiceConnection,
 		Handable {
 
-	//! Temperature alert threshold.
+	// ! Temperature alert threshold.
 	public static double tempAlertLevel = 85;
-	//! HDD usage alert percent threshold.
+	// ! HDD usage alert percent threshold.
 	public static double HDDAlertLevel = 0.95;
 
 	private ListView listView;
@@ -99,6 +99,8 @@ public class StatsActivity extends Activity implements ServiceConnection,
 
 	private LinearLayout linearLayoutAlertsInternal;
 	private LinearLayout linearLayoutAlertsBounding;
+
+	private TextView serverInfo;
 
 	/**
 	 * \fn public void onCreate(Bundle savedInstanceState) \brief Execute on
@@ -126,9 +128,9 @@ public class StatsActivity extends Activity implements ServiceConnection,
 		key = connectionSettings.getString(AdminTools.KEY, "");
 		interval = connectionSettings.getInt(AdminTools.INTERVAL, 2000);
 
-		TextView tv = (TextView) findViewById(R.id.textView_server_name);
+		serverInfo = (TextView) findViewById(R.id.textView_server_name);
 		String serverName = host + ":" + port;
-		tv.setText(serverName);
+		serverInfo.setText(serverName);
 
 		linearLayoutAlertsInternal = (LinearLayout) findViewById(R.id.linearLayout_alerts_internal);
 		linearLayoutAlertsBounding = (LinearLayout) findViewById(R.id.linearLayout_alerts);
@@ -229,6 +231,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 					.get(PacketAgentsData.PACKET_AGENTS_DATA);
 
 			ArrayList<AgentData> agents = pad.getAgentsList();
+			serverInfo.setText(host + ":" + port + " [" + agents.size() + "]");
 			if (agents.size() < agentsArray.getCount()) {
 				agentsArray.clear();
 				agentsArray.addAll(agents);
@@ -693,8 +696,7 @@ public class StatsActivity extends Activity implements ServiceConnection,
 /************************/
 
 /**
- * \class IntervalTextWatcher
- * \brief Text watcher for interval validation.
+ * \class IntervalTextWatcher \brief Text watcher for interval validation.
  */
 class IntervalTextWatcher implements TextWatcher {
 	/**
@@ -725,19 +727,19 @@ class IntervalTextWatcher implements TextWatcher {
 	@Override
 	public void afterTextChanged(Editable s) {
 		String str = s.toString();
-		/*if (!str.matches("^[0-9]+$")) {
-			s.delete(s.length() - 1, s.length() - 1);
-			str = s.toString();
-		}*/
+		/*
+		 * if (!str.matches("^[0-9]+$")) { s.delete(s.length() - 1, s.length() -
+		 * 1); str = s.toString(); }
+		 */
 		try {
-		 	int interval =  Integer.parseInt(str);
-		 	if (interval < 2000){
-		 		s.clear();
-		 		s.append("2000");
-		 	}else if(interval > 60000){
-		 		s.clear();
-		 		s.append("60000");
-		 	}
+			int interval = Integer.parseInt(str);
+			if (interval < 2000) {
+				s.clear();
+				s.append("2000");
+			} else if (interval > 60000) {
+				s.clear();
+				s.append("60000");
+			}
 		} catch (Exception e) {
 			s.clear();
 			if (!str.equals("")) {
@@ -748,8 +750,7 @@ class IntervalTextWatcher implements TextWatcher {
 };
 
 /**
- * \class ShortTextWatcher
- * \brief Text watcher for short text.
+ * \class ShortTextWatcher \brief Text watcher for short text.
  */
 class ShortTextWatcher implements TextWatcher {
 	/**
@@ -780,10 +781,10 @@ class ShortTextWatcher implements TextWatcher {
 	@Override
 	public void afterTextChanged(Editable s) {
 		String str = s.toString();
-		/*if (!str.matches("^[0-9]+$")) {
-			s.delete(s.length() - 1, s.length() - 1);
-			str = s.toString();
-		}*/
+		/*
+		 * if (!str.matches("^[0-9]+$")) { s.delete(s.length() - 1, s.length() -
+		 * 1); str = s.toString(); }
+		 */
 		try {
 			Short.parseShort(str);
 		} catch (Exception e) {
@@ -796,8 +797,8 @@ class ShortTextWatcher implements TextWatcher {
 };
 
 /**
- * \class ShortOnFocusChangeListener
- * \brief On focus change event listener for short text.
+ * \class ShortOnFocusChangeListener \brief On focus change event listener for
+ * short text.
  */
 class ShortOnFocusChangeListener implements View.OnFocusChangeListener {
 	/**
