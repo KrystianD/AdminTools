@@ -6,7 +6,7 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
-using namespace WinAgent;
+namespace WinAgent;
 
 Server::Server() {
 	m_state = NotConnected;
@@ -53,7 +53,7 @@ void Server::process() {
 		//http://msdn.microsoft.com/en-us/library/windows/desktop/ms740141(v=vs.85).aspx
 		FD_ZERO(&fds);
 		FD_SET(ConnectSocket, &fds);
-		int res = select (0,&fds,0,0,&tv); //deskryptor = 0, wg info z linka wy¿ej, pierwszy argument jest ignorowany
+		int res = select (0,&fds,0,0,&tv); //deskryptor = 0, wg info z linka wyï¿½ej, pierwszy argument jest ignorowany
 		if(res == -1)
 		{
 			std::cerr << "Select error\n" ;
@@ -168,7 +168,7 @@ bool Server::sendHeader (int type) {
 	h.type = type;
 	h.size = 0;
 	THeader* tHPtr = &h;
-	send (ConnectSocket,  reinterpret_cast<char*>(tHPtr), sizeof (h), 0);//uwaga, do ogarniêcia przes³anie struktury uint16 i uint32 (choc wydaje mi siê ze tak jest ok)
+	send (ConnectSocket,  reinterpret_cast<char*>(tHPtr), sizeof (h), 0);//uwaga, do ogarniï¿½cia przesï¿½anie struktury uint16 i uint32 (choc wydaje mi siï¿½ ze tak jest ok)
 	return true;
 }
 
