@@ -241,6 +241,7 @@ void Client::processPacket (int size)
 		TPacketAgentData p;
 		if (p.fromBuffer (buf))
 		{
+			fixPacket (p);
 			p.id = dbAgent.id;
 			if (dbAgent.name.size () == 0)
 				p.name = ip;

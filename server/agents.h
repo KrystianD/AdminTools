@@ -22,6 +22,8 @@ public:
 //! Global list of agents data.
 extern vector<TAgentData> agentsData;
 
+void fixPacket (TPacketAgentData& packet);
+
 /**
  *	\fn	void assignData (TPacketAgentData& data)
  *	\brief Update or assign new agent data to global list.

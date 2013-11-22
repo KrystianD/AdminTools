@@ -27,6 +27,22 @@ bool cmp (const TAgentData& a1, const TAgentData& a2)
 		return o1 < o2;
 }
 
+void fixPacket (TPacketAgentData& packet)
+{
+	vector<TDiskUsage>& d = packet.data.disksUsage;
+	for (int i = d.size () - 1; i >= 0; i--)
+	{
+		for (int j = i - 1; j >= 0; j--)
+		{
+			if (d[i].name == d[j].name)
+			{
+				d.erase (d.begin () + i);
+				break;
+			}
+		}
+	}
+}
+
 void assignData (TPacketAgentData& packet)
 {
 	for (int i = 0; i < agentsData.size (); i++)
